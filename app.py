@@ -11,7 +11,6 @@ from urllib.parse import unquote, urlparse
 import httpx
 import weaviate
 from weaviate.classes.config import Configure, DataType, Property, VectorDistances
-from weaviate.classes.data import DataObject
 from weaviate.classes.query import MetadataQuery
 
 
@@ -26,50 +25,6 @@ MEMORY_MESSAGES = int(os.getenv("MEMORY_MESSAGES", "10"))
 
 
 CONVERSATIONS: dict[str, list[dict[str, str]]] = {}
-
-
-DEFAULT_CHINESE_ARTICLES = [
-    {
-        "source_id": 101,
-        "title": "糖尿病飲食與血糖管理",
-        "source": "中文健康測試資料 / diabetes-guide",
-        "content": (
-            "糖尿病患者應優先選擇高纖、低精緻糖的食物，將全穀類、豆類、蔬菜與優質蛋白質"
-            "平均分配到三餐。飯後可以依照醫囑監測血糖，觀察不同食物對血糖的影響；若出現低血糖"
-            "症狀，應先補充快速吸收的糖分並再度量測。"
-        ),
-    },
-    {
-        "source_id": 102,
-        "title": "銀髮族運動安全",
-        "source": "中文健康測試資料 / senior-exercise",
-        "content": (
-            "銀髮族運動應包含有氧、肌力與平衡訓練。每週可安排快走、腳踏車或水中運動，並加入"
-            "坐站訓練、彈力帶與單腳站立等動作。開始前要先暖身，若有頭暈、胸悶或關節劇痛，"
-            "應停止運動並尋求專業協助。"
-        ),
-    },
-    {
-        "source_id": 103,
-        "title": "高血壓生活調整",
-        "source": "中文健康測試資料 / hypertension-lifestyle",
-        "content": (
-            "高血壓患者可透過減少鈉攝取、規律運動、控制體重、限制酒精與維持充足睡眠來協助控制"
-            "血壓。建議在固定時間量測血壓並記錄數值，回診時提供給醫師參考；藥物不可自行停用或"
-            "任意調整劑量。"
-        ),
-    },
-    {
-        "source_id": 104,
-        "title": "偏頭痛誘發因子",
-        "source": "中文健康測試資料 / migraine-triggers",
-        "content": (
-            "偏頭痛常見誘發因子包含睡眠不足、壓力、脫水、跳餐、酒精、強光與部分食物。患者可以"
-            "建立頭痛日記，記錄發作時間、飲食、睡眠與壓力狀態，協助找出個人誘因。若頭痛型態突然"
-            "改變或伴隨神經學症狀，應盡快就醫。"
-        ),
-    },
-]
 
 
 INDEX_HTML = r"""<!doctype html>
@@ -285,12 +240,78 @@ INDEX_HTML = r"""<!doctype html>
       overflow-wrap: anywhere;
     }
 
+    .embedding {
+      margin-top: 10px;
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .embedding summary {
+      cursor: pointer;
+      overflow-wrap: anywhere;
+    }
+
+    .embedding pre {
+      max-height: 180px;
+      overflow: auto;
+      margin: 8px 0 0;
+      padding: 10px;
+      border-radius: 6px;
+      background: #f4f6f8;
+      color: #26323f;
+      font-size: 11px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
     form {
       display: grid;
       gap: 10px;
       padding: 14px 16px;
       border-top: 1px solid var(--line);
       background: #fbfcfd;
+    }
+
+    dialog {
+      width: min(620px, calc(100vw - 32px));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0;
+      color: var(--ink);
+      box-shadow: 0 24px 70px rgba(16, 24, 40, 0.24);
+    }
+
+    dialog::backdrop {
+      background: rgba(23, 32, 42, 0.42);
+    }
+
+    .dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dialog-head h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .dialog-form {
+      border-top: 0;
+      background: #ffffff;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 4px;
     }
 
     label {
@@ -363,9 +384,51 @@ INDEX_HTML = r"""<!doctype html>
     .refs {
       margin-top: 10px;
       display: grid;
-      gap: 6px;
+      gap: 8px;
       color: var(--muted);
       font-size: 12px;
+    }
+
+    .citation {
+      height: auto;
+      min-width: 28px;
+      padding: 1px 6px;
+      margin: 0 2px;
+      border-color: #b8ddd7;
+      background: var(--soft);
+      color: var(--accent-strong);
+      font-size: 12px;
+      vertical-align: baseline;
+      display: inline-flex;
+    }
+
+    .reference-body {
+      padding: 14px 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .reference-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .reference-content {
+      max-height: 48vh;
+      overflow: auto;
+      margin: 0;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #fbfcfd;
+      color: #26323f;
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     .ask-form {
@@ -404,32 +467,12 @@ INDEX_HTML = r"""<!doctype html>
         <h2>向量資料庫</h2>
         <div class="actions">
           <button id="refreshBtn" title="重新載入資料">重新整理</button>
-          <button id="seedBtn" title="加入預設中文測試資料">加入範例</button>
+          <button class="primary" id="openDocDialogBtn" title="新增向量資料">+新增資料</button>
         </div>
       </div>
       <div class="content">
         <div class="doc-list" id="docList"></div>
       </div>
-      <form id="docForm">
-        <div class="two">
-          <label>來源 ID
-            <input id="sourceId" type="number" placeholder="自動產生" />
-          </label>
-          <label>標題
-            <input id="title" required placeholder="例如：睡眠衛教重點" />
-          </label>
-        </div>
-        <label>來源
-          <input id="source" required placeholder="例如：內部測試資料 / sleep-guide" />
-        </label>
-        <label>內容
-          <textarea id="content" required placeholder="輸入要放進 vector DB 的中文資料"></textarea>
-        </label>
-        <button class="primary" id="addDocBtn" type="submit">
-          <span class="spinner" aria-hidden="true"></span>
-          <span class="btn-text">新增並 embedding</span>
-        </button>
-      </form>
     </section>
 
     <section>
@@ -449,10 +492,56 @@ INDEX_HTML = r"""<!doctype html>
     </section>
   </main>
 
+  <dialog id="docDialog">
+    <div class="dialog-head">
+      <h2>新增資料</h2>
+      <button id="closeDocDialogBtn" type="button" title="關閉新增資料視窗">關閉</button>
+    </div>
+    <form class="dialog-form" id="docForm">
+      <div class="two">
+        <label>來源 ID
+          <input id="sourceId" type="number" placeholder="自動產生" />
+        </label>
+        <label>標題
+          <input id="title" required placeholder="例如：睡眠衛教重點" />
+        </label>
+      </div>
+      <label>來源
+        <input id="source" required placeholder="例如：內部測試資料 / sleep-guide" />
+      </label>
+      <label>內容
+        <textarea id="content" required placeholder="輸入要放進 vector DB 的中文資料"></textarea>
+      </label>
+      <div class="dialog-actions">
+        <button id="cancelDocDialogBtn" type="button">取消</button>
+        <button class="primary" id="addDocBtn" type="submit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-text">新增並 embedding</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="referenceDialog">
+    <div class="dialog-head">
+      <h2 id="referenceTitle">參考資料</h2>
+      <button id="closeReferenceDialogBtn" type="button" title="關閉參考資料視窗">關閉</button>
+    </div>
+    <div class="reference-body">
+      <div class="reference-meta" id="referenceMeta"></div>
+      <pre class="reference-content" id="referenceContent"></pre>
+    </div>
+  </dialog>
+
   <script>
     const docList = document.querySelector("#docList");
     const chatLog = document.querySelector("#chatLog");
     const statusEl = document.querySelector("#status");
+    const docDialog = document.querySelector("#docDialog");
+    const referenceDialog = document.querySelector("#referenceDialog");
+    const referenceTitle = document.querySelector("#referenceTitle");
+    const referenceMeta = document.querySelector("#referenceMeta");
+    const referenceContent = document.querySelector("#referenceContent");
     const docForm = document.querySelector("#docForm");
     const addDocBtn = document.querySelector("#addDocBtn");
     const askForm = document.querySelector("#askForm");
@@ -479,9 +568,37 @@ INDEX_HTML = r"""<!doctype html>
       }[ch]));
     }
 
+    function renderEmbedding(embedding) {
+      if (!embedding || !embedding.dimension) {
+        return `<details class="embedding"><summary>Embedding：無資料</summary></details>`;
+      }
+      const preview = `[${embedding.preview.join(", ")}${embedding.dimension > embedding.preview.length ? ", ..." : ""}]`;
+      return `
+        <details class="embedding">
+          <summary>Embedding：${embedding.dimension} 維 · ${escapeHtml(preview)}</summary>
+          <pre>${escapeHtml(JSON.stringify(embedding.values, null, 2))}</pre>
+        </details>
+      `;
+    }
+
+    function openReferenceDialog(ref) {
+      referenceTitle.textContent = `[${ref.index}] ${ref.title || "參考資料"}`;
+      referenceMeta.textContent = `來源：${ref.source || "未知"} · source_id=${ref.source_id ?? "未知"} · distance=${ref.distance_text || "未知"}`;
+      referenceContent.textContent = ref.content || "";
+      referenceDialog.showModal();
+    }
+
+    function renderAnswerWithCitations(text, references) {
+      const refsByIndex = new Map(references.map(ref => [String(ref.index), ref]));
+      return escapeHtml(text).replace(/\[(\d+)\]/g, (match, index) => {
+        if (!refsByIndex.has(index)) return match;
+        return `<button class="citation" type="button" data-ref-index="${escapeHtml(index)}">[${escapeHtml(index)}]</button>`;
+      });
+    }
+
     function renderDocs(docs) {
       if (!docs.length) {
-        docList.innerHTML = `<div class="doc"><div class="doc-title">目前沒有資料</div><div class="doc-meta">可新增資料，或按「加入範例」。</div></div>`;
+        docList.innerHTML = `<div class="doc"><div class="doc-title">目前沒有資料</div><div class="doc-meta">按「+新增資料」建立第一筆向量資料。</div></div>`;
         return;
       }
 
@@ -500,6 +617,7 @@ INDEX_HTML = r"""<!doctype html>
             </button>
           </div>
           <div class="doc-content">${escapeHtml(doc.content || "")}</div>
+          ${renderEmbedding(doc.embedding)}
         </article>
       `).join("");
 
@@ -547,7 +665,17 @@ INDEX_HTML = r"""<!doctype html>
     function addMessage(role, text, references = []) {
       const div = document.createElement("div");
       div.className = `msg ${role}`;
-      div.textContent = text;
+      if (role === "assistant" && references.length) {
+        div.innerHTML = renderAnswerWithCitations(text, references);
+        div.querySelectorAll("[data-ref-index]").forEach(button => {
+          button.addEventListener("click", () => {
+            const ref = references.find(item => String(item.index) === button.dataset.refIndex);
+            if (ref) openReferenceDialog(ref);
+          });
+        });
+      } else {
+        div.textContent = text;
+      }
       if (references.length) {
         const refs = document.createElement("div");
         refs.className = "refs";
@@ -597,6 +725,7 @@ INDEX_HTML = r"""<!doctype html>
         } else {
           await loadDocs();
         }
+        docDialog.close();
         setStatus("已新增資料");
       } catch (err) {
         setStatus(err.message);
@@ -606,6 +735,25 @@ INDEX_HTML = r"""<!doctype html>
         addDocBtn.classList.remove("loading");
         buttonText.textContent = "新增並 embedding";
       }
+    });
+
+    document.querySelector("#openDocDialogBtn").addEventListener("click", () => {
+      docDialog.showModal();
+      document.querySelector("#title").focus();
+    });
+
+    document.querySelector("#closeDocDialogBtn").addEventListener("click", () => {
+      if (addDocBtn.disabled) return;
+      docDialog.close();
+    });
+
+    document.querySelector("#cancelDocDialogBtn").addEventListener("click", () => {
+      if (addDocBtn.disabled) return;
+      docDialog.close();
+    });
+
+    document.querySelector("#closeReferenceDialogBtn").addEventListener("click", () => {
+      referenceDialog.close();
     });
 
     askForm.addEventListener("submit", async event => {
@@ -639,12 +787,6 @@ INDEX_HTML = r"""<!doctype html>
     });
 
     document.querySelector("#refreshBtn").addEventListener("click", loadDocs);
-    document.querySelector("#seedBtn").addEventListener("click", async () => {
-      setStatus("加入中文範例中");
-      await api("/api/seed", { method: "POST", body: "{}" });
-      await loadDocs();
-      setStatus("已加入範例");
-    });
     document.querySelector("#clearChatBtn").addEventListener("click", async () => {
       await api(`/api/conversations/${encodeURIComponent(conversationId)}`, { method: "DELETE" });
       chatLog.innerHTML = "";
@@ -702,6 +844,29 @@ def document_embedding_text(document: dict[str, Any]) -> str:
     return f"標題：{document['title']}\n來源：{document['source']}\n內容：{document['content']}"
 
 
+def flatten_vector(vector_payload: Any) -> list[float]:
+    if isinstance(vector_payload, dict):
+        vector_payload = next(
+            (value for value in vector_payload.values() if isinstance(value, list)),
+            [],
+        )
+    if not isinstance(vector_payload, list):
+        return []
+    if vector_payload and isinstance(vector_payload[0], list):
+        vector_payload = vector_payload[0]
+    return [float(value) for value in vector_payload]
+
+
+def serialize_embedding(vector_payload: Any) -> dict[str, Any]:
+    vector = flatten_vector(vector_payload)
+    rounded = [round(value, 6) for value in vector]
+    return {
+        "dimension": len(rounded),
+        "preview": rounded[:12],
+        "values": rounded,
+    }
+
+
 def connect_client() -> weaviate.WeaviateClient:
     return weaviate.connect_to_local()
 
@@ -754,7 +919,7 @@ def list_documents() -> list[dict[str, Any]]:
         collection = client.collections.get(COLLECTION_NAME)
         result = collection.query.fetch_objects(
             limit=100,
-            include_vector=False,
+            include_vector=True,
             return_metadata=MetadataQuery(creation_time=True),
         )
         documents = []
@@ -769,6 +934,7 @@ def list_documents() -> list[dict[str, Any]]:
                     "source": props.get("source", ""),
                     "content": props.get("content", ""),
                     "created_at": created_at.isoformat() if created_at else "",
+                    "embedding": serialize_embedding(obj.vector),
                 }
             )
         documents.sort(key=lambda document: document["created_at"], reverse=True)
@@ -788,26 +954,6 @@ def add_document(payload: dict[str, Any]) -> dict[str, Any]:
         collection = client.collections.get(COLLECTION_NAME)
         uuid = collection.data.insert(properties=document, vector=vector)
         return {"uuid": str(uuid), **document}
-    finally:
-        client.close()
-
-
-def seed_default_documents() -> dict[str, int]:
-    api_key = require_openai_api_key()
-    vectors = embed_texts(api_key, [document_embedding_text(doc) for doc in DEFAULT_CHINESE_ARTICLES])
-    objects = [
-        DataObject(properties=document, vector=vector)
-        for document, vector in zip(DEFAULT_CHINESE_ARTICLES, vectors)
-    ]
-
-    client = connect_client()
-    try:
-        ensure_collection(client)
-        collection = client.collections.get(COLLECTION_NAME)
-        result = collection.data.insert_many(objects)
-        if result.has_errors:
-            raise RuntimeError(f"寫入 Weaviate 失敗：{result.errors}")
-        return {"inserted": len(objects)}
     finally:
         client.close()
 
@@ -972,9 +1118,6 @@ class AppHandler(BaseHTTPRequestHandler):
             if parsed.path == "/api/documents":
                 document = add_document(self.read_json())
                 self.send_json({"document": document, "documents": list_documents()}, status=201)
-                return
-            if parsed.path == "/api/seed":
-                self.send_json(seed_default_documents(), status=201)
                 return
             if parsed.path == "/api/ask":
                 self.send_json(ask_question(self.read_json()))
