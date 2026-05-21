@@ -6,8 +6,11 @@
 
 - 查看目前 Weaviate collection 裡的中文衛教資料
 - 新增資料時自動呼叫 OpenAI embedding，並寫入 vector DB
+- 新增資料可直接輸入文字，或上傳 TXT / PDF 衛教檔案
+- 上傳的 TXT / PDF 原始檔會保存到 MinIO
 - 刪除單筆 vector DB 資料
 - 問答時先搜尋 vector DB，再把參考資料交給 GPT
+- AI 問答可切換是否使用 RAG 搜尋，方便比較有無引用資料的差異
 - 回答中會標記實際使用的參考來源，例如 `[1]`
 - 回答中的 `[1]`、`[2]` 可點擊查看原始參考資料
 - 沒有足夠相關參考時，不會在回答中加索引
@@ -19,9 +22,12 @@
 
 ## 檔案
 
-- `app.py`：Web app 後端、前端頁面、OpenAI 呼叫、Weaviate 操作
+- `app.py`：Web app 後端、OpenAI 呼叫、Weaviate 操作，並在 production 服務 Vue build 後的靜態檔
+- `frontend/medivector-chat-app`：Vue / Vite 前端專案
 - `test.py`：CLI 測試版 RAG 流程
-- `docker-compose.yml`：啟動 Weaviate
+- `docker-compose.yml`：啟動 app、Weaviate 與 MinIO
+- `Dockerfile`：build Vue 前端並打包 Python app
+- `.dockerignore`：排除本機虛擬環境、前端依賴與 build 輸出
 - `requirements.txt`：Python 套件需求
 
 ## 需求
@@ -37,7 +43,7 @@ pip install -r requirements.txt
 
 如果目前 `.venv` 壞掉或 Python 指向異常，可以重建虛擬環境。
 
-## 啟動 Weaviate
+## 啟動 Weaviate 與 MinIO
 
 在專案目錄執行：
 
@@ -57,7 +63,60 @@ Weaviate 預設會跑在：
 http://127.0.0.1:8080
 ```
 
-## 啟動 Web App
+MinIO API 與管理介面預設會跑在：
+
+```text
+http://127.0.0.1:9000
+http://127.0.0.1:9001
+```
+
+MinIO 預設帳密：
+
+```text
+minioadmin / minioadmin
+```
+
+## 使用 Docker 啟動全部服務
+
+先設定 OpenAI API Key：
+
+```powershell
+$env:OPENAI_API_KEY="你的 API key"
+```
+
+然後在專案根目錄執行：
+
+```powershell
+docker compose up --build -d
+```
+
+這會一起啟動：
+
+- `app`：Python API + Vue build 後的前端，`http://127.0.0.1:8000`
+- `weaviate`：Vector DB，`http://127.0.0.1:8080`
+- `minio`：原始檔保存，API `http://127.0.0.1:9000`，Console `http://127.0.0.1:9001`
+
+啟動後請開：
+
+```text
+http://localhost:8000/
+```
+
+`http://localhost:8080/v1` 是 Weaviate REST API，看到 JSON 代表 vector DB 正常，不是前端頁面。
+
+查看狀態：
+
+```powershell
+docker compose ps
+```
+
+停止服務：
+
+```powershell
+docker compose down
+```
+
+## 啟動後端 API
 
 先設定 OpenAI API Key：
 
@@ -78,13 +137,32 @@ $env:PYTHONPATH = (Join-Path (Get-Location) '.venv\Lib\site-packages')
 & 'C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\python3.11.exe' app.py
 ```
 
-開啟頁面：
+後端 API：
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## 重啟 Web App
+## 啟動 Vue 前端
+
+前端在 `frontend\medivector-chat-app`，使用 Vite + Vue。
+
+```powershell
+cd frontend\medivector-chat-app
+npm run dev
+```
+
+前端開發伺服器預設會跑在：
+
+```text
+http://127.0.0.1:3000
+```
+
+Vite 已設定 `/api` proxy 到 Python 後端 `http://127.0.0.1:8000`。
+
+若要讓 Python 直接服務前端靜態檔，先在 `frontend\medivector-chat-app` 執行 `npm run build`，產生 `dist` 後再開 `http://127.0.0.1:8000`。
+
+## 重啟後端 API
 
 先找出 8000 port 的 PID：
 
@@ -102,6 +180,8 @@ Stop-Process -Id <PID> -Force
 
 如果只是要重新整理畫面，在瀏覽器按 `Ctrl+R` 即可。
 
+如果 Docker app 已啟動，但 `http://localhost:8000/` 仍看到舊畫面或「前端尚未 build」，通常是本機舊的 Python server 佔著 8000。可以用 `netstat -ano | Select-String ':8000'` 找 PID，再停止舊程序後重新整理瀏覽器。
+
 ## 使用方式
 
 ### 新增資料
@@ -111,7 +191,11 @@ Stop-Process -Id <PID> -Force
 - 來源 ID：可留空，系統會自動產生
 - 標題
 - 來源
-- 內容
+- 內容，或上傳 TXT / PDF 衛教檔案
+
+若同時填寫內容並上傳檔案，系統會把兩者合併後產生 embedding。上傳的 TXT / PDF 原始檔會保存到 MinIO，向量資料庫會記錄檔名、bucket、object key 與檔案大小。PDF 需是可複製文字的 PDF；掃描圖片型 PDF 目前不做 OCR。
+
+若檔案文字太長，系統會自動切成多個 chunk 後分別 embedding，避免超過 OpenAI embeddings 單次輸入上限。原始檔仍只會在 MinIO 保存一份。
 
 按「新增並 embedding」後，按鈕會鎖定並顯示 loading。成功後清單會自動刷新，且資料依建立時間由新到舊排序。
 
@@ -126,7 +210,12 @@ Stop-Process -Id <PID> -Force
 - `Enter`：送出
 - `Shift+Enter`：換行
 
-送出後會顯示「思考中」。後端會先將當前問題 embedding，搜尋 vector DB，再把相關資料交給 GPT 回答。
+送出前可以切換「使用 RAG 搜尋向量資料庫」：
+
+- 開啟：後端會先將當前問題 embedding，搜尋 vector DB，再把相關資料交給 GPT 回答。
+- 關閉：後端不搜尋 vector DB，直接讓 GPT 依模型能力與對話上下文回答。
+
+送出後會顯示「思考中」。
 
 如果回答內有 `[1]`、`[2]` 這類引用標記，可以直接點擊查看原始參考資料。
 
@@ -154,7 +243,7 @@ Content-Type: application/json
 }
 ```
 
-新增時會呼叫 OpenAI embeddings。
+新增時會呼叫 OpenAI embeddings。Web 介面上傳 TXT / PDF 時會使用 `multipart/form-data`，欄位名稱為 `file`。有上傳檔案時，後端會先抽出文字做 embedding，並把原始檔保存到 MinIO bucket。
 
 ### 刪除資料
 
@@ -170,7 +259,8 @@ Content-Type: application/json
 
 {
   "conversation_id": "browser-session-id",
-  "question": "年輕人健身要注意什麼？"
+  "question": "年輕人健身要注意什麼？",
+  "rag_enabled": true
 }
 ```
 
@@ -182,16 +272,28 @@ Content-Type: application/json
 | `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | embedding 模型 |
 | `OPENAI_CHAT_MODEL` | `gpt-4.1-mini` | 回答用模型 |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | OpenAI API base URL |
-| `TOP_K` | `3` | vector search 最多取幾筆 |
-| `MAX_REFERENCE_DISTANCE` | `0.45` | 絕對 distance 上限 |
-| `REFERENCE_DISTANCE_MARGIN` | `0.04` | 只保留最佳命中 distance 附近的參考 |
+| `TOP_K` | `5` | 最多回傳幾筆參考資料 |
+| `REFERENCE_CANDIDATE_LIMIT` | `20` | vector search 第一階段先取幾筆候選 |
+| `MAX_REFERENCE_DISTANCE` | `0.65` | 絕對 distance 上限 |
+| `REFERENCE_DISTANCE_MARGIN` | `0.12` | 只保留最佳命中 distance 附近的參考 |
 | `MEMORY_MESSAGES` | `10` | 保留最近幾則對話給 GPT |
+| `MAX_EMBEDDING_CHARS` | `6000` | TXT / PDF 匯入後每個 embedding chunk 的最大字元數 |
+| `WEAVIATE_HOST` | `127.0.0.1` | Weaviate HTTP host；Docker 內使用 `weaviate` |
+| `WEAVIATE_PORT` | `8080` | Weaviate HTTP port |
+| `WEAVIATE_GRPC_PORT` | `50051` | Weaviate gRPC port |
+| `MINIO_ENDPOINT` | `127.0.0.1:9000` | MinIO API endpoint |
+| `MINIO_ACCESS_KEY` | `minioadmin` | MinIO access key |
+| `MINIO_SECRET_KEY` | `minioadmin` | MinIO secret key |
+| `MINIO_BUCKET` | `health-education-files` | 保存上傳衛教檔案的 bucket |
+| `MINIO_SECURE` | `false` | 是否使用 HTTPS 連線 MinIO |
 | `HOST` | `127.0.0.1` | Web app host |
 | `PORT` | `8000` | Web app port |
 
 ## 檢索邏輯
 
 目前 vector DB 搜尋只使用「當前問題」做 embedding，避免先前對話污染檢索結果。短期記憶只會交給 GPT 回答時參考。
+
+針對常見中文衛教關鍵詞，檢索時會補上少量英文同義詞，例如「鼠蹊／腹股溝」會補 `groin / inguinal`，「神經」會補 `nerve / ilioinguinal / genitofemoral` 等。這只影響 vector DB 檢索，不會改寫使用者原本的問題。
 
 搜尋後會做兩層過濾：
 

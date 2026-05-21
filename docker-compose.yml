@@ -1,4 +1,35 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4.1-mini}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      TOP_K: ${TOP_K:-5}
+      REFERENCE_CANDIDATE_LIMIT: ${REFERENCE_CANDIDATE_LIMIT:-20}
+      MAX_REFERENCE_DISTANCE: ${MAX_REFERENCE_DISTANCE:-0.65}
+      REFERENCE_DISTANCE_MARGIN: ${REFERENCE_DISTANCE_MARGIN:-0.12}
+      MEMORY_MESSAGES: ${MEMORY_MESSAGES:-10}
+      MAX_EMBEDDING_CHARS: ${MAX_EMBEDDING_CHARS:-6000}
+      WEAVIATE_HOST: weaviate
+      WEAVIATE_PORT: 8080
+      WEAVIATE_GRPC_PORT: 50051
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-health-education-files}
+      MINIO_SECURE: "false"
+    depends_on:
+      - weaviate
+      - minio
+
   weaviate:
     image: cr.weaviate.io/semitechnologies/weaviate:1.36.0
     ports:
@@ -9,3 +40,21 @@ services:
       DEFAULT_VECTORIZER_MODULE: none
       PERSISTENCE_DATA_PATH: /var/lib/weaviate
       CLUSTER_HOSTNAME: node1
+    volumes:
+      - weaviate-data:/var/lib/weaviate
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+
+volumes:
+  weaviate-data:
+  minio-data:

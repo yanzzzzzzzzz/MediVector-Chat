@@ -1,0 +1,12 @@
+.git
+.venv
+.uv-cache
+.uv-venv
+__pycache__
+*.pyc
+*.log
+app.out.log
+app.err.log
+frontend/**/node_modules
+frontend/**/dist
+frontend/**/.vite
