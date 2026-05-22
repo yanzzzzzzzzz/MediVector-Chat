@@ -17,9 +17,12 @@ from urllib.parse import unquote, urlparse
 
 import httpx
 import weaviate
+from dotenv import load_dotenv
 from weaviate.classes.config import Configure, DataType, Property, VectorDistances
 from weaviate.classes.query import MetadataQuery
 
+
+load_dotenv(Path(__file__).with_name(".env"))
 
 COLLECTION_NAME = "Article"
 FRONTEND_DIST_DIR = Path(__file__).with_name("frontend") / "medivector-chat-app" / "dist"

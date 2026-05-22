@@ -28,6 +28,7 @@
 - `docker-compose.yml`：啟動 app、Weaviate 與 MinIO
 - `Dockerfile`：build Vue 前端並打包 Python app
 - `.dockerignore`：排除本機虛擬環境、前端依賴與 build 輸出
+- `.env.example`：環境變數範本；複製成 `.env` 後填入自己的設定
 - `requirements.txt`：Python 套件需求
 
 ## 需求
@@ -42,6 +43,22 @@ pip install -r requirements.txt
 ```
 
 如果目前 `.venv` 壞掉或 Python 指向異常，可以重建虛擬環境。
+
+## 設定環境變數
+
+專案使用根目錄的 `.env` 管理環境變數。先複製範本：
+
+```powershell
+Copy-Item .env.example .env
+```
+
+然後編輯 `.env`，至少填入：
+
+```dotenv
+OPENAI_API_KEY=你的 API key
+```
+
+`.env` 會被 Git 忽略，不會提交到 repository。Docker Compose 會自動讀取 `.env`；本機執行 `app.py` 或 `test.py` 時也會載入同一份 `.env`。
 
 ## 啟動 Weaviate 與 MinIO
 
@@ -78,13 +95,7 @@ minioadmin / minioadmin
 
 ## 使用 Docker 啟動全部服務
 
-先設定 OpenAI API Key：
-
-```powershell
-$env:OPENAI_API_KEY="你的 API key"
-```
-
-然後在專案根目錄執行：
+確認 `.env` 已設定後，在專案根目錄執行：
 
 ```powershell
 docker compose up --build -d
@@ -117,12 +128,6 @@ docker compose down
 ```
 
 ## 啟動後端 API
-
-先設定 OpenAI API Key：
-
-```powershell
-$env:OPENAI_API_KEY="你的 API key"
-```
 
 一般 Python 可用時：
 
