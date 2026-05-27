@@ -9,6 +9,7 @@
       <section class="panel">
         <div class="toolbar">
           <h2>向量資料庫</h2>
+
           <div class="actions">
             <button type="button" @click="loadDocs">重新整理</button>
             <button class="primary" type="button" @click="openDocDialog">+新增資料</button>
@@ -17,41 +18,49 @@
 
         <div class="content">
           <div class="doc-list">
-            <div v-if="docsLoading" class="list-loading" role="status" aria-live="polite">
-              <span class="spinner inline" aria-hidden="true"></span>
+            <div v-if="docsLoading" aria-live="polite" class="list-loading" role="status">
+              <span aria-hidden="true" class="spinner inline" />
               <span>載入資料中</span>
             </div>
-            <div v-else-if="!docs.length" class="doc">
+
+            <div v-else-if="docs.length === 0" class="doc">
               <div class="doc-title">目前沒有資料</div>
               <div class="doc-meta">按「+新增資料」建立第一筆向量資料。</div>
             </div>
+
             <template v-else>
               <article v-for="doc in docs" :key="doc.uuid" class="doc">
                 <div class="doc-head">
                   <div>
                     <div class="doc-title">{{ doc.title || '(未命名)' }}</div>
                     <div class="doc-meta">source_id={{ doc.source_id }} · {{ doc.source || '' }}</div>
+
                     <div v-if="Number(doc.chunk_count || 1) > 1" class="doc-meta">
                       chunk={{ doc.chunk_index || 1 }} / {{ doc.chunk_count || 1 }}
                     </div>
+
                     <div v-if="doc.file_name" class="doc-meta">
                       file={{ doc.file_name }} · {{ doc.file_bucket || '' }}/{{ doc.file_object_key || '' }}
                     </div>
+
                     <div class="doc-meta">created={{ doc.created_at || '未知' }}</div>
                     <div class="doc-meta">uuid={{ doc.uuid }}</div>
                   </div>
+
                   <button
                     class="danger"
-                    type="button"
                     :class="{ loading: deletingUuid === doc.uuid }"
                     :disabled="Boolean(deletingUuid)"
+                    type="button"
                     @click="deleteDoc(doc.uuid)"
                   >
-                    <span class="spinner" aria-hidden="true"></span>
+                    <span aria-hidden="true" class="spinner" />
                     <span>{{ deletingUuid === doc.uuid ? '刪除中' : '刪除' }}</span>
                   </button>
                 </div>
+
                 <div class="doc-content">{{ doc.content || '' }}</div>
+
                 <details class="embedding">
                   <summary>{{ embeddingSummary(doc.embedding) }}</summary>
                   <pre v-if="doc.embedding?.dimension">{{ JSON.stringify(doc.embedding.values, null, 2) }}</pre>
@@ -65,6 +74,7 @@
       <section class="panel">
         <div class="toolbar">
           <h2>AI 問答</h2>
+
           <div class="actions">
             <button type="button" @click="clearChat">清除對話</button>
           </div>
@@ -77,22 +87,33 @@
             :class="['msg', message.role, { thinking: message.thinking }]"
           >
             <template v-if="message.thinking">
-              <span class="spinner inline" aria-hidden="true"></span>
+              <span aria-hidden="true" class="spinner inline" />
               <span>思考中</span>
             </template>
-            <template v-else-if="message.role === 'assistant' && message.references.length">
+
+            <template v-else-if="message.role === 'assistant' && message.references.length > 0">
               <template v-for="(part, index) in answerParts(message)" :key="index">
                 <button v-if="part.ref" class="citation" type="button" @click="openReferenceDialog(part.ref)">
                   [{{ part.ref.index }}]
                 </button>
+
                 <template v-else>{{ part.text }}</template>
               </template>
             </template>
+
             <template v-else>{{ message.text }}</template>
 
-            <div v-if="message.references.length" class="refs">
-              <div v-for="ref in message.references" :key="ref.index">
-                [{{ ref.index }}] {{ ref.source }} · {{ ref.title }} · distance={{ ref.distance_text }}
+            <div v-if="message.role === 'assistant' && message.riskAssessment" class="risk-wrap">
+              <span :class="['risk-badge', `risk-${message.riskAssessment.level}`]">
+                風險分級：{{ message.riskAssessment.label }}
+              </span>
+
+              <div class="risk-detail">{{ message.riskAssessment.reason }}</div>
+            </div>
+
+            <div v-if="message.references.length > 0" class="refs">
+              <div v-for="sourceRef in message.references" :key="sourceRef.index">
+                [{{ sourceRef.index }}] {{ sourceRef.source }} · {{ sourceRef.title }} · distance={{ sourceRef.distance_text }}
               </div>
             </div>
           </div>
@@ -103,14 +124,16 @@
             <span>使用 RAG 搜尋向量資料庫</span>
             <input v-model="ragEnabled" type="checkbox">
           </label>
+
           <label>問題
             <textarea
               v-model.trim="question"
-              required
               placeholder="問一個問題，系統會先搜尋 vector DB 當參考"
+              required
               @keydown="handleQuestionKeydown"
-            ></textarea>
+            />
           </label>
+
           <button class="primary" type="submit">送出</button>
         </form>
       </section>
@@ -121,29 +144,36 @@
         <h2>新增資料</h2>
         <button type="button" @click="closeDocDialog">關閉</button>
       </div>
+
       <form class="dialog-form" @submit.prevent="addDocument">
         <div class="two">
           <label>來源 ID
-            <input v-model="newDoc.source_id" type="number" placeholder="自動產生">
+            <input v-model="newDoc.source_id" placeholder="自動產生" type="number">
           </label>
+
           <label>標題
-            <input v-model.trim="newDoc.title" required placeholder="例如：睡眠衛教重點">
+            <input v-model.trim="newDoc.title" placeholder="例如：睡眠衛教重點" required>
           </label>
         </div>
+
         <label>來源
-          <input v-model.trim="newDoc.source" required placeholder="例如：內部測試資料 / sleep-guide">
+          <input v-model.trim="newDoc.source" placeholder="例如：內部測試資料 / sleep-guide" required>
         </label>
+
         <label>內容
-          <textarea v-model.trim="newDoc.content" placeholder="輸入要放進 vector DB 的中文資料，或改以上傳檔案"></textarea>
+          <textarea v-model.trim="newDoc.content" placeholder="輸入要放進 vector DB 的中文資料，或改以上傳檔案" />
         </label>
+
         <label>衛教檔案
-          <input ref="fileInputEl" type="file" accept=".txt,.pdf,text/plain,application/pdf" @change="onFileChange">
+          <input ref="fileInputEl" accept=".txt,.pdf,text/plain,application/pdf" type="file" @change="onFileChange">
           <span class="hint">可上傳 TXT 或 PDF；若同時填寫內容與上傳檔案，系統會合併後 embedding。</span>
         </label>
+
         <div class="dialog-actions">
           <button type="button" @click="closeDocDialog">取消</button>
-          <button class="primary" type="submit" :class="{ loading: addingDoc }" :disabled="addingDoc">
-            <span class="spinner" aria-hidden="true"></span>
+
+          <button class="primary" :class="{ loading: addingDoc }" :disabled="addingDoc" type="submit">
+            <span aria-hidden="true" class="spinner" />
             <span>{{ addingDoc ? 'Embedding 中' : '新增並 embedding' }}</span>
           </button>
         </div>
@@ -155,10 +185,12 @@
         <h2>{{ activeReference ? `[${activeReference.index}] ${activeReference.title || '參考資料'}` : '參考資料' }}</h2>
         <button type="button" @click="closeReferenceDialog">關閉</button>
       </div>
+
       <div v-if="activeReference" class="reference-body">
         <div class="reference-meta">
           來源：{{ activeReference.source || '未知' }} · source_id={{ activeReference.source_id ?? '未知' }} · distance={{ activeReference.distance_text || '未知' }}
         </div>
+
         <pre class="reference-content">{{ activeReference.content || '' }}</pre>
       </div>
     </dialog>
@@ -202,11 +234,20 @@
     distance_text: string
   }
 
+  interface RiskAssessment {
+    level: 'green' | 'yellow' | 'red'
+    label: string
+    reason: string
+    diverted: boolean
+    action: string
+  }
+
   interface ChatMessage {
     id: number
     role: 'user' | 'assistant'
     text: string
     references: ReferenceItem[]
+    riskAssessment?: RiskAssessment | null
     thinking?: boolean
   }
 
@@ -241,11 +282,11 @@
 
   localStorage.setItem('conversationId', conversationId)
 
-  function setStatus(text: string) {
+  function setStatus (text: string) {
     status.value = text
   }
 
-  async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+  async function api<T> (path: string, options: RequestInit = {}): Promise<T> {
     const requestOptions: RequestInit = { ...options }
     if (!(options.body instanceof FormData)) {
       requestOptions.headers = {
@@ -259,13 +300,13 @@
     return body as T
   }
 
-  function embeddingSummary(embedding?: Embedding) {
+  function embeddingSummary (embedding?: Embedding) {
     if (!embedding?.dimension) return 'Embedding：無資料'
     const suffix = embedding.dimension > embedding.preview.length ? ', ...' : ''
     return `Embedding：${embedding.dimension} 維 · [${embedding.preview.join(', ')}${suffix}]`
   }
 
-  async function loadDocs() {
+  async function loadDocs () {
     setStatus('載入資料中')
     docsLoading.value = true
     try {
@@ -277,7 +318,7 @@
     }
   }
 
-  async function deleteDoc(uuid: string) {
+  async function deleteDoc (uuid: string) {
     if (deletingUuid.value) return
     if (!confirm('確定要刪除這筆 vector DB 資料？')) return
     deletingUuid.value = uuid
@@ -295,20 +336,27 @@
     }
   }
 
-  function addMessage(role: 'user' | 'assistant', text: string, references: ReferenceItem[] = [], thinking = false) {
+  function addMessage (
+    role: 'user' | 'assistant',
+    text: string,
+    references: ReferenceItem[] = [],
+    thinking = false,
+    riskAssessment: RiskAssessment | null = null,
+  ) {
     const message: ChatMessage = {
       id: nextMessageId++,
       role,
       text,
       references,
       thinking,
+      riskAssessment,
     }
     messages.value.push(message)
     scrollChat()
     return message
   }
 
-  function answerParts(message: ChatMessage): AnswerPart[] {
+  function answerParts (message: ChatMessage): AnswerPart[] {
     const referencesByIndex = new Map(message.references.map(ref => [String(ref.index), ref]))
     const parts: AnswerPart[] = []
     const pattern = /\[(\d+)\]/g
@@ -330,7 +378,7 @@
     return parts
   }
 
-  function scrollChat() {
+  function scrollChat () {
     nextTick(() => {
       if (chatLogEl.value) {
         chatLogEl.value.scrollTop = chatLogEl.value.scrollHeight
@@ -338,21 +386,21 @@
     })
   }
 
-  function openDocDialog() {
+  function openDocDialog () {
     docDialogEl.value?.showModal()
   }
 
-  function closeDocDialog() {
+  function closeDocDialog () {
     if (addingDoc.value) return
     docDialogEl.value?.close()
   }
 
-  function onFileChange(event: Event) {
+  function onFileChange (event: Event) {
     const input = event.target as HTMLInputElement
     selectedFile.value = input.files?.[0] || null
   }
 
-  function resetDocForm() {
+  function resetDocForm () {
     newDoc.source_id = ''
     newDoc.title = ''
     newDoc.source = ''
@@ -361,7 +409,7 @@
     if (fileInputEl.value) fileInputEl.value.value = ''
   }
 
-  async function addDocument() {
+  async function addDocument () {
     if (addingDoc.value) return
     if (!newDoc.content && !selectedFile.value) {
       alert('請輸入內容，或上傳 TXT / PDF 衛教檔案。')
@@ -397,16 +445,16 @@
     }
   }
 
-  function openReferenceDialog(refItem: ReferenceItem) {
+  function openReferenceDialog (refItem: ReferenceItem) {
     activeReference.value = refItem
     nextTick(() => referenceDialogEl.value?.showModal())
   }
 
-  function closeReferenceDialog() {
+  function closeReferenceDialog () {
     referenceDialogEl.value?.close()
   }
 
-  async function askQuestion() {
+  async function askQuestion () {
     const trimmedQuestion = question.value.trim()
     if (!trimmedQuestion) return
 
@@ -417,7 +465,12 @@
     setStatus(useRag ? '搜尋參考並詢問 GPT' : '直接詢問 GPT')
 
     try {
-      const data = await api<{ answer: string, rag_enabled: boolean, references: ReferenceItem[] }>('/api/ask', {
+      const data = await api<{
+        answer: string
+        rag_enabled: boolean
+        references: ReferenceItem[]
+        risk_assessment?: RiskAssessment
+      }>('/api/ask', {
         method: 'POST',
         body: JSON.stringify({
           conversation_id: conversationId,
@@ -426,11 +479,15 @@
         }),
       })
       messages.value = messages.value.filter(message => message.id !== thinkingMessage.id)
-      addMessage('assistant', data.answer, data.references || [])
-      if (!data.rag_enabled) {
-        setStatus('RAG 關閉，未搜尋向量資料庫')
+      addMessage('assistant', data.answer, data.references || [], false, data.risk_assessment || null)
+      if (data.risk_assessment?.diverted) {
+        setStatus(`急症分流：${data.risk_assessment.reason}`)
+      } else if (data.rag_enabled) {
+        const riskLabel = data.risk_assessment ? `風險=${data.risk_assessment.label}` : '風險=一般'
+        const referenceLabel = data.references.length > 0 ? `使用 ${data.references.length} 筆參考` : '未使用參考索引'
+        setStatus(`${riskLabel} · ${referenceLabel}`)
       } else {
-        setStatus(data.references.length ? `使用 ${data.references.length} 筆參考` : '未使用參考索引')
+        setStatus('RAG 關閉，未搜尋向量資料庫')
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
@@ -440,13 +497,13 @@
     }
   }
 
-  function handleQuestionKeydown(event: KeyboardEvent) {
+  function handleQuestionKeydown (event: KeyboardEvent) {
     if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return
     event.preventDefault()
     askQuestion()
   }
 
-  async function clearChat() {
+  async function clearChat () {
     await api(`/api/conversations/${encodeURIComponent(conversationId)}`, { method: 'DELETE' })
     messages.value = []
     setStatus('已清除對話記憶')
@@ -806,6 +863,46 @@
     gap: 8px;
     color: #687381;
     font-size: 12px;
+  }
+
+  .risk-wrap {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+  }
+
+  .risk-badge {
+    width: fit-content;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .risk-green {
+    background: #eef7f5;
+    color: #0b5f59;
+    border-color: #b8ddd7;
+  }
+
+  .risk-yellow {
+    background: #fff8e8;
+    color: #8a5a00;
+    border-color: #f7d186;
+  }
+
+  .risk-red {
+    background: #fff1ef;
+    color: #b42318;
+    border-color: #f5b3ad;
+  }
+
+  .risk-detail {
+    color: #687381;
+    font-size: 12px;
+    line-height: 1.5;
   }
 
   .citation {
