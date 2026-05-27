@@ -2,7 +2,14 @@
   <div class="page">
     <header class="app-header">
       <h1>Vector DB 中文問答</h1>
-      <div class="status">{{ status }}</div>
+
+      <div class="header-tools">
+        <label class="api-key-control">
+          <span>API Key</span>
+          <input v-model.trim="apiKey" autocomplete="off" placeholder="選填，後端啟用驗證時需填入" type="password">
+        </label>
+        <div class="status">{{ status }}</div>
+      </div>
     </header>
 
     <main class="layout">
@@ -198,7 +205,7 @@
 </template>
 
 <script setup lang="ts">
-  import { nextTick, onMounted, reactive, ref } from 'vue'
+  import { nextTick, onMounted, reactive, ref, watch } from 'vue'
 
   interface Embedding {
     dimension: number
@@ -263,6 +270,7 @@
   const messages = ref<ChatMessage[]>([])
   const question = ref('')
   const ragEnabled = ref(true)
+  const apiKey = ref(localStorage.getItem('appApiKey') || '')
   const addingDoc = ref(false)
   const selectedFile = ref<File | null>(null)
   const activeReference = ref<ReferenceItem | null>(null)
@@ -288,11 +296,17 @@
 
   async function api<T> (path: string, options: RequestInit = {}): Promise<T> {
     const requestOptions: RequestInit = { ...options }
+    const headers: Record<string, string> = {
+      ...(options.headers as Record<string, string> | undefined),
+    }
+    if (apiKey.value) {
+      headers['X-API-Key'] = apiKey.value
+    }
     if (!(options.body instanceof FormData)) {
-      requestOptions.headers = {
-        'Content-Type': 'application/json',
-        ...(options.headers as Record<string, string> | undefined),
-      }
+      headers['Content-Type'] = 'application/json'
+    }
+    if (Object.keys(headers).length > 0) {
+      requestOptions.headers = headers
     }
     const response = await fetch(path, requestOptions)
     const body = await response.json().catch(() => ({}))
@@ -515,6 +529,14 @@
       setStatus(message)
     })
   })
+
+  watch(apiKey, (value) => {
+    if (value) {
+      localStorage.setItem('appApiKey', value)
+      return
+    }
+    localStorage.removeItem('appApiKey')
+  })
 </script>
 
 <style scoped>
@@ -533,6 +555,12 @@
     padding: 0 24px;
     border-bottom: 1px solid #d9dee5;
     background: #ffffff;
+  }
+
+  .header-tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   h1 {
@@ -642,6 +670,25 @@
     font-size: 13px;
     min-width: 180px;
     text-align: right;
+  }
+
+  .api-key-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #687381;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .api-key-control input {
+    width: 220px;
+    border: 1px solid #d9dee5;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+    color: #17202a;
+    background: #ffffff;
   }
 
   .content {
@@ -1029,6 +1076,9 @@
     .ask-form { grid-template-columns: 1fr; }
     .ask-form button { grid-column: 1; width: 100%; }
     .status { text-align: left; min-width: 0; }
+    .header-tools { width: 100%; flex-direction: column; align-items: stretch; }
+    .api-key-control { width: 100%; justify-content: space-between; }
+    .api-key-control input { width: min(100%, 320px); }
     .app-header { align-items: flex-start; height: auto; padding: 14px 16px; flex-direction: column; }
   }
 </style>
