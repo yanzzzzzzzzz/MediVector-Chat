@@ -103,6 +103,16 @@
 
             <template v-else>{{ message.text }}</template>
 
+            <div v-if="message.role === 'assistant' && message.evidenceAssessment" class="evidence-wrap">
+              <span
+                :class="['evidence-badge', message.evidenceAssessment.sufficient ? 'evidence-sufficient' : 'evidence-insufficient']"
+              >
+                證據{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }}
+              </span>
+
+              <div class="evidence-detail">{{ message.evidenceAssessment.reason }}</div>
+            </div>
+
             <div v-if="message.role === 'assistant' && message.riskAssessment" class="risk-wrap">
               <span :class="['risk-badge', `risk-${message.riskAssessment.level}`]">
                 風險分級：{{ message.riskAssessment.label }}
@@ -114,6 +124,10 @@
             <div v-if="message.references.length > 0" class="refs">
               <div v-for="sourceRef in message.references" :key="sourceRef.index">
                 [{{ sourceRef.index }}] {{ sourceRef.source }} · {{ sourceRef.title }} · distance={{ sourceRef.distance_text }}
+              </div>
+
+              <div v-if="message.evidenceAssessment" class="refs-evidence">
+                證據狀態：{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }} · {{ message.evidenceAssessment.reason }}
               </div>
             </div>
           </div>
@@ -242,11 +256,19 @@
     action: string
   }
 
+  interface EvidenceAssessment {
+    sufficient: boolean
+    reason: string
+    reference_count: number
+    best_distance: number | null
+  }
+
   interface ChatMessage {
     id: number
     role: 'user' | 'assistant'
     text: string
     references: ReferenceItem[]
+    evidenceAssessment?: EvidenceAssessment | null
     riskAssessment?: RiskAssessment | null
     thinking?: boolean
   }
@@ -341,6 +363,7 @@
     text: string,
     references: ReferenceItem[] = [],
     thinking = false,
+    evidenceAssessment: EvidenceAssessment | null = null,
     riskAssessment: RiskAssessment | null = null,
   ) {
     const message: ChatMessage = {
@@ -348,6 +371,7 @@
       role,
       text,
       references,
+      evidenceAssessment,
       thinking,
       riskAssessment,
     }
@@ -469,6 +493,7 @@
         answer: string
         rag_enabled: boolean
         references: ReferenceItem[]
+        evidence_assessment?: EvidenceAssessment
         risk_assessment?: RiskAssessment
       }>('/api/ask', {
         method: 'POST',
@@ -479,13 +504,21 @@
         }),
       })
       messages.value = messages.value.filter(message => message.id !== thinkingMessage.id)
-      addMessage('assistant', data.answer, data.references || [], false, data.risk_assessment || null)
+      addMessage(
+        'assistant',
+        data.answer,
+        data.references || [],
+        false,
+        data.evidence_assessment || null,
+        data.risk_assessment || null,
+      )
       if (data.risk_assessment?.diverted) {
         setStatus(`急症分流：${data.risk_assessment.reason}`)
       } else if (data.rag_enabled) {
         const riskLabel = data.risk_assessment ? `風險=${data.risk_assessment.label}` : '風險=一般'
         const referenceLabel = data.references.length > 0 ? `使用 ${data.references.length} 筆參考` : '未使用參考索引'
-        setStatus(`${riskLabel} · ${referenceLabel}`)
+        const evidenceLabel = data.evidence_assessment?.sufficient ? '證據充足' : '證據不足'
+        setStatus(`${riskLabel} · ${referenceLabel} · ${evidenceLabel}`)
       } else {
         setStatus('RAG 關閉，未搜尋向量資料庫')
       }
@@ -863,6 +896,47 @@
     gap: 8px;
     color: #687381;
     font-size: 12px;
+  }
+
+  .refs-evidence {
+    padding-top: 2px;
+    color: #51606d;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .evidence-wrap {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+  }
+
+  .evidence-badge {
+    width: fit-content;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .evidence-sufficient {
+    background: #eef7f5;
+    color: #0b5f59;
+    border-color: #b8ddd7;
+  }
+
+  .evidence-insufficient {
+    background: #fff8e8;
+    color: #8a5a00;
+    border-color: #f7d186;
+  }
+
+  .evidence-detail {
+    color: #687381;
+    font-size: 12px;
+    line-height: 1.5;
   }
 
   .risk-wrap {

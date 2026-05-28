@@ -34,6 +34,8 @@ TOP_K = int(os.getenv("TOP_K", "5"))
 REFERENCE_CANDIDATE_LIMIT = int(os.getenv("REFERENCE_CANDIDATE_LIMIT", "20"))
 MAX_REFERENCE_DISTANCE = float(os.getenv("MAX_REFERENCE_DISTANCE", "0.65"))
 REFERENCE_DISTANCE_MARGIN = float(os.getenv("REFERENCE_DISTANCE_MARGIN", "0.12"))
+MIN_REFERENCE_COUNT = int(os.getenv("MIN_REFERENCE_COUNT", "2"))
+MAX_EVIDENCE_DISTANCE = float(os.getenv("MAX_EVIDENCE_DISTANCE", str(MAX_REFERENCE_DISTANCE)))
 MEMORY_MESSAGES = int(os.getenv("MEMORY_MESSAGES", "10"))
 MAX_EMBEDDING_CHARS = int(os.getenv("MAX_EMBEDDING_CHARS", "6000"))
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "127.0.0.1:9000")
@@ -70,6 +72,14 @@ class Reference:
     source: str
     content: str
     distance: float | None
+
+
+@dataclass
+class EvidenceAssessment:
+    sufficient: bool
+    reason: str
+    reference_count: int
+    best_distance: float | None
 
 
 @dataclass
@@ -707,12 +717,48 @@ def search_references(client: weaviate.WeaviateClient, api_key: str, question: s
     return references
 
 
+def assess_evidence(references: list[Reference]) -> EvidenceAssessment:
+    if not references:
+        return EvidenceAssessment(
+            sufficient=False,
+            reason="沒有找到可用參考資料。",
+            reference_count=0,
+            best_distance=None,
+        )
+
+    distances = [ref.distance for ref in references if ref.distance is not None]
+    best_distance = min(distances) if distances else None
+    if len(references) < MIN_REFERENCE_COUNT:
+        return EvidenceAssessment(
+            sufficient=False,
+            reason=f"參考資料不足，只有 {len(references)} 筆。",
+            reference_count=len(references),
+            best_distance=best_distance,
+        )
+
+    if best_distance is not None and best_distance > MAX_EVIDENCE_DISTANCE:
+        return EvidenceAssessment(
+            sufficient=False,
+            reason=f"最佳參考距離過高（{best_distance:.4f}），證據偏弱。",
+            reference_count=len(references),
+            best_distance=best_distance,
+        )
+
+    return EvidenceAssessment(
+        sufficient=True,
+        reason="參考資料數量與距離達到門檻。",
+        reference_count=len(references),
+        best_distance=best_distance,
+    )
+
+
 def chat_with_gpt(
     api_key: str,
     question: str,
     references: list[Reference],
     history: list[dict[str, str]],
     risk: RiskAssessment,
+    evidence: EvidenceAssessment,
     rag_enabled: bool = True,
 ) -> str:
     template_instruction = (
@@ -722,6 +768,11 @@ def chat_with_gpt(
         f"{RESPONSE_SECTION_WARNINGS}\n"
         f"{RESPONSE_SECTION_WHEN_TO_SEEK_CARE}\n"
         "每段內容請簡潔、可執行。"
+    )
+
+    evidence_instruction = (
+        f"本次引用證據狀態：{'足夠' if evidence.sufficient else '不足'}。"
+        f"原因：{evidence.reason}"
     )
 
     if references:
@@ -735,19 +786,25 @@ def chat_with_gpt(
             "請根據可用參考資料回答。"
             "每個使用到參考資料的重點都要在句尾加上對應索引，例如 [1]。"
             "不要引用未使用或不存在的索引。\n\n"
+            f"{evidence_instruction}\n"
+            "如果證據不足，請以保守方式回答，不要下定論或使用過度肯定語氣。\n\n"
             f"{template_instruction}"
         )
     elif not rag_enabled:
         user_content = (
             f"使用者目前問題：{question}\n\n"
             "本次使用者已關閉 RAG 搜尋，請不要使用向量資料庫參考，也不要在回答中加任何 [1] 這類索引。"
-            f"\n\n{template_instruction}"
+            f"\n\n{evidence_instruction}\n"
+            "請以保守方式回答，不要表現出有檢索證據支持的確定語氣。\n\n"
+            f"{template_instruction}"
         )
     else:
         user_content = (
             f"使用者目前問題：{question}\n\n"
             "向量資料庫沒有找到足夠相關的參考資料。請直接回答，不要在回答中加任何 [1] 這類索引。"
-            f"\n\n{template_instruction}"
+            f"\n\n{evidence_instruction}\n"
+            "請明確標示這是保守衛教，不要給出確定性判斷。\n\n"
+            f"{template_instruction}"
         )
 
     risk_instruction = (
@@ -764,10 +821,12 @@ def chat_with_gpt(
                 "若有向量資料庫參考，只能標註實際用到且能支持內容的索引；不要編造來源。"
                 "若沒有參考資料，或本次 RAG 關閉，不要輸出任何引用索引。"
                 "你只提供衛教資訊，不可做出診斷、處方、劑量建議或保證療效。"
+                "當引用證據不足時，必須主動降低語氣強度，明確說明不確定性。"
                 "語氣需保守，不可過度肯定，遇到不確定資訊要明確說明限制。"
             ),
         },
         {"role": "system", "content": risk_instruction},
+        {"role": "system", "content": evidence_instruction},
         *history[-MEMORY_MESSAGES:],
         {"role": "user", "content": user_content},
     ]
@@ -819,16 +878,30 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
         }
 
     references: list[Reference] = []
+    evidence = EvidenceAssessment(
+        sufficient=False,
+        reason="未評估。",
+        reference_count=0,
+        best_distance=None,
+    )
     if rag_enabled:
         client = connect_client()
         try:
             ensure_collection(client)
             references = search_references(client, api_key, question)
+            evidence = assess_evidence(references)
         finally:
             client.close()
+    else:
+        evidence = EvidenceAssessment(
+            sufficient=False,
+            reason="RAG 已關閉，未進行引用證據評估。",
+            reference_count=0,
+            best_distance=None,
+        )
 
     try:
-        answer = chat_with_gpt(api_key, question, references, history, risk, rag_enabled=rag_enabled)
+        answer = chat_with_gpt(api_key, question, references, history, risk, evidence, rag_enabled=rag_enabled)
     except Exception:
         raise
 
@@ -856,6 +929,12 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
             }
             for ref in references
         ],
+        "evidence_assessment": {
+            "sufficient": evidence.sufficient,
+            "reason": evidence.reason,
+            "reference_count": evidence.reference_count,
+            "best_distance": evidence.best_distance,
+        },
         "memory_messages": len(history),
         "risk_assessment": {
             "level": risk.level,
