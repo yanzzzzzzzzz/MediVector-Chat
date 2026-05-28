@@ -113,6 +113,14 @@
               <div class="evidence-detail">{{ message.evidenceAssessment.reason }}</div>
             </div>
 
+            <div v-if="message.role === 'assistant' && message.retrievalTerms && message.retrievalTerms.length > 0" class="retrieval-wrap">
+              <div class="retrieval-title">本次檢索詞</div>
+
+              <div class="retrieval-tags">
+                <span v-for="term in message.retrievalTerms" :key="term" class="retrieval-tag">{{ term }}</span>
+              </div>
+            </div>
+
             <div v-if="message.role === 'assistant' && message.riskAssessment" class="risk-wrap">
               <span :class="['risk-badge', `risk-${message.riskAssessment.level}`]">
                 風險分級：{{ message.riskAssessment.label }}
@@ -128,6 +136,10 @@
 
               <div v-if="message.evidenceAssessment" class="refs-evidence">
                 證據狀態：{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }} · {{ message.evidenceAssessment.reason }}
+              </div>
+
+              <div v-if="message.retrievalTerms && message.retrievalTerms.length > 0" class="refs-retrieval">
+                檢索詞：{{ message.retrievalTerms.join(' · ') }}
               </div>
             </div>
           </div>
@@ -263,12 +275,22 @@
     best_distance: number | null
   }
 
+  interface AskResponse {
+    answer: string
+    rag_enabled: boolean
+    references: ReferenceItem[]
+    evidence_assessment?: EvidenceAssessment
+    retrieval_terms?: string[]
+    risk_assessment?: RiskAssessment
+  }
+
   interface ChatMessage {
     id: number
     role: 'user' | 'assistant'
     text: string
     references: ReferenceItem[]
     evidenceAssessment?: EvidenceAssessment | null
+    retrievalTerms?: string[]
     riskAssessment?: RiskAssessment | null
     thinking?: boolean
   }
@@ -364,6 +386,7 @@
     references: ReferenceItem[] = [],
     thinking = false,
     evidenceAssessment: EvidenceAssessment | null = null,
+    retrievalTerms: string[] = [],
     riskAssessment: RiskAssessment | null = null,
   ) {
     const message: ChatMessage = {
@@ -372,6 +395,7 @@
       text,
       references,
       evidenceAssessment,
+      retrievalTerms,
       thinking,
       riskAssessment,
     }
@@ -489,13 +513,7 @@
     setStatus(useRag ? '搜尋參考並詢問 GPT' : '直接詢問 GPT')
 
     try {
-      const data = await api<{
-        answer: string
-        rag_enabled: boolean
-        references: ReferenceItem[]
-        evidence_assessment?: EvidenceAssessment
-        risk_assessment?: RiskAssessment
-      }>('/api/ask', {
+      const data = await api<AskResponse>('/api/ask', {
         method: 'POST',
         body: JSON.stringify({
           conversation_id: conversationId,
@@ -510,6 +528,7 @@
         data.references || [],
         false,
         data.evidence_assessment || null,
+        data.retrieval_terms || [],
         data.risk_assessment || null,
       )
       if (data.risk_assessment?.diverted) {
@@ -518,7 +537,9 @@
         const riskLabel = data.risk_assessment ? `風險=${data.risk_assessment.label}` : '風險=一般'
         const referenceLabel = data.references.length > 0 ? `使用 ${data.references.length} 筆參考` : '未使用參考索引'
         const evidenceLabel = data.evidence_assessment?.sufficient ? '證據充足' : '證據不足'
-        setStatus(`${riskLabel} · ${referenceLabel} · ${evidenceLabel}`)
+        const retrievalTerms = data.retrieval_terms || []
+        const retrievalLabel = retrievalTerms.length > 0 ? `檢索詞=${retrievalTerms.length} 組` : '檢索詞=無'
+        setStatus(`${riskLabel} · ${referenceLabel} · ${evidenceLabel} · ${retrievalLabel}`)
       } else {
         setStatus('RAG 關閉，未搜尋向量資料庫')
       }
@@ -905,6 +926,12 @@
     line-height: 1.5;
   }
 
+  .refs-retrieval {
+    color: #51606d;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
   .evidence-wrap {
     margin-top: 10px;
     display: grid;
@@ -937,6 +964,34 @@
     color: #687381;
     font-size: 12px;
     line-height: 1.5;
+  }
+
+  .retrieval-wrap {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+  }
+
+  .retrieval-title {
+    color: #51606d;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .retrieval-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .retrieval-tag {
+    padding: 2px 8px;
+    border: 1px solid #d9dee5;
+    border-radius: 999px;
+    background: #fbfcfd;
+    color: #51606d;
+    font-size: 12px;
+    line-height: 1.4;
   }
 
   .risk-wrap {

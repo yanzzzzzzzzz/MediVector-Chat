@@ -49,19 +49,10 @@ WEAVIATE_GRPC_PORT = int(os.getenv("WEAVIATE_GRPC_PORT", "50051"))
 
 
 CONVERSATIONS: dict[str, list[dict[str, str]]] = {}
+CONVERSATION_RETRIEVAL_TERMS: dict[str, list[str]] = {}
 
 
-RETRIEVAL_QUERY_EXPANSIONS = {
-    "鼠蹊": "groin inguinal",
-    "腹股溝": "groin inguinal",
-    "運動員": "athlete athletes athletic sports",
-    "疼痛": "pain",
-    "神經": "nerve neural neurological ilioinguinal iliohypogastric genitofemoral obturator pudendal femoral",
-    "復健": "rehabilitation physical therapy conservative treatment",
-    "保守治療": "conservative treatment non-surgical management",
-    "肌腱": "tendon tendinopathy",
-    "內收肌": "adductor",
-}
+QUERY_EXPANSION_MODEL = "gpt-4o-mini-2024-07-18"
 
 @dataclass
 class Reference:
@@ -128,6 +119,106 @@ def level_to_action(level: str) -> str:
     if level == "yellow":
         return RISK_YELLOW_ACTION
     return RISK_GREEN_ACTION
+
+
+def normalize_retrieval_terms(terms: list[str]) -> list[str]:
+    normalized_terms: list[str] = []
+    seen_terms: set[str] = set()
+    for term in terms:
+        cleaned_term = re.sub(r"\s+", " ", str(term or "").strip())
+        if not cleaned_term:
+            continue
+        lowered_term = cleaned_term.lower()
+        if lowered_term in seen_terms:
+            continue
+        seen_terms.add(lowered_term)
+        normalized_terms.append(cleaned_term)
+    return normalized_terms
+
+
+def generate_retrieval_terms(api_key: str, question: str, history: list[dict[str, str]]) -> list[str]:
+    recent_user_turns = [
+        str(message.get("content") or "").strip()
+        for message in history[-6:]
+        if str(message.get("role") or "") == "user" and str(message.get("content") or "").strip()
+    ]
+    conversation_context = "\n".join(f"- {turn}" for turn in recent_user_turns)
+
+    schema = {
+        "name": "retrieval_query_terms",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "terms": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "minItems": 3,
+                    "maxItems": 8,
+                },
+            },
+            "required": ["terms"],
+            "additionalProperties": False,
+        },
+    }
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "你是醫療檢索關鍵詞擴展器。"
+                "規則：\n"
+                "1. 必須保留問題中出現的所有解剖部位、症狀、疾病名稱，不可省略。\n"
+                "2. 每個中文關鍵詞都必須同時加上對應的英文同義詞或醫學術語（例如：鼠蹊部→groin inguinal，發燒→fever pyrexia）。\n"
+                "3. 可追加相關症狀、病因、治療方式的中英詞，但不要偏離問題主題。\n"
+                "4. 不要寫完整句子，詞組需簡短，適合直接拼接到向量檢索查詢中。\n"
+                "5. 避免重複、避免與問題無關的泛用詞。\n"
+                "只輸出符合 schema 的 JSON。"
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
+                f"使用者當前問題：{question}\n\n"
+                f"最近對話內容：\n{conversation_context or '- 無'}\n\n"
+                "請先列出問題中的解剖部位與症狀詞（含英文），再追加 2 到 4 個相關擴展詞（含英文），合計 3 到 8 組。"
+            ),
+        },
+    ]
+
+    try:
+        data = openai_post(
+            api_key,
+            "/chat/completions",
+            {
+                "model": QUERY_EXPANSION_MODEL,
+                "temperature": 0.2,
+                "messages": messages,
+                "response_format": {
+                    "type": "json_schema",
+                    "json_schema": schema,
+                },
+            },
+        )
+        content = data["choices"][0]["message"]["content"]
+        parsed = json.loads(content)
+        terms = normalize_retrieval_terms([str(term) for term in parsed.get("terms") or []])
+        return terms[:8]
+    except Exception:
+        return []
+
+
+def get_conversation_retrieval_terms(
+    api_key: str,
+    conversation_id: str,
+    question: str,
+    history: list[dict[str, str]],
+) -> list[str]:
+    cached_terms = CONVERSATION_RETRIEVAL_TERMS.get(conversation_id)
+    if cached_terms is not None:
+        return cached_terms
+
+    generated_terms = generate_retrieval_terms(api_key, question, history)
+    CONVERSATION_RETRIEVAL_TERMS[conversation_id] = generated_terms
+    return generated_terms
 
 
 def assess_question_risk(api_key: str, question: str) -> RiskAssessment:
@@ -288,47 +379,11 @@ def document_embedding_text(document: dict[str, Any]) -> str:
     return f"標題：{document['title']}\n來源：{document['source']}\n內容：{document['content']}"
 
 
-def retrieval_query_text(question: str) -> str:
-    expansions = [
-        expansion
-        for keyword, expansion in RETRIEVAL_QUERY_EXPANSIONS.items()
-        if keyword in question
-    ]
-    if not expansions:
+def retrieval_query_text(question: str, retrieval_terms: list[str] | None = None) -> str:
+    normalized_terms = normalize_retrieval_terms(retrieval_terms or [])
+    if not normalized_terms:
         return question
-    return f"{question}\n\n檢索關鍵詞：{' '.join(expansions)}"
-
-
-def required_reference_term_groups(question: str) -> list[tuple[str, ...]]:
-    groups: list[tuple[str, ...]] = []
-    if "鼠蹊" in question or "腹股溝" in question:
-        groups.append(("鼠蹊", "腹股溝", "groin", "inguinal"))
-    if "神經" in question:
-        groups.append(
-            (
-                "神經",
-                "nerve",
-                "neural",
-                "neurolog",
-                "ilioinguinal",
-                "iliohypogastric",
-                "genitofemoral",
-                "obturator",
-                "pudendal",
-                "femoral",
-            )
-        )
-    return groups
-
-
-def reference_matches_required_terms(props: dict[str, Any], groups: list[tuple[str, ...]]) -> bool:
-    if not groups:
-        return True
-    haystack = " ".join(
-        str(props.get(key) or "")
-        for key in ("title", "source", "content", "file_name")
-    ).lower()
-    return all(any(term.lower() in haystack for term in group) for group in groups)
+    return f"{question}\n\n檢索關鍵詞：{' '.join(normalized_terms)}"
 
 
 def split_text_for_embedding(text: str, max_chars: int = MAX_EMBEDDING_CHARS) -> list[str]:
@@ -665,9 +720,14 @@ def is_minio_object_referenced(collection: Any, file_object_key: str) -> bool:
     return any(str(obj.properties.get("file_object_key") or "") == file_object_key for obj in result.objects)
 
 
-def search_references(client: weaviate.WeaviateClient, api_key: str, question: str) -> list[Reference]:
+def search_references(
+    client: weaviate.WeaviateClient,
+    api_key: str,
+    question: str,
+    retrieval_terms: list[str] | None = None,
+) -> list[Reference]:
     collection = client.collections.get(COLLECTION_NAME)
-    question_vector = embed_texts(api_key, [retrieval_query_text(question)])[0]
+    question_vector = embed_texts(api_key, [retrieval_query_text(question, retrieval_terms)])[0]
     result = collection.query.near_vector(
         near_vector=question_vector,
         limit=REFERENCE_CANDIDATE_LIMIT,
@@ -682,16 +742,12 @@ def search_references(client: weaviate.WeaviateClient, api_key: str, question: s
 
     references: list[Reference] = []
     seen_reference_keys: set[tuple[str, str, str]] = set()
-    required_term_groups = required_reference_term_groups(question)
     for obj in result.objects:
         distance = obj.metadata.distance
         if distance is not None and distance > max_allowed_distance:
             continue
 
         props = obj.properties
-        if not reference_matches_required_terms(props, required_term_groups):
-            continue
-
         reference_key = (
             str(props.get("title", "")),
             str(props.get("source", "")),
@@ -884,11 +940,13 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
         reference_count=0,
         best_distance=None,
     )
+    retrieval_terms: list[str] = []
     if rag_enabled:
+        retrieval_terms = get_conversation_retrieval_terms(api_key, conversation_id, question, history)
         client = connect_client()
         try:
             ensure_collection(client)
-            references = search_references(client, api_key, question)
+            references = search_references(client, api_key, question, retrieval_terms)
             evidence = assess_evidence(references)
         finally:
             client.close()
@@ -935,6 +993,7 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
             "reference_count": evidence.reference_count,
             "best_distance": evidence.best_distance,
         },
+        "retrieval_terms": retrieval_terms,
         "memory_messages": len(history),
         "risk_assessment": {
             "level": risk.level,
@@ -984,6 +1043,7 @@ class AppHandler(BaseHTTPRequestHandler):
             if parsed.path.startswith("/api/conversations/"):
                 conversation_id = unquote(parsed.path.removeprefix("/api/conversations/"))
                 CONVERSATIONS.pop(conversation_id, None)
+                CONVERSATION_RETRIEVAL_TERMS.pop(conversation_id, None)
                 self.send_json({"deleted": True})
                 return
             self.send_error_json(404, "找不到路徑。")
@@ -1080,13 +1140,27 @@ class AppHandler(BaseHTTPRequestHandler):
         sys.stderr.write("%s - %s\n" % (self.log_date_time_string(), format % args))
 
 
-def main() -> None:
+def _serve() -> None:
     port = int(os.getenv("PORT", "8000"))
     host = os.getenv("HOST", "127.0.0.1")
     server = ThreadingHTTPServer((host, port), AppHandler)
     print(f"Web app running at http://{host}:{port}")
     print("Press Ctrl+C to stop.")
     server.serve_forever()
+
+
+def main() -> None:
+    reload = "--reload" in sys.argv or os.getenv("RELOAD", "").lower() in {"1", "true", "yes"}
+    if reload:
+        try:
+            from watchfiles import run_process
+        except ImportError:
+            print("watchfiles 未安裝，請執行 pip install watchfiles。", file=sys.stderr)
+            sys.exit(1)
+        print("Auto-reload 已啟用，監聽 app.py 變動…")
+        run_process(Path(__file__), target=_serve, watch_filter=lambda _c, p: p == str(Path(__file__).resolve()))
+    else:
+        _serve()
 
 
 if __name__ == "__main__":
