@@ -18,30 +18,30 @@ services:
       REFERENCE_DISTANCE_MARGIN: ${REFERENCE_DISTANCE_MARGIN:-0.12}
       MEMORY_MESSAGES: ${MEMORY_MESSAGES:-10}
       MAX_EMBEDDING_CHARS: ${MAX_EMBEDDING_CHARS:-6000}
-      WEAVIATE_HOST: weaviate
-      WEAVIATE_PORT: 8080
-      WEAVIATE_GRPC_PORT: 50051
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: ${PG_USER:-medivector}
+      PG_PASSWORD: ${PG_PASSWORD:-medivector}
+      PG_DATABASE: ${PG_DATABASE:-medivector}
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-health-education-files}
       MINIO_SECURE: "false"
     depends_on:
-      - weaviate
+      - postgres
       - minio
 
-  weaviate:
-    image: cr.weaviate.io/semitechnologies/weaviate:1.36.0
+  postgres:
+    image: pgvector/pgvector:pg16
     ports:
-      - "8080:8080"
-      - "50051:50051"
+      - "5432:5432"
     environment:
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
-      DEFAULT_VECTORIZER_MODULE: none
-      PERSISTENCE_DATA_PATH: /var/lib/weaviate
-      CLUSTER_HOSTNAME: node1
+      POSTGRES_USER: ${PG_USER:-medivector}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-medivector}
+      POSTGRES_DB: ${PG_DATABASE:-medivector}
     volumes:
-      - weaviate-data:/var/lib/weaviate
+      - postgres-data:/var/lib/postgresql/data
 
   minio:
     image: minio/minio:latest
@@ -56,5 +56,5 @@ services:
       - minio-data:/data
 
 volumes:
-  weaviate-data:
+  postgres-data:
   minio-data:

@@ -16,17 +16,17 @@ from typing import Any
 from urllib.parse import unquote, urlparse
 
 import httpx
-import weaviate
+import psycopg
+from contextlib import contextmanager
+from pgvector.psycopg import register_vector
 from dotenv import load_dotenv
-from weaviate.classes.config import Configure, DataType, Property, VectorDistances
-from weaviate.classes.query import MetadataQuery
 
 
 load_dotenv(Path(__file__).with_name(".env"))
 
-COLLECTION_NAME = "Article"
 FRONTEND_DIST_DIR = Path(__file__).with_name("frontend") / "medivector-chat-app" / "dist"
 EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+EMBEDDING_DIM = 1536  # text-embedding-3-small default
 CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-4.1-mini")
 RISK_MODEL = "gpt-4o-mini-2024-07-18"
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
@@ -43,12 +43,13 @@ MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
 MINIO_BUCKET = os.getenv("MINIO_BUCKET", "health-education-files")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").strip().lower() in {"1", "true", "yes", "on"}
-WEAVIATE_HOST = os.getenv("WEAVIATE_HOST", "127.0.0.1")
-WEAVIATE_PORT = int(os.getenv("WEAVIATE_PORT", "8080"))
-WEAVIATE_GRPC_PORT = int(os.getenv("WEAVIATE_GRPC_PORT", "50051"))
+PG_HOST = os.getenv("PG_HOST", "127.0.0.1")
+PG_PORT = int(os.getenv("PG_PORT", "5432"))
+PG_USER = os.getenv("PG_USER", "medivector")
+PG_PASSWORD = os.getenv("PG_PASSWORD", "medivector")
+PG_DATABASE = os.getenv("PG_DATABASE", "medivector")
 
 
-CONVERSATIONS: dict[str, list[dict[str, str]]] = {}
 CONVERSATION_RETRIEVAL_TERMS: dict[str, list[str]] = {}
 
 
@@ -515,6 +516,12 @@ def delete_minio_object(file_bucket: str, file_object_key: str) -> None:
 
 
 def flatten_vector(vector_payload: Any) -> list[float]:
+    try:
+        import numpy as np
+        if isinstance(vector_payload, np.ndarray):
+            return vector_payload.tolist()
+    except ImportError:
+        pass
     if isinstance(vector_payload, dict):
         vector_payload = next(
             (value for value in vector_payload.values() if isinstance(value, list)),
@@ -537,53 +544,88 @@ def serialize_embedding(vector_payload: Any) -> dict[str, Any]:
     }
 
 
-def connect_client() -> weaviate.WeaviateClient:
-    return weaviate.connect_to_local(
-        host=WEAVIATE_HOST,
-        port=WEAVIATE_PORT,
-        grpc_port=WEAVIATE_GRPC_PORT,
-    )
+def get_pg_conninfo() -> str:
+    return f"host={PG_HOST} port={PG_PORT} user={PG_USER} password={PG_PASSWORD} dbname={PG_DATABASE}"
 
 
-def article_properties() -> list[Property]:
-    return [
-        Property(name="source_id", data_type=DataType.INT),
-        Property(name="title", data_type=DataType.TEXT),
-        Property(name="source", data_type=DataType.TEXT),
-        Property(name="content", data_type=DataType.TEXT),
-        Property(name="file_name", data_type=DataType.TEXT),
-        Property(name="file_object_key", data_type=DataType.TEXT),
-        Property(name="file_bucket", data_type=DataType.TEXT),
-        Property(name="file_content_type", data_type=DataType.TEXT),
-        Property(name="file_size", data_type=DataType.INT),
-        Property(name="chunk_index", data_type=DataType.INT),
-        Property(name="chunk_count", data_type=DataType.INT),
-    ]
+@contextmanager
+def db_connection():
+    conn = psycopg.connect(get_pg_conninfo())
+    register_vector(conn)
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
-def ensure_collection_file_properties(collection: Any) -> None:
-    for prop in article_properties()[4:]:
+def init_db() -> None:
+    max_retries = 10
+    # Step 1: 建立 extension（不需要 vector type，用普通連線）
+    for attempt in range(max_retries):
         try:
-            collection.config.add_property(prop)
+            conn = psycopg.connect(get_pg_conninfo())
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+                conn.commit()
+            finally:
+                conn.close()
+            break
         except Exception as exc:
-            if "already exists" not in str(exc):
+            if attempt < max_retries - 1:
+                print(f"DB 連線失敗（{attempt + 1}/{max_retries}），3 秒後重試…: {exc}", file=sys.stderr)
+                time.sleep(3)
+            else:
                 raise
 
-
-def ensure_collection(client: weaviate.WeaviateClient) -> None:
-    if client.collections.exists(COLLECTION_NAME):
-        ensure_collection_file_properties(client.collections.get(COLLECTION_NAME))
-        return
-
-    client.collections.create(
-        name=COLLECTION_NAME,
-        properties=article_properties(),
-        vector_config=Configure.Vectors.self_provided(
-            vector_index_config=Configure.VectorIndex.hnsw(
-                distance_metric=VectorDistances.COSINE,
-            ),
-        ),
-    )
+    # Step 2: 建立資料表（extension 已存在，可安全 register_vector）
+    with db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"""
+                CREATE TABLE IF NOT EXISTS articles (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    source_id BIGINT NOT NULL DEFAULT 0,
+                    title TEXT NOT NULL DEFAULT '',
+                    source TEXT NOT NULL DEFAULT '',
+                    content TEXT NOT NULL DEFAULT '',
+                    file_name TEXT NOT NULL DEFAULT '',
+                    file_object_key TEXT NOT NULL DEFAULT '',
+                    file_bucket TEXT NOT NULL DEFAULT '',
+                    file_content_type TEXT NOT NULL DEFAULT '',
+                    file_size BIGINT NOT NULL DEFAULT 0,
+                    chunk_index INT NOT NULL DEFAULT 1,
+                    chunk_count INT NOT NULL DEFAULT 1,
+                    embedding VECTOR({EMBEDDING_DIM}),
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS articles_embedding_idx
+                ON articles USING hnsw (embedding vector_cosine_ops)
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS conversations (
+                    id UUID PRIMARY KEY,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS messages (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+                    role TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS messages_conv_idx
+                ON messages (conversation_id, created_at)
+            """)
 
 
 def normalize_document(payload: dict[str, Any]) -> dict[str, Any]:
@@ -614,41 +656,39 @@ def normalize_document(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def list_documents() -> list[dict[str, Any]]:
-    client = connect_client()
-    try:
-        ensure_collection(client)
-        collection = client.collections.get(COLLECTION_NAME)
-        result = collection.query.fetch_objects(
-            limit=100,
-            include_vector=True,
-            return_metadata=MetadataQuery(creation_time=True),
-        )
-        documents = []
-        for obj in result.objects:
-            props = obj.properties
-            created_at = obj.metadata.creation_time
-            documents.append(
-                {
-                    "uuid": str(obj.uuid),
-                    "source_id": props.get("source_id", ""),
-                    "title": props.get("title", ""),
-                    "source": props.get("source", ""),
-                    "content": props.get("content", ""),
-                    "file_name": props.get("file_name", ""),
-                    "file_object_key": props.get("file_object_key", ""),
-                    "file_bucket": props.get("file_bucket", ""),
-                    "file_content_type": props.get("file_content_type", ""),
-                    "file_size": props.get("file_size", 0),
-                    "chunk_index": props.get("chunk_index", 1),
-                    "chunk_count": props.get("chunk_count", 1),
-                    "created_at": created_at.isoformat() if created_at else "",
-                    "embedding": serialize_embedding(obj.vector),
-                }
-            )
-        documents.sort(key=lambda document: document["created_at"], reverse=True)
-        return documents
-    finally:
-        client.close()
+    with db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, source_id, title, source, content,
+                       file_name, file_object_key, file_bucket, file_content_type, file_size,
+                       chunk_index, chunk_count, embedding, created_at
+                FROM articles
+                ORDER BY created_at DESC
+                LIMIT 100
+            """)
+            rows = cur.fetchall()
+    documents = []
+    for row in rows:
+        (id_, source_id, title, source, content,
+         file_name, file_object_key, file_bucket, file_content_type, file_size,
+         chunk_index, chunk_count, embedding, created_at) = row
+        documents.append({
+            "uuid": str(id_),
+            "source_id": source_id or 0,
+            "title": title or "",
+            "source": source or "",
+            "content": content or "",
+            "file_name": file_name or "",
+            "file_object_key": file_object_key or "",
+            "file_bucket": file_bucket or "",
+            "file_content_type": file_content_type or "",
+            "file_size": file_size or 0,
+            "chunk_index": chunk_index or 1,
+            "chunk_count": chunk_count or 1,
+            "created_at": created_at.isoformat() if created_at else "",
+            "embedding": serialize_embedding(embedding),
+        })
+    return documents
 
 
 def add_document(payload: dict[str, Any]) -> dict[str, Any]:
@@ -677,64 +717,88 @@ def add_document(payload: dict[str, Any]) -> dict[str, Any]:
         for item in documents:
             item.update(minio_object)
 
-    client = connect_client()
     try:
-        ensure_collection(client)
-        collection = client.collections.get(COLLECTION_NAME)
-        inserted_documents = []
-        for item, vector in zip(documents, vectors):
-            uuid = collection.data.insert(properties=item, vector=vector)
-            inserted_documents.append({"uuid": str(uuid), **item})
+        with db_connection() as conn:
+            with conn.cursor() as cur:
+                inserted_documents = []
+                for item, vector in zip(documents, vectors):
+                    cur.execute("""
+                        INSERT INTO articles
+                            (source_id, title, source, content, file_name, file_object_key,
+                             file_bucket, file_content_type, file_size, chunk_index, chunk_count, embedding)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, (
+                        item.get("source_id", 0),
+                        item.get("title", ""),
+                        item.get("source", ""),
+                        item.get("content", ""),
+                        item.get("file_name", ""),
+                        item.get("file_object_key", ""),
+                        item.get("file_bucket", ""),
+                        item.get("file_content_type", ""),
+                        item.get("file_size", 0),
+                        item.get("chunk_index", 1),
+                        item.get("chunk_count", 1),
+                        vector,
+                    ))
+                    row = cur.fetchone()
+                    inserted_documents.append({"uuid": str(row[0]), **item})
         return inserted_documents[0]
     except Exception:
         delete_minio_object(str(minio_object.get("file_bucket") or ""), str(minio_object.get("file_object_key") or ""))
         raise
-    finally:
-        client.close()
 
 
 def delete_document(uuid: str) -> dict[str, bool]:
-    client = connect_client()
-    try:
-        ensure_collection(client)
-        collection = client.collections.get(COLLECTION_NAME)
-        obj = collection.query.fetch_object_by_id(uuid)
-        file_bucket = ""
-        file_object_key = ""
-        if obj:
-            file_bucket = str(obj.properties.get("file_bucket") or "")
-            file_object_key = str(obj.properties.get("file_object_key") or "")
-
-        deleted = bool(collection.data.delete_by_id(uuid))
-        if deleted and not is_minio_object_referenced(collection, file_object_key):
-            delete_minio_object(file_bucket, file_object_key)
-        return {"deleted": deleted}
-    finally:
-        client.close()
-
-
-def is_minio_object_referenced(collection: Any, file_object_key: str) -> bool:
-    if not file_object_key:
-        return False
-    result = collection.query.fetch_objects(limit=1000)
-    return any(str(obj.properties.get("file_object_key") or "") == file_object_key for obj in result.objects)
+    file_bucket = ""
+    file_object_key = ""
+    deleted = False
+    should_delete_minio = False
+    with db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT file_bucket, file_object_key FROM articles WHERE id = %s",
+                (uuid,),
+            )
+            row = cur.fetchone()
+            if not row:
+                return {"deleted": False}
+            file_bucket, file_object_key = str(row[0] or ""), str(row[1] or "")
+            cur.execute("DELETE FROM articles WHERE id = %s", (uuid,))
+            deleted = cur.rowcount > 0
+            if deleted and file_object_key:
+                cur.execute(
+                    "SELECT 1 FROM articles WHERE file_object_key = %s LIMIT 1",
+                    (file_object_key,),
+                )
+                should_delete_minio = cur.fetchone() is None
+    if should_delete_minio:
+        delete_minio_object(file_bucket, file_object_key)
+    return {"deleted": deleted}
 
 
 def search_references(
-    client: weaviate.WeaviateClient,
     api_key: str,
     question: str,
     retrieval_terms: list[str] | None = None,
 ) -> list[Reference]:
-    collection = client.collections.get(COLLECTION_NAME)
     question_vector = embed_texts(api_key, [retrieval_query_text(question, retrieval_terms)])[0]
-    result = collection.query.near_vector(
-        near_vector=question_vector,
-        limit=REFERENCE_CANDIDATE_LIMIT,
-        return_metadata=MetadataQuery(distance=True),
-    )
+    with db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, source_id, title, source, content,
+                       embedding <=> %s::vector AS distance
+                FROM articles
+                ORDER BY distance
+                LIMIT %s
+                """,
+                (question_vector, REFERENCE_CANDIDATE_LIMIT),
+            )
+            rows = cur.fetchall()
 
-    distances = [obj.metadata.distance for obj in result.objects if obj.metadata.distance is not None]
+    distances = [float(row[5]) for row in rows if row[5] is not None]
     best_distance = min(distances) if distances else None
     max_allowed_distance = MAX_REFERENCE_DISTANCE
     if best_distance is not None:
@@ -742,17 +806,13 @@ def search_references(
 
     references: list[Reference] = []
     seen_reference_keys: set[tuple[str, str, str]] = set()
-    for obj in result.objects:
-        distance = obj.metadata.distance
+    for row in rows:
+        id_, source_id, title, source, content, distance = row
+        distance = float(distance) if distance is not None else None
         if distance is not None and distance > max_allowed_distance:
             continue
 
-        props = obj.properties
-        reference_key = (
-            str(props.get("title", "")),
-            str(props.get("source", "")),
-            str(props.get("content", "")),
-        )
+        reference_key = (str(title or ""), str(source or ""), str(content or ""))
         if reference_key in seen_reference_keys:
             continue
         seen_reference_keys.add(reference_key)
@@ -760,11 +820,11 @@ def search_references(
         references.append(
             Reference(
                 index=len(references) + 1,
-                uuid=str(obj.uuid),
-                source_id=int(props.get("source_id", 0) or 0),
-                title=str(props.get("title", "")),
-                source=str(props.get("source", "")),
-                content=str(props.get("content", "")),
+                uuid=str(id_),
+                source_id=int(source_id or 0),
+                title=str(title or ""),
+                source=str(source or ""),
+                content=str(content or ""),
                 distance=distance,
             )
         )
@@ -899,6 +959,60 @@ def chat_with_gpt(
     return normalized_template_answer(answer, risk)
 
 
+def ensure_conversation(conn: psycopg.Connection, conversation_id: str) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO conversations (id) VALUES (%s) ON CONFLICT (id) DO NOTHING",
+            (conversation_id,),
+        )
+
+
+def load_conversation_history(conversation_id: str) -> list[dict[str, str]]:
+    with db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT role, content FROM messages
+                WHERE conversation_id = %s
+                ORDER BY created_at
+                """,
+                (conversation_id,),
+            )
+            rows = cur.fetchall()
+    return [{"role": row[0], "content": row[1]} for row in rows]
+
+
+def save_messages(conversation_id: str, new_messages: list[dict[str, str]]) -> None:
+    with db_connection() as conn:
+        ensure_conversation(conn, conversation_id)
+        with conn.cursor() as cur:
+            for msg in new_messages:
+                cur.execute(
+                    "INSERT INTO messages (conversation_id, role, content) VALUES (%s, %s, %s)",
+                    (conversation_id, msg["role"], msg["content"]),
+                )
+            cur.execute(
+                """
+                DELETE FROM messages
+                WHERE conversation_id = %s
+                  AND id NOT IN (
+                      SELECT id FROM messages
+                      WHERE conversation_id = %s
+                      ORDER BY created_at DESC
+                      LIMIT %s
+                  )
+                """,
+                (conversation_id, conversation_id, MEMORY_MESSAGES),
+            )
+
+
+def delete_conversation(conversation_id: str) -> None:
+    with db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM conversations WHERE id = %s", (conversation_id,))
+    CONVERSATION_RETRIEVAL_TERMS.pop(conversation_id, None)
+
+
 def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
     api_key = require_openai_api_key()
     question = str(payload.get("question") or "").strip()
@@ -908,22 +1022,19 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
     risk = assess_question_risk(api_key, question)
 
     conversation_id = str(payload.get("conversation_id") or "default")
-    history = CONVERSATIONS.setdefault(conversation_id, [])
+    history = load_conversation_history(conversation_id)[-MEMORY_MESSAGES:]
 
     if risk.diverted:
         answer = emergency_diversion_answer(question)
-        history.extend(
-            [
-                {"role": "user", "content": question},
-                {"role": "assistant", "content": answer},
-            ]
-        )
-        del history[:-MEMORY_MESSAGES]
+        save_messages(conversation_id, [
+            {"role": "user", "content": question},
+            {"role": "assistant", "content": answer},
+        ])
         return {
             "answer": answer,
             "rag_enabled": False,
             "references": [],
-            "memory_messages": len(history),
+            "memory_messages": len(history) + 2,
             "risk_assessment": {
                 "level": risk.level,
                 "label": risk.label,
@@ -943,13 +1054,8 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
     retrieval_terms: list[str] = []
     if rag_enabled:
         retrieval_terms = get_conversation_retrieval_terms(api_key, conversation_id, question, history)
-        client = connect_client()
-        try:
-            ensure_collection(client)
-            references = search_references(client, api_key, question, retrieval_terms)
-            evidence = assess_evidence(references)
-        finally:
-            client.close()
+        references = search_references(api_key, question, retrieval_terms)
+        evidence = assess_evidence(references)
     else:
         evidence = EvidenceAssessment(
             sufficient=False,
@@ -963,13 +1069,10 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
     except Exception:
         raise
 
-    history.extend(
-        [
-            {"role": "user", "content": question},
-            {"role": "assistant", "content": answer},
-        ]
-    )
-    del history[:-MEMORY_MESSAGES]
+    save_messages(conversation_id, [
+        {"role": "user", "content": question},
+        {"role": "assistant", "content": answer},
+    ])
 
     return {
         "answer": answer,
@@ -994,7 +1097,7 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
             "best_distance": evidence.best_distance,
         },
         "retrieval_terms": retrieval_terms,
-        "memory_messages": len(history),
+        "memory_messages": len(history) + 2,
         "risk_assessment": {
             "level": risk.level,
             "label": risk.label,
@@ -1042,8 +1145,7 @@ class AppHandler(BaseHTTPRequestHandler):
                 return
             if parsed.path.startswith("/api/conversations/"):
                 conversation_id = unquote(parsed.path.removeprefix("/api/conversations/"))
-                CONVERSATIONS.pop(conversation_id, None)
-                CONVERSATION_RETRIEVAL_TERMS.pop(conversation_id, None)
+                delete_conversation(conversation_id)
                 self.send_json({"deleted": True})
                 return
             self.send_error_json(404, "找不到路徑。")
@@ -1143,6 +1245,7 @@ class AppHandler(BaseHTTPRequestHandler):
 def _serve() -> None:
     port = int(os.getenv("PORT", "8000"))
     host = os.getenv("HOST", "127.0.0.1")
+    init_db()
     server = ThreadingHTTPServer((host, port), AppHandler)
     print(f"Web app running at http://{host}:{port}")
     print("Press Ctrl+C to stop.")
