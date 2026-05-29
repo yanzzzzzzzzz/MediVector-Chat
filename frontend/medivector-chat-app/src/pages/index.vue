@@ -6,6 +6,41 @@
     </header>
 
     <main class="layout">
+      <aside class="convo-sidebar">
+        <div class="convo-sidebar-head">
+          <span class="convo-sidebar-title">我的對話</span>
+          <button class="primary convo-new-btn" type="button" @click="createNewConversation">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            新對話
+          </button>
+        </div>
+        <div class="convo-list">
+          <div v-if="conversations.length === 0" class="convo-empty">尚無對話記錄</div>
+          <div
+            v-for="convo in conversations"
+            :key="convo.id"
+            :class="['convo-row', { active: convo.id === conversationId }]"
+          >
+            <button
+              :class="['convo-item', { active: convo.id === conversationId }]"
+              type="button"
+              @click="switchConversation(convo.id)"
+            >
+              <span class="convo-item-title">{{ convo.title }}</span>
+              <span class="convo-item-time">{{ formatConvoTime(convo.created_at) }}</span>
+            </button>
+            <button
+              class="convo-delete-btn"
+              :disabled="deletingConvoId === convo.id"
+              type="button"
+              :title="'刪除對話'"
+              @click.stop="deleteConversation(convo.id)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>
+            </button>
+          </div>
+        </div>
+      </aside>
       <section class="panel">
         <div class="toolbar">
           <h2>向量資料庫</h2>
@@ -206,6 +241,29 @@
       </form>
     </dialog>
 
+    <dialog ref="deleteConvoDialogEl" class="confirm-dialog">
+      <div class="dialog-head">
+        <h2>刪除對話</h2>
+        <button type="button" @click="cancelDeleteConversation">關閉</button>
+      </div>
+      <div class="confirm-body">
+        <p>確定要刪除「{{ pendingDeleteTitle }}」？此操作無法復原。</p>
+        <div class="dialog-actions">
+          <button type="button" @click="cancelDeleteConversation">取消</button>
+          <button
+            class="danger"
+            :class="{ loading: deletingConvoId !== null }"
+            :disabled="deletingConvoId !== null"
+            type="button"
+            @click="confirmDeleteConversation"
+          >
+            <span aria-hidden="true" class="spinner" />
+            <span>{{ deletingConvoId !== null ? '刪除中' : '確認刪除' }}</span>
+          </button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog ref="referenceDialogEl">
       <div class="dialog-head">
         <h2>{{ activeReference ? `[${activeReference.index}] ${activeReference.title || '參考資料'}` : '參考資料' }}</h2>
@@ -300,6 +358,12 @@
     ref?: ReferenceItem
   }
 
+  interface ConversationItem {
+    id: string
+    title: string
+    created_at: string
+  }
+
   const status = ref('準備中')
   const docs = ref<DocumentItem[]>([])
   const docsLoading = ref(false)
@@ -310,11 +374,16 @@
   const addingDoc = ref(false)
   const selectedFile = ref<File | null>(null)
   const activeReference = ref<ReferenceItem | null>(null)
+  const conversations = ref<ConversationItem[]>([])
+  const deletingConvoId = ref<string | null>(null)
   const chatLogEl = ref<HTMLDivElement | null>(null)
   const docDialogEl = ref<HTMLDialogElement | null>(null)
   const referenceDialogEl = ref<HTMLDialogElement | null>(null)
+  const deleteConvoDialogEl = ref<HTMLDialogElement | null>(null)
+  const pendingDeleteId = ref<string | null>(null)
+  const pendingDeleteTitle = ref('')
   const fileInputEl = ref<HTMLInputElement | null>(null)
-  const conversationId = localStorage.getItem('conversationId') || crypto.randomUUID()
+  const conversationId = ref<string>(localStorage.getItem('conversationId') || crypto.randomUUID())
   let nextMessageId = 1
 
   const newDoc = reactive({
@@ -324,7 +393,7 @@
     content: '',
   })
 
-  localStorage.setItem('conversationId', conversationId)
+  localStorage.setItem('conversationId', conversationId.value)
 
   function setStatus (text: string) {
     status.value = text
@@ -516,7 +585,7 @@
       const data = await api<AskResponse>('/api/ask', {
         method: 'POST',
         body: JSON.stringify({
-          conversation_id: conversationId,
+          conversation_id: conversationId.value,
           question: trimmedQuestion,
           rag_enabled: useRag,
         }),
@@ -543,6 +612,7 @@
       } else {
         setStatus('RAG 關閉，未搜尋向量資料庫')
       }
+      loadConversations()
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       thinkingMessage.thinking = false
@@ -560,7 +630,7 @@
   async function loadConversationHistory () {
     try {
       const data = await api<{ messages: { role: string; content: string }[] }>(
-        `/api/conversations/${encodeURIComponent(conversationId)}`,
+        `/api/conversations/${encodeURIComponent(conversationId.value)}`,
       )
       for (const msg of data.messages) {
         if (msg.role === 'user' || msg.role === 'assistant') {
@@ -575,10 +645,86 @@
     }
   }
 
+  async function loadConversations () {
+    try {
+      const data = await api<{ conversations: ConversationItem[] }>('/api/conversations')
+      conversations.value = data.conversations
+    } catch {
+      // 對話列表載入失敗，靜默忽略
+    }
+  }
+
+  async function createNewConversation () {
+    const newId = crypto.randomUUID()
+    conversationId.value = newId
+    localStorage.setItem('conversationId', newId)
+    messages.value = []
+    setStatus('新對話已建立')
+  }
+
+  async function switchConversation (id: string) {
+    if (id === conversationId.value) return
+    conversationId.value = id
+    localStorage.setItem('conversationId', id)
+    messages.value = []
+    await loadConversationHistory()
+  }
+
+  async function deleteConversation (id: string) {
+    const convo = conversations.value.find(c => c.id === id)
+    pendingDeleteId.value = id
+    pendingDeleteTitle.value = convo?.title || '此對話'
+    deleteConvoDialogEl.value?.showModal()
+  }
+
+  function cancelDeleteConversation () {
+    deleteConvoDialogEl.value?.close()
+    pendingDeleteId.value = null
+  }
+
+  async function confirmDeleteConversation () {
+    const id = pendingDeleteId.value
+    if (!id) return
+    deletingConvoId.value = id
+    try {
+      await api(`/api/conversations/${encodeURIComponent(id)}`, { method: 'DELETE' })
+      deleteConvoDialogEl.value?.close()
+      pendingDeleteId.value = null
+      if (id === conversationId.value) {
+        const newId = crypto.randomUUID()
+        conversationId.value = newId
+        localStorage.setItem('conversationId', newId)
+        messages.value = []
+        setStatus('對話已刪除，已開新對話')
+      }
+      await loadConversations()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      setStatus(message)
+    } finally {
+      deletingConvoId.value = null
+    }
+  }
+
+  function formatConvoTime (isoString: string): string {
+    const d = new Date(isoString)
+    const now = new Date()
+    const diffMs = now.getTime() - d.getTime()
+    const diffDays = Math.floor(diffMs / 86400000)
+    if (diffDays === 0) return d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+    if (diffDays === 1) return '昨天'
+    if (diffDays < 7) return `${diffDays} 天前`
+    return d.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })
+  }
+
   async function clearChat () {
-    await api(`/api/conversations/${encodeURIComponent(conversationId)}`, { method: 'DELETE' })
+    await api(`/api/conversations/${encodeURIComponent(conversationId.value)}`, { method: 'DELETE' })
+    const newId = crypto.randomUUID()
+    conversationId.value = newId
+    localStorage.setItem('conversationId', newId)
     messages.value = []
     setStatus('已清除對話記憶')
+    loadConversations()
   }
 
   onMounted(() => {
@@ -586,6 +732,7 @@
       const message = error instanceof Error ? error.message : String(error)
       setStatus(message)
     })
+    loadConversations()
     loadConversationHistory()
   })
 </script>
@@ -616,11 +763,160 @@
 
   .layout {
     display: grid;
-    grid-template-columns: minmax(360px, 42%) minmax(420px, 1fr);
+    grid-template-columns: 220px minmax(360px, 42%) minmax(420px, 1fr);
     gap: 18px;
     padding: 18px;
     height: calc(100vh - 60px);
     min-height: 680px;
+  }
+
+  .convo-sidebar {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #d9dee5;
+    border-radius: 8px;
+    box-shadow: 0 10px 28px rgba(16, 24, 40, 0.08);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .convo-sidebar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 12px;
+    border-bottom: 1px solid #d9dee5;
+    flex-shrink: 0;
+  }
+
+  .convo-sidebar-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #17202a;
+  }
+
+  .convo-new-btn {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .convo-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .convo-empty {
+    padding: 20px 10px;
+    text-align: center;
+    color: #687381;
+    font-size: 13px;
+  }
+
+  .convo-item {
+    flex: 1;
+    min-width: 0;
+    height: auto;
+    min-height: 52px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    background: transparent;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+
+  .convo-row {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    transition: border-color 0.12s ease;
+  }
+
+  .convo-row:hover {
+    border-color: #d9dee5;
+  }
+
+  .convo-row.active {
+    border-color: #b8ddd7;
+  }
+
+  .convo-row:hover .convo-item,
+  .convo-row:hover .convo-delete-btn {
+    background: #f6f7f8;
+  }
+
+  .convo-row.active .convo-item,
+  .convo-row.active .convo-delete-btn {
+    background: #eef7f5;
+  }
+
+  .convo-delete-btn {
+    flex: 0 0 auto;
+    width: 32px;
+    padding: 0;
+    border: none;
+    border-left: 1px solid rgba(0,0,0,0.06);
+    border-radius: 0 6px 6px 0;
+    margin: 0;
+    background: transparent;
+    color: #a0aab4;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.12s ease, color 0.12s ease, background 0.12s ease;
+  }
+
+  .convo-row:hover .convo-delete-btn {
+    opacity: 1;
+  }
+
+  .convo-delete-btn:hover {
+    color: #b42318 !important;
+    background: #fff1ef !important;
+  }
+
+  .convo-delete-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .convo-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #17202a;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+  }
+
+  .convo-item.active .convo-item-title {
+    color: #0b5f59;
+  }
+
+  .convo-item-time {
+    font-size: 11px;
+    color: #a0aab4;
+    line-height: 1;
   }
 
   .panel {
@@ -1066,6 +1362,24 @@
     display: inline-flex;
   }
 
+  .confirm-dialog {
+    width: min(380px, calc(100vw - 32px));
+  }
+
+  .confirm-body {
+    padding: 16px 16px 14px;
+    display: grid;
+    gap: 14px;
+    background: #ffffff;
+  }
+
+  .confirm-body p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #17202a;
+  }
+
   .reference-body {
     padding: 14px 16px;
     display: grid;
@@ -1171,6 +1485,37 @@
       min-height: auto;
       grid-template-columns: 1fr;
     }
+
+    .convo-sidebar {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0;
+      min-height: auto;
+      border-radius: 8px;
+    }
+
+    .convo-sidebar-head { width: 100%; border-bottom: 1px solid #d9dee5; border-right: none; }
+
+    .convo-list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 8px;
+      gap: 6px;
+    }
+
+    .convo-item {
+      height: auto;
+      min-width: 120px;
+      max-width: 180px;
+      flex: 0 0 auto;
+      padding: 6px 10px;
+      text-align: left;
+    }
+
+    .convo-item-time { display: none; }
 
     .panel { min-height: 560px; }
     .two { grid-template-columns: 1fr; }
