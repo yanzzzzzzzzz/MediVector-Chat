@@ -557,6 +557,24 @@
     askQuestion()
   }
 
+  async function loadConversationHistory () {
+    try {
+      const data = await api<{ messages: { role: string; content: string }[] }>(
+        `/api/conversations/${encodeURIComponent(conversationId)}`,
+      )
+      for (const msg of data.messages) {
+        if (msg.role === 'user' || msg.role === 'assistant') {
+          addMessage(msg.role as 'user' | 'assistant', msg.content)
+        }
+      }
+      if (data.messages.length > 0) {
+        setStatus(`已還原 ${data.messages.length} 則對話記錄`)
+      }
+    } catch {
+      // 歷史載入失敗不中斷，靜默忽略
+    }
+  }
+
   async function clearChat () {
     await api(`/api/conversations/${encodeURIComponent(conversationId)}`, { method: 'DELETE' })
     messages.value = []
@@ -568,6 +586,7 @@
       const message = error instanceof Error ? error.message : String(error)
       setStatus(message)
     })
+    loadConversationHistory()
   })
 </script>
 

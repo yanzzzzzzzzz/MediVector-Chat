@@ -1116,6 +1116,11 @@ class AppHandler(BaseHTTPRequestHandler):
         if parsed.path == "/api/documents":
             self.send_json({"documents": list_documents()})
             return
+        if parsed.path.startswith("/api/conversations/"):
+            conversation_id = unquote(parsed.path.removeprefix("/api/conversations/"))
+            history = load_conversation_history(conversation_id)
+            self.send_json({"messages": history})
+            return
         if parsed.path.startswith("/api/"):
             self.send_error_json(404, "找不到路徑。")
             return
