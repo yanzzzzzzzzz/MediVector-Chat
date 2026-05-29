@@ -959,6 +959,32 @@ def chat_with_gpt(
     return normalized_template_answer(answer, risk)
 
 
+def list_conversations() -> list[dict]:
+    with db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT c.id,
+                       COALESCE(
+                           (SELECT content FROM messages
+                            WHERE conversation_id = c.id AND role = 'user'
+                            ORDER BY created_at
+                            LIMIT 1),
+                           '新對話'
+                       ) AS title,
+                       c.created_at
+                FROM conversations c
+                ORDER BY c.created_at DESC
+                LIMIT 50
+                """,
+            )
+            rows = cur.fetchall()
+    return [
+        {"id": str(row[0]), "title": row[1][:60], "created_at": row[2].isoformat()}
+        for row in rows
+    ]
+
+
 def ensure_conversation(conn: psycopg.Connection, conversation_id: str) -> None:
     with conn.cursor() as cur:
         cur.execute(
@@ -1115,6 +1141,9 @@ class AppHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == "/api/documents":
             self.send_json({"documents": list_documents()})
+            return
+        if parsed.path == "/api/conversations":
+            self.send_json({"conversations": list_conversations()})
             return
         if parsed.path.startswith("/api/conversations/"):
             conversation_id = unquote(parsed.path.removeprefix("/api/conversations/"))
