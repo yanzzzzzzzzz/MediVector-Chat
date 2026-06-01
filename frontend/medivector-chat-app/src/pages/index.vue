@@ -9,13 +9,26 @@
       <aside class="convo-sidebar">
         <div class="convo-sidebar-head">
           <span class="convo-sidebar-title">我的對話</span>
+
           <button class="primary convo-new-btn" type="button" @click="createNewConversation">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            <svg
+              fill="none"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            ><line x1="12" x2="12" y1="5" y2="19" /><line x1="5" x2="19" y1="12" y2="12" /></svg>
             新對話
           </button>
         </div>
+
         <div class="convo-list">
           <div v-if="conversations.length === 0" class="convo-empty">尚無對話記錄</div>
+
           <div
             v-for="convo in conversations"
             :key="convo.id"
@@ -29,86 +42,52 @@
               <span class="convo-item-title">{{ convo.title }}</span>
               <span class="convo-item-time">{{ formatConvoTime(convo.created_at) }}</span>
             </button>
+
             <button
               class="convo-delete-btn"
               :disabled="deletingConvoId === convo.id"
-              type="button"
               :title="'刪除對話'"
+              type="button"
               @click.stop="deleteConversation(convo.id)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>
+              <svg
+                fill="none"
+                height="13"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="13"
+                xmlns="http://www.w3.org/2000/svg"
+              ><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>
             </button>
           </div>
         </div>
+
+        <div class="sidebar-footer">
+          <button class="sidebar-docs-btn" type="button" @click="openDocsDialog">
+            <svg
+              fill="none"
+              height="15"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="15"
+              xmlns="http://www.w3.org/2000/svg"
+            ><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
+            衛教資料庫
+          </button>
+        </div>
       </aside>
-      <section class="panel">
-        <div class="toolbar">
-          <h2>向量資料庫</h2>
-
-          <div class="actions">
-            <button type="button" @click="loadDocs">重新整理</button>
-            <button class="primary" type="button" @click="openDocDialog">+新增資料</button>
-          </div>
-        </div>
-
-        <div class="content">
-          <div class="doc-list">
-            <div v-if="docsLoading" aria-live="polite" class="list-loading" role="status">
-              <span aria-hidden="true" class="spinner inline" />
-              <span>載入資料中</span>
-            </div>
-
-            <div v-else-if="docs.length === 0" class="doc">
-              <div class="doc-title">目前沒有資料</div>
-              <div class="doc-meta">按「+新增資料」建立第一筆向量資料。</div>
-            </div>
-
-            <template v-else>
-              <article v-for="doc in docs" :key="doc.uuid" class="doc">
-                <div class="doc-head">
-                  <div>
-                    <div class="doc-title">{{ doc.title || '(未命名)' }}</div>
-                    <div class="doc-meta">source_id={{ doc.source_id }} · {{ doc.source || '' }}</div>
-
-                    <div v-if="Number(doc.chunk_count || 1) > 1" class="doc-meta">
-                      chunk={{ doc.chunk_index || 1 }} / {{ doc.chunk_count || 1 }}
-                    </div>
-
-                    <div v-if="doc.file_name" class="doc-meta">
-                      file={{ doc.file_name }} · {{ doc.file_bucket || '' }}/{{ doc.file_object_key || '' }}
-                    </div>
-
-                    <div class="doc-meta">created={{ doc.created_at || '未知' }}</div>
-                    <div class="doc-meta">uuid={{ doc.uuid }}</div>
-                  </div>
-
-                  <button
-                    class="danger"
-                    :class="{ loading: deletingUuid === doc.uuid }"
-                    :disabled="Boolean(deletingUuid)"
-                    type="button"
-                    @click="deleteDoc(doc.uuid)"
-                  >
-                    <span aria-hidden="true" class="spinner" />
-                    <span>{{ deletingUuid === doc.uuid ? '刪除中' : '刪除' }}</span>
-                  </button>
-                </div>
-
-                <div class="doc-content">{{ doc.content || '' }}</div>
-
-                <details class="embedding">
-                  <summary>{{ embeddingSummary(doc.embedding) }}</summary>
-                  <pre v-if="doc.embedding?.dimension">{{ JSON.stringify(doc.embedding.values, null, 2) }}</pre>
-                </details>
-              </article>
-            </template>
-          </div>
-        </div>
-      </section>
 
       <section class="panel">
         <div class="toolbar">
-          <h2>AI 問答</h2>
+          <div class="toolbar-left">
+            <h2 class="chat-title">{{ currentConvoTitle }}</h2>
+          </div>
 
           <div class="actions">
             <button type="button" @click="clearChat">清除對話</button>
@@ -200,6 +179,98 @@
       </section>
     </main>
 
+    <dialog ref="docsDialogEl" class="docs-dialog">
+      <div class="dialog-head">
+        <h2>衛教資料庫</h2>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" @click="loadDocs">
+            <svg
+              fill="none"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            ><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" /></svg>
+            重新整理
+          </button>
+
+          <button class="primary" type="button" @click="openDocDialog">
+            <svg
+              fill="none"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            ><line x1="12" x2="12" y1="5" y2="19" /><line x1="5" x2="19" y1="12" y2="12" /></svg>
+            新增資料
+          </button>
+
+          <button type="button" @click="closeDocsDialog">關閉</button>
+        </div>
+      </div>
+
+      <div class="docs-dialog-body">
+        <div v-if="docsLoading" aria-live="polite" class="list-loading" role="status">
+          <span aria-hidden="true" class="spinner inline" />
+          <span>載入資料中</span>
+        </div>
+
+        <div v-else-if="docs.length === 0" class="doc">
+          <div class="doc-title">目前沒有衛教資料</div>
+          <div class="doc-meta">按「新增資料」建立第一筆向量資料。</div>
+        </div>
+
+        <template v-else>
+          <article v-for="doc in docs" :key="doc.uuid" class="doc">
+            <div class="doc-head">
+              <div>
+                <div class="doc-title">{{ doc.title || '(未命名)' }}</div>
+                <div class="doc-meta">source_id={{ doc.source_id }} · {{ doc.source || '' }}</div>
+
+                <div v-if="Number(doc.chunk_count || 1) > 1" class="doc-meta">
+                  chunk={{ doc.chunk_index || 1 }} / {{ doc.chunk_count || 1 }}
+                </div>
+
+                <div v-if="doc.file_name" class="doc-meta">
+                  file={{ doc.file_name }} · {{ doc.file_bucket || '' }}/{{ doc.file_object_key || '' }}
+                </div>
+
+                <div class="doc-meta">created={{ doc.created_at || '未知' }}</div>
+                <div class="doc-meta">uuid={{ doc.uuid }}</div>
+              </div>
+
+              <button
+                class="danger"
+                :class="{ loading: deletingUuid === doc.uuid }"
+                :disabled="Boolean(deletingUuid)"
+                type="button"
+                @click="deleteDoc(doc.uuid)"
+              >
+                <span aria-hidden="true" class="spinner" />
+                <span>{{ deletingUuid === doc.uuid ? '刪除中' : '刪除' }}</span>
+              </button>
+            </div>
+
+            <div class="doc-content">{{ doc.content || '' }}</div>
+
+            <details class="embedding">
+              <summary>{{ embeddingSummary(doc.embedding) }}</summary>
+              <pre v-if="doc.embedding?.dimension">{{ JSON.stringify(doc.embedding.values, null, 2) }}</pre>
+            </details>
+          </article>
+        </template>
+      </div>
+    </dialog>
+
     <dialog ref="docDialogEl">
       <div class="dialog-head">
         <h2>新增資料</h2>
@@ -246,10 +317,13 @@
         <h2>刪除對話</h2>
         <button type="button" @click="cancelDeleteConversation">關閉</button>
       </div>
+
       <div class="confirm-body">
         <p>確定要刪除「{{ pendingDeleteTitle }}」？此操作無法復原。</p>
+
         <div class="dialog-actions">
           <button type="button" @click="cancelDeleteConversation">取消</button>
+
           <button
             class="danger"
             :class="{ loading: deletingConvoId !== null }"
@@ -282,7 +356,7 @@
 </template>
 
 <script setup lang="ts">
-  import { nextTick, onMounted, reactive, ref } from 'vue'
+  import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 
   interface Embedding {
     dimension: number
@@ -378,6 +452,7 @@
   const deletingConvoId = ref<string | null>(null)
   const chatLogEl = ref<HTMLDivElement | null>(null)
   const docDialogEl = ref<HTMLDialogElement | null>(null)
+  const docsDialogEl = ref<HTMLDialogElement | null>(null)
   const referenceDialogEl = ref<HTMLDialogElement | null>(null)
   const deleteConvoDialogEl = ref<HTMLDialogElement | null>(null)
   const pendingDeleteId = ref<string | null>(null)
@@ -501,6 +576,20 @@
         chatLogEl.value.scrollTop = chatLogEl.value.scrollHeight
       }
     })
+  }
+
+  const currentConvoTitle = computed(() => {
+    const found = conversations.value.find(c => c.id === conversationId.value)
+    return found?.title || '新對話'
+  })
+
+  function openDocsDialog () {
+    loadDocs()
+    docsDialogEl.value?.showModal()
+  }
+
+  function closeDocsDialog () {
+    docsDialogEl.value?.close()
   }
 
   function openDocDialog () {
@@ -629,7 +718,7 @@
 
   async function loadConversationHistory () {
     try {
-      const data = await api<{ messages: { role: string; content: string }[] }>(
+      const data = await api<{ messages: { role: string, content: string }[] }>(
         `/api/conversations/${encodeURIComponent(conversationId.value)}`,
       )
       for (const msg of data.messages) {
@@ -710,7 +799,7 @@
     const d = new Date(isoString)
     const now = new Date()
     const diffMs = now.getTime() - d.getTime()
-    const diffDays = Math.floor(diffMs / 86400000)
+    const diffDays = Math.floor(diffMs / 86_400_000)
     if (diffDays === 0) return d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
     if (diffDays === 1) return '昨天'
     if (diffDays < 7) return `${diffDays} 天前`
@@ -763,7 +852,7 @@
 
   .layout {
     display: grid;
-    grid-template-columns: 220px minmax(360px, 42%) minmax(420px, 1fr);
+    grid-template-columns: 220px 1fr;
     gap: 18px;
     padding: 18px;
     height: calc(100vh - 60px);
@@ -811,6 +900,34 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+  }
+
+  .sidebar-footer {
+    flex-shrink: 0;
+    padding: 8px 10px;
+    border-top: 1px solid #d9dee5;
+  }
+
+  .sidebar-docs-btn {
+    width: 100%;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #454e59;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+
+  .sidebar-docs-btn:hover {
+    background: #f0f4f8;
+    border-color: #d9dee5;
   }
 
   .convo-empty {
@@ -1024,6 +1141,45 @@
     gap: 10px;
   }
 
+  .docs-dialog {
+    width: min(860px, calc(100vw - 32px));
+    max-height: min(88vh, 860px);
+    flex-direction: column;
+  }
+
+  .docs-dialog[open] {
+    display: flex;
+  }
+
+  .docs-dialog-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+    background: #f6f7f8;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .chat-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #17202a;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 400px;
+  }
+
   .list-loading {
     min-height: 120px;
     display: flex;
@@ -1119,6 +1275,10 @@
     color: #17202a;
     box-shadow: 0 24px 70px rgba(16, 24, 40, 0.24);
     overflow: hidden;
+  }
+
+  dialog:not([open]) {
+    display: none;
   }
 
   dialog::backdrop {
@@ -1479,7 +1639,7 @@
     outline-offset: 2px;
   }
 
-  @media (max-width: 920px) {
+  @media (max-width: 720px) {
     .layout {
       height: auto;
       min-height: auto;
