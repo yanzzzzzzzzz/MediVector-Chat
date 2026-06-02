@@ -1,10 +1,10 @@
 # Vector DB 中文問答 Demo
 
-這是一個本機執行的中文 RAG 測試專案。它使用 Weaviate 作為 vector DB，OpenAI embeddings 產生向量，並用 GPT 根據搜尋到的參考資料回答問題。
+這是一個本機執行的中文衛教 RAG 測試專案。它使用 PostgreSQL + pgvector 作為 vector DB，OpenAI embeddings 產生向量，並用 GPT 根據搜尋到的參考資料回答問題。
 
 ## 功能
 
-- 查看目前 Weaviate collection 裡的中文衛教資料
+- 查看目前 PostgreSQL / pgvector 裡的中文衛教資料
 - 新增資料時自動呼叫 OpenAI embedding，並寫入 vector DB
 - 新增資料可直接輸入文字，或上傳 TXT / PDF 衛教檔案
 - 上傳的 TXT / PDF 原始檔會保存到 MinIO
@@ -14,7 +14,10 @@
 - 回答中會標記實際使用的參考來源，例如 `[1]`
 - 回答中的 `[1]`、`[2]` 可點擊查看原始參考資料
 - 沒有足夠相關參考時，不會在回答中加索引
-- 同一頁對話保留最近 10 則訊息作短期記憶
+- 對話會保存到 PostgreSQL，左側可切換、刪除不同對話
+- 同一對話保留最近 10 則訊息作短期記憶
+- AI 回答會顯示證據充足度、檢索詞與醫療風險分級
+- 紅燈急症風險會轉向就醫/急救提醒，不進入一般衛教回答
 - Enter 送出問題，Shift+Enter 換行
 - 新增、刪除、載入資料、AI 思考中都有 loading 狀態
 - 每筆資料可查看 embedding 維度、前段預覽與完整數字 array
@@ -22,10 +25,10 @@
 
 ## 檔案
 
-- `app.py`：Web app 後端、OpenAI 呼叫、Weaviate 操作，並在 production 服務 Vue build 後的靜態檔
+- `app.py`：Web app 後端、OpenAI 呼叫、PostgreSQL / pgvector 操作，並在 production 服務 Vue build 後的靜態檔
 - `frontend/medivector-chat-app`：Vue / Vite 前端專案
-- `test.py`：CLI 測試版 RAG 流程
-- `docker-compose.yml`：啟動 app、Weaviate 與 MinIO
+- `test.py`：舊版 CLI 測試稿，主流程以 `app.py` 為準
+- `docker-compose.yml`：啟動 app、PostgreSQL / pgvector 與 MinIO
 - `Dockerfile`：build Vue 前端並打包 Python app
 - `.dockerignore`：排除本機虛擬環境、前端依賴與 build 輸出
 - `.env.example`：環境變數範本；複製成 `.env` 後填入自己的設定
@@ -58,9 +61,9 @@ Copy-Item .env.example .env
 OPENAI_API_KEY=你的 API key
 ```
 
-`.env` 會被 Git 忽略，不會提交到 repository。Docker Compose 會自動讀取 `.env`；本機執行 `app.py` 或 `test.py` 時也會載入同一份 `.env`。
+`.env` 會被 Git 忽略，不會提交到 repository。Docker Compose 會自動讀取 `.env`；本機執行 `app.py` 時也會載入同一份 `.env`。
 
-## 啟動 Weaviate 與 MinIO
+## 啟動 PostgreSQL / pgvector 與 MinIO
 
 在專案目錄執行：
 
@@ -74,10 +77,18 @@ docker compose up -d
 docker compose ps
 ```
 
-Weaviate 預設會跑在：
+PostgreSQL 預設會跑在：
 
 ```text
-http://127.0.0.1:8080
+127.0.0.1:5432
+```
+
+PostgreSQL 預設連線資訊：
+
+```text
+database: medivector
+user: medivector
+password: medivector
 ```
 
 MinIO API 與管理介面預設會跑在：
@@ -104,7 +115,7 @@ docker compose up --build -d
 這會一起啟動：
 
 - `app`：Python API + Vue build 後的前端，`http://127.0.0.1:8000`
-- `weaviate`：Vector DB，`http://127.0.0.1:8080`
+- `postgres`：PostgreSQL + pgvector，`127.0.0.1:5432`
 - `minio`：原始檔保存，API `http://127.0.0.1:9000`，Console `http://127.0.0.1:9001`
 
 啟動後請開：
@@ -113,7 +124,7 @@ docker compose up --build -d
 http://localhost:8000/
 ```
 
-`http://localhost:8080/v1` 是 Weaviate REST API，看到 JSON 代表 vector DB 正常，不是前端頁面。
+`http://localhost:8000/` 是前端頁面；PostgreSQL 是資料庫服務，不會像一般網頁一樣用瀏覽器開啟。
 
 查看狀態：
 
@@ -128,6 +139,8 @@ docker compose down
 ```
 
 ## 啟動後端 API
+
+請先確認 PostgreSQL / pgvector 與 MinIO 已透過 Docker Compose 啟動。
 
 一般 Python 可用時：
 
@@ -269,6 +282,26 @@ Content-Type: application/json
 }
 ```
 
+### 取得對話列表
+
+```http
+GET /api/conversations
+```
+
+回傳已保存的對話，標題會使用該對話第一則使用者訊息。
+
+### 取得單一對話記錄
+
+```http
+GET /api/conversations/{conversation_id}
+```
+
+### 刪除對話
+
+```http
+DELETE /api/conversations/{conversation_id}
+```
+
 ## 環境變數
 
 | 名稱 | 預設值 | 說明 |
@@ -281,11 +314,15 @@ Content-Type: application/json
 | `REFERENCE_CANDIDATE_LIMIT` | `20` | vector search 第一階段先取幾筆候選 |
 | `MAX_REFERENCE_DISTANCE` | `0.65` | 絕對 distance 上限 |
 | `REFERENCE_DISTANCE_MARGIN` | `0.12` | 只保留最佳命中 distance 附近的參考 |
+| `MIN_REFERENCE_COUNT` | `2` | 判定證據充足時至少需要幾筆參考 |
+| `MAX_EVIDENCE_DISTANCE` | 同 `MAX_REFERENCE_DISTANCE` | 判定證據充足時可接受的最佳 distance 上限 |
 | `MEMORY_MESSAGES` | `10` | 保留最近幾則對話給 GPT |
 | `MAX_EMBEDDING_CHARS` | `6000` | TXT / PDF 匯入後每個 embedding chunk 的最大字元數 |
-| `WEAVIATE_HOST` | `127.0.0.1` | Weaviate HTTP host；Docker 內使用 `weaviate` |
-| `WEAVIATE_PORT` | `8080` | Weaviate HTTP port |
-| `WEAVIATE_GRPC_PORT` | `50051` | Weaviate gRPC port |
+| `PG_HOST` | `127.0.0.1` | PostgreSQL host；Docker app 內使用 `postgres` |
+| `PG_PORT` | `5432` | PostgreSQL port |
+| `PG_USER` | `medivector` | PostgreSQL 使用者 |
+| `PG_PASSWORD` | `medivector` | PostgreSQL 密碼 |
+| `PG_DATABASE` | `medivector` | PostgreSQL database |
 | `MINIO_ENDPOINT` | `127.0.0.1:9000` | MinIO API endpoint |
 | `MINIO_ACCESS_KEY` | `minioadmin` | MinIO access key |
 | `MINIO_SECRET_KEY` | `minioadmin` | MinIO secret key |
@@ -296,9 +333,9 @@ Content-Type: application/json
 
 ## 檢索邏輯
 
-目前 vector DB 搜尋只使用「當前問題」做 embedding，避免先前對話污染檢索結果。短期記憶只會交給 GPT 回答時參考。
+目前 vector DB 搜尋會使用「當前問題」加上 AI 產生的中英文檢索詞做 embedding。短期記憶只會交給 GPT 回答時參考，不會直接把整段歷史對話塞進向量檢索。
 
-針對常見中文衛教關鍵詞，檢索時會補上少量英文同義詞，例如「鼠蹊／腹股溝」會補 `groin / inguinal`，「神經」會補 `nerve / ilioinguinal / genitofemoral` 等。這只影響 vector DB 檢索，不會改寫使用者原本的問題。
+針對中文衛教問題，系統會先用小模型產生 3 到 8 組適合檢索的中英文詞組，例如症狀、解剖部位、疾病名稱與醫學術語。這只影響 vector DB 檢索，不會改寫使用者原本的問題。
 
 搜尋後會做兩層過濾：
 
@@ -306,6 +343,13 @@ Content-Type: application/json
 2. distance 不可超過「最佳命中 distance + `REFERENCE_DISTANCE_MARGIN`」
 
 因此如果最佳命中是年輕人健身，距離明顯比較遠的高血壓資料會被排除。
+
+搜尋結果也會再進行證據充足度評估：
+
+1. 參考資料數量需達到 `MIN_REFERENCE_COUNT`
+2. 最佳 distance 需低於 `MAX_EVIDENCE_DISTANCE`
+
+若證據不足，回答會降低語氣強度，避免把推測講成確定結論。
 
 ## Embedding 與 Distance 視覺化
 
@@ -317,10 +361,14 @@ Content-Type: application/json
 
 右側 GPT 回答下方的參考來源會顯示：
 
-- `distance`：Weaviate 回傳的向量距離，越低代表越相似
+- `distance`：pgvector cosine distance，越低代表越相似
+- 證據狀態：目前引用是否達到數量與距離門檻
+- 檢索詞：本次用於擴展向量檢索的詞組
+- 風險分級：一般、注意或急症
 
 ## 注意事項
 
-- `app.py` 不會在啟動時重建 collection，所以使用者新增的資料會保留。
-- `test.py` 是 CLI 測試腳本，會重建 collection 並重新寫入預設資料。
+- `app.py` 啟動時只會建立缺少的 PostgreSQL extension、資料表與索引，不會清空既有資料。
+- 使用 Docker Compose 時，PostgreSQL 與 MinIO 資料會保存在 Docker volume。
+- `test.py` 是舊版 Weaviate CLI 測試稿，和目前 Docker Compose 的 PostgreSQL / pgvector 主流程不同。
 - 問答引用時會對內容相同的參考資料做去重，避免重複列出相同來源。
