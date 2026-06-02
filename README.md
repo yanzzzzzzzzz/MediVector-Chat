@@ -333,7 +333,7 @@ DELETE /api/conversations/{conversation_id}
 
 ## 檢索邏輯
 
-目前 vector DB 搜尋會使用「當前問題」加上 AI 產生的中英文檢索詞做 embedding。短期記憶只會交給 GPT 回答時參考，不會直接把整段歷史對話塞進向量檢索。
+目前 vector DB 搜尋會先用 AI 進行 query contextualization：判斷當前問題是否需要最近對話才能理解，並產生一個可獨立檢索的 standalone question。每次問答都會重新產生 standalone question 與中英文檢索詞，避免同一對話後續問題沿用上一題的檢索詞。若問題本身已有明確主題，例如「心臟跳動異常怎麼辦」，檢索會以該主題為準，不應把最近對話中的其他疾病混入；若問題是語意不完整的追問，才會用最近對話補全 standalone question。短期記憶仍會交給 GPT 回答時參考，但不會直接把整段歷史對話塞進向量檢索。
 
 針對中文衛教問題，系統會先用小模型產生 3 到 8 組適合檢索的中英文詞組，例如症狀、解剖部位、疾病名稱與醫學術語。這只影響 vector DB 檢索，不會改寫使用者原本的問題。
 

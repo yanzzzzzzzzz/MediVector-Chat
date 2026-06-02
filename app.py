@@ -50,9 +50,6 @@ PG_PASSWORD = os.getenv("PG_PASSWORD", "medivector")
 PG_DATABASE = os.getenv("PG_DATABASE", "medivector")
 
 
-CONVERSATION_RETRIEVAL_TERMS: dict[str, list[str]] = {}
-
-
 QUERY_EXPANSION_MODEL = "gpt-4o-mini-2024-07-18"
 
 @dataclass
@@ -81,6 +78,13 @@ class RiskAssessment:
     reason: str
     diverted: bool
     action: str
+
+
+@dataclass
+class RetrievalQuery:
+    question: str
+    terms: list[str]
+    needs_context: bool
 
 
 RISK_GREEN_ACTION = "一般衛教模式：提供健康教育資訊與自我照護建議。"
@@ -137,7 +141,7 @@ def normalize_retrieval_terms(terms: list[str]) -> list[str]:
     return normalized_terms
 
 
-def generate_retrieval_terms(api_key: str, question: str, history: list[dict[str, str]]) -> list[str]:
+def generate_retrieval_query(api_key: str, question: str, history: list[dict[str, str]]) -> RetrievalQuery:
     recent_user_turns = [
         str(message.get("content") or "").strip()
         for message in history[-6:]
@@ -146,10 +150,12 @@ def generate_retrieval_terms(api_key: str, question: str, history: list[dict[str
     conversation_context = "\n".join(f"- {turn}" for turn in recent_user_turns)
 
     schema = {
-        "name": "retrieval_query_terms",
+        "name": "retrieval_query_contextualization",
         "schema": {
             "type": "object",
             "properties": {
+                "needs_context": {"type": "boolean"},
+                "standalone_question": {"type": "string"},
                 "terms": {
                     "type": "array",
                     "items": {"type": "string"},
@@ -157,7 +163,7 @@ def generate_retrieval_terms(api_key: str, question: str, history: list[dict[str
                     "maxItems": 8,
                 },
             },
-            "required": ["terms"],
+            "required": ["needs_context", "standalone_question", "terms"],
             "additionalProperties": False,
         },
     }
@@ -165,13 +171,17 @@ def generate_retrieval_terms(api_key: str, question: str, history: list[dict[str
         {
             "role": "system",
             "content": (
-                "你是醫療檢索關鍵詞擴展器。"
+                "你是醫療 RAG 檢索查詢改寫器。"
                 "規則：\n"
-                "1. 必須保留問題中出現的所有解剖部位、症狀、疾病名稱，不可省略。\n"
-                "2. 每個中文關鍵詞都必須同時加上對應的英文同義詞或醫學術語（例如：鼠蹊部→groin inguinal，發燒→fever pyrexia）。\n"
-                "3. 可追加相關症狀、病因、治療方式的中英詞，但不要偏離問題主題。\n"
-                "4. 不要寫完整句子，詞組需簡短，適合直接拼接到向量檢索查詢中。\n"
-                "5. 避免重複、避免與問題無關的泛用詞。\n"
+                "1. 先判斷當前問題是否必須參考最近對話才能理解，並輸出 needs_context。\n"
+                "2. 如果當前問題已明確包含症狀、疾病、解剖部位、檢查、治療或藥物，通常視為新檢索主題，不要把最近對話中的其他主題加入 standalone_question 或 terms。\n"
+                "3. 只有當問題是語意不完整的追問時，才使用最近對話補全 standalone_question。\n"
+                "4. standalone_question 必須是可獨立拿去向量檢索的完整問題；不可加入當前問題與必要上下文以外的主題。\n"
+                "5. terms 必須根據 standalone_question 產生，必須保留其中所有解剖部位、症狀、疾病名稱。\n"
+                "6. 每個中文關鍵詞都必須同時加上對應的英文同義詞或醫學術語（例如：鼠蹊部→groin inguinal，發燒→fever pyrexia）。\n"
+                "7. 可追加相關症狀、病因、治療方式的中英詞，但不要偏離 standalone_question。\n"
+                "8. 不要寫完整句子，詞組需簡短，適合直接拼接到向量檢索查詢中。\n"
+                "9. 避免重複、避免與問題無關的泛用詞或歷史對話主題。\n"
                 "只輸出符合 schema 的 JSON。"
             ),
         },
@@ -180,7 +190,7 @@ def generate_retrieval_terms(api_key: str, question: str, history: list[dict[str
             "content": (
                 f"使用者當前問題：{question}\n\n"
                 f"最近對話內容：\n{conversation_context or '- 無'}\n\n"
-                "請先列出問題中的解剖部位與症狀詞（含英文），再追加 2 到 4 個相關擴展詞（含英文），合計 3 到 8 組。"
+                "請輸出 needs_context、standalone_question，並依 standalone_question 產生 3 到 8 組中英文檢索詞。"
             ),
         },
     ]
@@ -201,25 +211,23 @@ def generate_retrieval_terms(api_key: str, question: str, history: list[dict[str
         )
         content = data["choices"][0]["message"]["content"]
         parsed = json.loads(content)
+        standalone_question = str(parsed.get("standalone_question") or "").strip() or question
         terms = normalize_retrieval_terms([str(term) for term in parsed.get("terms") or []])
-        return terms[:8]
+        return RetrievalQuery(
+            question=standalone_question,
+            terms=terms[:8],
+            needs_context=bool(parsed.get("needs_context")),
+        )
     except Exception:
-        return []
+        return RetrievalQuery(question=question, terms=[], needs_context=False)
 
 
-def get_conversation_retrieval_terms(
+def get_retrieval_query(
     api_key: str,
-    conversation_id: str,
     question: str,
     history: list[dict[str, str]],
-) -> list[str]:
-    cached_terms = CONVERSATION_RETRIEVAL_TERMS.get(conversation_id)
-    if cached_terms is not None:
-        return cached_terms
-
-    generated_terms = generate_retrieval_terms(api_key, question, history)
-    CONVERSATION_RETRIEVAL_TERMS[conversation_id] = generated_terms
-    return generated_terms
+) -> RetrievalQuery:
+    return generate_retrieval_query(api_key, question, history)
 
 
 def assess_question_risk(api_key: str, question: str) -> RiskAssessment:
@@ -1036,7 +1044,6 @@ def delete_conversation(conversation_id: str) -> None:
     with db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM conversations WHERE id = %s", (conversation_id,))
-    CONVERSATION_RETRIEVAL_TERMS.pop(conversation_id, None)
 
 
 def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
@@ -1079,8 +1086,9 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
     )
     retrieval_terms: list[str] = []
     if rag_enabled:
-        retrieval_terms = get_conversation_retrieval_terms(api_key, conversation_id, question, history)
-        references = search_references(api_key, question, retrieval_terms)
+        retrieval_query = get_retrieval_query(api_key, question, history)
+        retrieval_terms = retrieval_query.terms
+        references = search_references(api_key, retrieval_query.question, retrieval_terms)
         evidence = assess_evidence(references)
     else:
         evidence = EvidenceAssessment(
