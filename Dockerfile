@@ -19,6 +19,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py test.py ./
+COPY medivector ./medivector
 COPY --from=frontend-build /frontend/dist ./frontend/medivector-chat-app/dist
 
 EXPOSE 8000

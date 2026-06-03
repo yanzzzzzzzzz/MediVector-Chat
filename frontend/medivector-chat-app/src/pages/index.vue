@@ -6,82 +6,15 @@
     </header>
 
     <main class="layout">
-      <aside class="convo-sidebar">
-        <div class="convo-sidebar-head">
-          <span class="convo-sidebar-title">我的對話</span>
-
-          <button class="primary convo-new-btn" type="button" @click="createNewConversation">
-            <svg
-              fill="none"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.5"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
-            ><line x1="12" x2="12" y1="5" y2="19" /><line x1="5" x2="19" y1="12" y2="12" /></svg>
-            新對話
-          </button>
-        </div>
-
-        <div class="convo-list">
-          <div v-if="conversations.length === 0" class="convo-empty">尚無對話記錄</div>
-
-          <div
-            v-for="convo in conversations"
-            :key="convo.id"
-            :class="['convo-row', { active: convo.id === conversationId }]"
-          >
-            <button
-              :class="['convo-item', { active: convo.id === conversationId }]"
-              type="button"
-              @click="switchConversation(convo.id)"
-            >
-              <span class="convo-item-title">{{ convo.title }}</span>
-              <span class="convo-item-time">{{ formatConvoTime(convo.created_at) }}</span>
-            </button>
-
-            <button
-              class="convo-delete-btn"
-              :disabled="deletingConvoId === convo.id"
-              :title="'刪除對話'"
-              type="button"
-              @click.stop="deleteConversation(convo.id)"
-            >
-              <svg
-                fill="none"
-                height="13"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="13"
-                xmlns="http://www.w3.org/2000/svg"
-              ><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="sidebar-footer">
-          <button class="sidebar-docs-btn" type="button" @click="openDocsDialog">
-            <svg
-              fill="none"
-              height="15"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="15"
-              xmlns="http://www.w3.org/2000/svg"
-            ><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
-            衛教資料庫
-          </button>
-        </div>
-      </aside>
+      <ConversationSidebar
+        :conversation-id="conversationId"
+        :conversations="conversations"
+        :deleting-convo-id="deletingConvoId"
+        @create-new="createNewConversation"
+        @delete-conversation="deleteConversation"
+        @open-docs="openDocsDialog"
+        @switch-conversation="switchConversation"
+      />
 
       <section class="panel">
         <div class="toolbar">
@@ -95,68 +28,12 @@
         </div>
 
         <div ref="chatLogEl" class="chat-log">
-          <div
+          <MessageBubble
             v-for="message in messages"
             :key="message.id"
-            :class="['msg', message.role, { thinking: message.thinking }]"
-          >
-            <template v-if="message.thinking">
-              <span aria-hidden="true" class="spinner inline" />
-              <span>思考中</span>
-            </template>
-
-            <template v-else-if="message.role === 'assistant' && message.references.length > 0">
-              <template v-for="(part, index) in answerParts(message)" :key="index">
-                <button v-if="part.ref" class="citation" type="button" @click="openReferenceDialog(part.ref)">
-                  [{{ part.ref.index }}]
-                </button>
-
-                <template v-else>{{ part.text }}</template>
-              </template>
-            </template>
-
-            <template v-else>{{ message.text }}</template>
-
-            <div v-if="message.role === 'assistant' && message.evidenceAssessment" class="evidence-wrap">
-              <span
-                :class="['evidence-badge', message.evidenceAssessment.sufficient ? 'evidence-sufficient' : 'evidence-insufficient']"
-              >
-                證據{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }}
-              </span>
-
-              <div class="evidence-detail">{{ message.evidenceAssessment.reason }}</div>
-            </div>
-
-            <div v-if="message.role === 'assistant' && message.retrievalTerms && message.retrievalTerms.length > 0" class="retrieval-wrap">
-              <div class="retrieval-title">本次檢索詞</div>
-
-              <div class="retrieval-tags">
-                <span v-for="term in message.retrievalTerms" :key="term" class="retrieval-tag">{{ term }}</span>
-              </div>
-            </div>
-
-            <div v-if="message.role === 'assistant' && message.riskAssessment" class="risk-wrap">
-              <span :class="['risk-badge', `risk-${message.riskAssessment.level}`]">
-                風險分級：{{ message.riskAssessment.label }}
-              </span>
-
-              <div class="risk-detail">{{ message.riskAssessment.reason }}</div>
-            </div>
-
-            <div v-if="message.references.length > 0" class="refs">
-              <div v-for="sourceRef in message.references" :key="sourceRef.index">
-                [{{ sourceRef.index }}] {{ sourceRef.source }} · {{ sourceRef.title }} · distance={{ sourceRef.distance_text }}
-              </div>
-
-              <div v-if="message.evidenceAssessment" class="refs-evidence">
-                證據狀態：{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }} · {{ message.evidenceAssessment.reason }}
-              </div>
-
-              <div v-if="message.retrievalTerms && message.retrievalTerms.length > 0" class="refs-retrieval">
-                檢索詞：{{ message.retrievalTerms.join(' · ') }}
-              </div>
-            </div>
-          </div>
+            :message="message"
+            @open-reference="openReferenceDialog"
+          />
         </div>
 
         <form class="ask-form" @submit.prevent="askQuestion">
@@ -250,6 +127,7 @@
                 <div>
                   <div class="doc-title">{{ group.title || '(未命名)' }}</div>
                   <div class="doc-meta">source_id={{ group.source_id }} · {{ group.source || '未填來源' }}</div>
+
                   <div class="doc-meta">
                     日期={{ group.published_date || '未填' }} · 適用對象={{ group.audience || '未填' }} · 主題={{ group.topic || '未分類' }}
                   </div>
@@ -288,10 +166,12 @@
                 <article v-for="chunk in group.chunks" :key="chunk.uuid" class="chunk-card">
                   <div class="doc-meta">chunk={{ chunk.chunk_index || 1 }} / {{ chunk.chunk_count || 1 }} · uuid={{ chunk.uuid }}</div>
                   <p class="doc-preview">{{ previewText(chunk.content || '', 220) }}</p>
+
                   <details class="doc-details nested">
                     <summary>展開 chunk 內容</summary>
                     <div class="doc-content">{{ chunk.content || '' }}</div>
                   </details>
+
                   <details class="embedding nested">
                     <summary>{{ embeddingSummary(chunk.embedding) }}</summary>
                     <pre v-if="chunk.embedding?.dimension">{{ JSON.stringify(chunk.embedding.values, null, 2) }}</pre>
@@ -302,6 +182,7 @@
               <details class="doc-details">
                 <summary>技術資訊</summary>
                 <div class="doc-meta">document_id={{ group.document_id }}</div>
+
                 <div v-if="group.file_name" class="doc-meta">
                   file={{ group.file_name }} · {{ group.file_bucket || '' }}/{{ group.file_object_key || '' }}
                 </div>
@@ -352,7 +233,14 @@
         </label>
 
         <label>衛教檔案
-          <input ref="fileInputEl" accept=".txt,.pdf,text/plain,application/pdf" type="file" multiple @change="onFileChange">
+          <input
+            ref="fileInputEl"
+            accept=".txt,.pdf,text/plain,application/pdf"
+            multiple
+            type="file"
+            @change="onFileChange"
+          >
+
           <span class="hint">
             可批次上傳 TXT 或 PDF；新增時多檔會各自成為一份文件。編輯既有文件時若選檔，會替換為該檔文字並重新 embedding。
           </span>
@@ -360,9 +248,9 @@
 
         <div class="metadata-actions">
           <button
-            type="button"
             :class="{ loading: inferringMetadata }"
             :disabled="!canInferMetadata || inferringMetadata || addingDoc"
+            type="button"
             @click="inferMetadata"
           >
             <span aria-hidden="true" class="spinner" />
@@ -409,156 +297,17 @@
       </div>
     </dialog>
 
-    <dialog ref="referenceDialogEl">
-      <div class="dialog-head">
-        <h2>{{ activeReference ? `[${activeReference.index}] ${activeReference.title || '參考資料'}` : '參考資料' }}</h2>
-        <button type="button" @click="closeReferenceDialog">關閉</button>
-      </div>
-
-      <div v-if="activeReference" class="reference-body">
-        <div class="reference-meta">
-          來源：{{ activeReference.source || '未知' }} · source_id={{ activeReference.source_id ?? '未知' }} · distance={{ activeReference.distance_text || '未知' }}
-          <br>
-          日期：{{ activeReference.published_date || '未填' }} · 適用對象：{{ activeReference.audience || '未填' }} · 主題：{{ activeReference.topic || '未分類' }}
-        </div>
-
-        <pre class="reference-content">{{ activeReference.content || '' }}</pre>
-      </div>
-    </dialog>
+    <ReferenceDialog ref="referenceDialogEl" :reference="activeReference" @close="closeReferenceDialog" />
   </div>
 </template>
 
 <script setup lang="ts">
+  import type { AskResponse, ChatMessage, ConversationItem, DocumentGroup, DocumentItem, DocumentSection, Embedding, EvidenceAssessment, MetadataSuggestions, ReferenceItem, RiskAssessment } from '@/types'
   import { computed, nextTick, onMounted, reactive, ref } from 'vue'
-
-  interface Embedding {
-    dimension: number
-    preview: number[]
-    values: number[]
-  }
-
-  interface DocumentItem {
-    uuid: string
-    document_id: string
-    source_id: number | string
-    title: string
-    source: string
-    publisher?: string
-    published_date?: string
-    version?: string
-    audience?: string
-    topic?: string
-    credibility?: string
-    content: string
-    file_name?: string | null
-    file_object_key?: string | null
-    file_bucket?: string | null
-    file_content_type?: string | null
-    file_size?: number | null
-    chunk_index?: number | null
-    chunk_count?: number | null
-    created_at: string
-    updated_at?: string
-    embedding?: Embedding
-  }
-
-  interface DocumentGroup {
-    document_id: string
-    source_id: number | string
-    title: string
-    source: string
-    publisher: string
-    published_date: string
-    version: string
-    audience: string
-    topic: string
-    credibility: string
-    file_name: string
-    file_object_key: string
-    file_bucket: string
-    created_at: string
-    updated_at: string
-    chunk_count: number
-    chunks: DocumentItem[]
-    content: string
-  }
-
-  interface DocumentSection {
-    key: string
-    label: string
-    groups: DocumentGroup[]
-  }
-
-  interface MetadataSuggestions {
-    title: string
-    published_date: string
-    audience: string
-    topic: string
-  }
-
-  interface ReferenceItem {
-    index: number
-    uuid: string
-    document_id: string
-    source_id: number
-    title: string
-    source: string
-    publisher?: string
-    published_date?: string
-    version?: string
-    audience?: string
-    topic?: string
-    credibility?: string
-    content: string
-    distance: number | null
-    distance_text: string
-  }
-
-  interface RiskAssessment {
-    level: 'green' | 'yellow' | 'red'
-    label: string
-    reason: string
-    diverted: boolean
-    action: string
-  }
-
-  interface EvidenceAssessment {
-    sufficient: boolean
-    reason: string
-    reference_count: number
-    best_distance: number | null
-  }
-
-  interface AskResponse {
-    answer: string
-    rag_enabled: boolean
-    references: ReferenceItem[]
-    evidence_assessment?: EvidenceAssessment
-    retrieval_terms?: string[]
-    risk_assessment?: RiskAssessment
-  }
-
-  interface ChatMessage {
-    id: number
-    role: 'user' | 'assistant'
-    text: string
-    references: ReferenceItem[]
-    evidenceAssessment?: EvidenceAssessment | null
-    retrievalTerms?: string[]
-    riskAssessment?: RiskAssessment | null
-    thinking?: boolean
-  }
-
-  interface AnswerPart {
-    text?: string
-    ref?: ReferenceItem
-  }
-
-  interface ConversationItem {
-    id: string
-    title: string
-    created_at: string
-  }
+  import ConversationSidebar from '@/components/ConversationSidebar.vue'
+  import MessageBubble from '@/components/MessageBubble.vue'
+  import ReferenceDialog from '@/components/ReferenceDialog.vue'
+  import { api } from '@/composables/useApi'
 
   const status = ref('準備中')
   const docs = ref<DocumentItem[]>([])
@@ -578,7 +327,7 @@
   const chatLogEl = ref<HTMLDivElement | null>(null)
   const docDialogEl = ref<HTMLDialogElement | null>(null)
   const docsDialogEl = ref<HTMLDialogElement | null>(null)
-  const referenceDialogEl = ref<HTMLDialogElement | null>(null)
+  const referenceDialogEl = ref<InstanceType<typeof ReferenceDialog> | null>(null)
   const deleteConvoDialogEl = ref<HTMLDialogElement | null>(null)
   const pendingDeleteId = ref<string | null>(null)
   const pendingDeleteTitle = ref('')
@@ -608,20 +357,6 @@
     status.value = text
   }
 
-  async function api<T> (path: string, options: RequestInit = {}): Promise<T> {
-    const requestOptions: RequestInit = { ...options }
-    if (!(options.body instanceof FormData)) {
-      requestOptions.headers = {
-        'Content-Type': 'application/json',
-        ...(options.headers as Record<string, string> | undefined),
-      }
-    }
-    const response = await fetch(path, requestOptions)
-    const body = await response.json().catch(() => ({}))
-    if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`)
-    return body as T
-  }
-
   function embeddingSummary (embedding?: Embedding) {
     if (!embedding?.dimension) return 'Embedding：無資料'
     const suffix = embedding.dimension > embedding.preview.length ? ', ...' : ''
@@ -646,6 +381,20 @@
     }
   }
 
+  function chunkIndexOf (doc: DocumentItem) {
+    return Number(doc.chunk_index || 1)
+  }
+
+  function insertChunkByIndex (sortedChunks: DocumentItem[], chunk: DocumentItem) {
+    const insertAt = sortedChunks.findIndex(item => chunkIndexOf(chunk) < chunkIndexOf(item))
+    if (insertAt === -1) return [...sortedChunks, chunk]
+    return [
+      ...sortedChunks.slice(0, insertAt),
+      chunk,
+      ...sortedChunks.slice(insertAt),
+    ]
+  }
+
   const docGroups = computed<DocumentGroup[]>(() => {
     const groups = new Map<string, DocumentItem[]>()
     for (const doc of docs.value) {
@@ -654,7 +403,10 @@
     }
 
     return Array.from(groups.entries()).map(([documentId, chunks]) => {
-      const sortedChunks = [...chunks].sort((a, b) => Number(a.chunk_index || 1) - Number(b.chunk_index || 1))
+      const sortedChunks = chunks.reduce<DocumentItem[]>(
+        (sorted, chunk) => insertChunkByIndex(sorted, chunk),
+        [],
+      )
       const first = sortedChunks[0]
       return {
         document_id: documentId,
@@ -684,9 +436,9 @@
     for (const group of docGroups.value) {
       const value = docGroupBy.value === 'topic'
         ? group.topic
-        : docGroupBy.value === 'source'
+        : (docGroupBy.value === 'source'
           ? group.source
-          : group.file_name
+          : group.file_name)
       const label = value || (docGroupBy.value === 'file' ? '未上傳檔案' : '未分類')
       sections.set(label, [...(sections.get(label) || []), group])
     }
@@ -733,28 +485,6 @@
     messages.value.push(message)
     scrollChat()
     return message
-  }
-
-  function answerParts (message: ChatMessage): AnswerPart[] {
-    const referencesByIndex = new Map(message.references.map(ref => [String(ref.index), ref]))
-    const parts: AnswerPart[] = []
-    const pattern = /\[(\d+)\]/g
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-
-    while ((match = pattern.exec(message.text)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push({ text: message.text.slice(lastIndex, match.index) })
-      }
-      const refItem = referencesByIndex.get(match[1])
-      parts.push(refItem ? { ref: refItem } : { text: match[0] })
-      lastIndex = pattern.lastIndex
-    }
-
-    if (lastIndex < message.text.length) {
-      parts.push({ text: message.text.slice(lastIndex) })
-    }
-    return parts
   }
 
   function scrollChat () {
@@ -902,7 +632,7 @@
 
   function openReferenceDialog (refItem: ReferenceItem) {
     activeReference.value = refItem
-    nextTick(() => referenceDialogEl.value?.showModal())
+    nextTick(() => referenceDialogEl.value?.show())
   }
 
   function closeReferenceDialog () {
@@ -1044,17 +774,6 @@
     }
   }
 
-  function formatConvoTime (isoString: string): string {
-    const d = new Date(isoString)
-    const now = new Date()
-    const diffMs = now.getTime() - d.getTime()
-    const diffDays = Math.floor(diffMs / 86_400_000)
-    if (diffDays === 0) return d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
-    if (diffDays === 1) return '昨天'
-    if (diffDays < 7) return `${diffDays} 天前`
-    return d.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })
-  }
-
   async function clearChat () {
     await api(`/api/conversations/${encodeURIComponent(conversationId.value)}`, { method: 'DELETE' })
     const newId = crypto.randomUUID()
@@ -1106,183 +825,6 @@
     padding: 18px;
     height: calc(100vh - 60px);
     min-height: 680px;
-  }
-
-  .convo-sidebar {
-    display: flex;
-    flex-direction: column;
-    background: #ffffff;
-    border: 1px solid #d9dee5;
-    border-radius: 8px;
-    box-shadow: 0 10px 28px rgba(16, 24, 40, 0.08);
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .convo-sidebar-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 12px 12px;
-    border-bottom: 1px solid #d9dee5;
-    flex-shrink: 0;
-  }
-
-  .convo-sidebar-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #17202a;
-  }
-
-  .convo-new-btn {
-    height: 30px;
-    padding: 0 10px;
-    font-size: 12px;
-    gap: 4px;
-  }
-
-  .convo-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .sidebar-footer {
-    flex-shrink: 0;
-    padding: 8px 10px;
-    border-top: 1px solid #d9dee5;
-  }
-
-  .sidebar-docs-btn {
-    width: 100%;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 10px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #454e59;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.12s ease, border-color 0.12s ease;
-  }
-
-  .sidebar-docs-btn:hover {
-    background: #f0f4f8;
-    border-color: #d9dee5;
-  }
-
-  .convo-empty {
-    padding: 20px 10px;
-    text-align: center;
-    color: #687381;
-    font-size: 13px;
-  }
-
-  .convo-item {
-    flex: 1;
-    min-width: 0;
-    height: auto;
-    min-height: 52px;
-    padding: 8px 10px;
-    border: 1px solid transparent;
-    border-right: none;
-    border-radius: 6px 0 0 6px;
-    background: transparent;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
-    cursor: pointer;
-    transition: background 0.12s ease, border-color 0.12s ease;
-  }
-
-  .convo-row {
-    display: flex;
-    align-items: stretch;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    transition: border-color 0.12s ease;
-  }
-
-  .convo-row:hover {
-    border-color: #d9dee5;
-  }
-
-  .convo-row.active {
-    border-color: #b8ddd7;
-  }
-
-  .convo-row:hover .convo-item,
-  .convo-row:hover .convo-delete-btn {
-    background: #f6f7f8;
-  }
-
-  .convo-row.active .convo-item,
-  .convo-row.active .convo-delete-btn {
-    background: #eef7f5;
-  }
-
-  .convo-delete-btn {
-    flex: 0 0 auto;
-    width: 32px;
-    padding: 0;
-    border: none;
-    border-left: 1px solid rgba(0,0,0,0.06);
-    border-radius: 0 6px 6px 0;
-    margin: 0;
-    background: transparent;
-    color: #a0aab4;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.12s ease, color 0.12s ease, background 0.12s ease;
-  }
-
-  .convo-row:hover .convo-delete-btn {
-    opacity: 1;
-  }
-
-  .convo-delete-btn:hover {
-    color: #b42318 !important;
-    background: #fff1ef !important;
-  }
-
-  .convo-delete-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  .convo-item-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: #17202a;
-    line-height: 1.4;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-all;
-  }
-
-  .convo-item.active .convo-item-title {
-    color: #0b5f59;
-  }
-
-  .convo-item-time {
-    font-size: 11px;
-    color: #a0aab4;
-    line-height: 1;
   }
 
   .panel {
@@ -1703,169 +1245,6 @@
     gap: 12px;
   }
 
-  .msg {
-    max-width: 88%;
-    border: 1px solid #d9dee5;
-    border-radius: 8px;
-    padding: 10px 12px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    font-size: 14px;
-    background: #ffffff;
-  }
-
-  .msg.user {
-    justify-self: end;
-    background: #eef7f5;
-    border-color: #b8ddd7;
-  }
-
-  .msg.assistant { justify-self: start; }
-
-  .msg.thinking {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    color: #687381;
-  }
-
-  .refs {
-    margin-top: 10px;
-    display: grid;
-    gap: 8px;
-    color: #687381;
-    font-size: 12px;
-  }
-
-  .refs-evidence {
-    padding-top: 2px;
-    color: #51606d;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .refs-retrieval {
-    color: #51606d;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .evidence-wrap {
-    margin-top: 10px;
-    display: grid;
-    gap: 6px;
-  }
-
-  .evidence-badge {
-    width: fit-content;
-    padding: 2px 8px;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1.4;
-  }
-
-  .evidence-sufficient {
-    background: #eef7f5;
-    color: #0b5f59;
-    border-color: #b8ddd7;
-  }
-
-  .evidence-insufficient {
-    background: #fff8e8;
-    color: #8a5a00;
-    border-color: #f7d186;
-  }
-
-  .evidence-detail {
-    color: #687381;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .retrieval-wrap {
-    margin-top: 10px;
-    display: grid;
-    gap: 6px;
-  }
-
-  .retrieval-title {
-    color: #51606d;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .retrieval-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .retrieval-tag {
-    padding: 2px 8px;
-    border: 1px solid #d9dee5;
-    border-radius: 999px;
-    background: #fbfcfd;
-    color: #51606d;
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
-  .risk-wrap {
-    margin-top: 10px;
-    display: grid;
-    gap: 6px;
-  }
-
-  .risk-badge {
-    width: fit-content;
-    padding: 2px 8px;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1.4;
-  }
-
-  .risk-green {
-    background: #eef7f5;
-    color: #0b5f59;
-    border-color: #b8ddd7;
-  }
-
-  .risk-yellow {
-    background: #fff8e8;
-    color: #8a5a00;
-    border-color: #f7d186;
-  }
-
-  .risk-red {
-    background: #fff1ef;
-    color: #b42318;
-    border-color: #f5b3ad;
-  }
-
-  .risk-detail {
-    color: #687381;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .citation {
-    height: auto;
-    min-width: 28px;
-    padding: 1px 6px;
-    margin: 0 2px;
-    border-color: #b8ddd7;
-    background: #eef7f5;
-    color: #0b5f59;
-    font-size: 12px;
-    vertical-align: baseline;
-    display: inline-flex;
-  }
-
   .confirm-dialog {
     width: min(380px, calc(100vw - 32px));
   }
@@ -1882,36 +1261,6 @@
     font-size: 14px;
     line-height: 1.6;
     color: #17202a;
-  }
-
-  .reference-body {
-    padding: 14px 16px;
-    display: grid;
-    gap: 10px;
-    background: #ffffff;
-  }
-
-  .reference-meta {
-    color: #687381;
-    font-size: 12px;
-    line-height: 1.6;
-    overflow-wrap: anywhere;
-  }
-
-  .reference-content {
-    max-height: 48vh;
-    overflow: auto;
-    margin: 0;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid #d9dee5;
-    background: #fbfcfd;
-    color: #26323f;
-    font: inherit;
-    font-size: 14px;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
   }
 
   .ask-form {
@@ -1989,37 +1338,6 @@
       min-height: auto;
       grid-template-columns: 1fr;
     }
-
-    .convo-sidebar {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 0;
-      min-height: auto;
-      border-radius: 8px;
-    }
-
-    .convo-sidebar-head { width: 100%; border-bottom: 1px solid #d9dee5; border-right: none; }
-
-    .convo-list {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding: 8px;
-      gap: 6px;
-    }
-
-    .convo-item {
-      height: auto;
-      min-width: 120px;
-      max-width: 180px;
-      flex: 0 0 auto;
-      padding: 6px 10px;
-      text-align: left;
-    }
-
-    .convo-item-time { display: none; }
 
     .panel { min-height: 560px; }
     .two { grid-template-columns: 1fr; }
