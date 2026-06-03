@@ -224,56 +224,97 @@
           <span>載入資料中</span>
         </div>
 
-        <div v-else-if="docs.length === 0" class="doc">
+        <div v-else-if="docGroups.length === 0" class="doc">
           <div class="doc-title">目前沒有衛教資料</div>
           <div class="doc-meta">按「新增資料」建立第一筆向量資料。</div>
         </div>
 
         <template v-else>
-          <article v-for="doc in docs" :key="doc.uuid" class="doc">
-            <div class="doc-head">
-              <div>
-                <div class="doc-title">{{ doc.title || '(未命名)' }}</div>
-                <div class="doc-meta">source_id={{ doc.source_id }} · {{ doc.source || '' }}</div>
+          <div class="doc-tools">
+            <label>分組方式
+              <select v-model="docGroupBy">
+                <option value="topic">主題分類</option>
+                <option value="source">來源</option>
+                <option value="file">檔案</option>
+              </select>
+            </label>
 
-                <div v-if="Number(doc.chunk_count || 1) > 1" class="doc-meta">
-                  chunk={{ doc.chunk_index || 1 }} / {{ doc.chunk_count || 1 }}
+            <div class="doc-count">{{ docGroups.length }} 份文件 · {{ docs.length }} 個 chunks</div>
+          </div>
+
+          <section v-for="section in groupedDocSections" :key="section.key" class="doc-section">
+            <h3>{{ section.label }}</h3>
+
+            <article v-for="group in section.groups" :key="group.document_id" class="doc">
+              <div class="doc-head">
+                <div>
+                  <div class="doc-title">{{ group.title || '(未命名)' }}</div>
+                  <div class="doc-meta">source_id={{ group.source_id }} · {{ group.source || '未填來源' }}</div>
+                  <div class="doc-meta">
+                    日期={{ group.published_date || '未填' }} · 適用對象={{ group.audience || '未填' }} · 主題={{ group.topic || '未分類' }}
+                  </div>
+
+                  <div class="doc-meta">
+                    {{ group.file_name || '手動內容' }} · chunks={{ group.chunks.length }} · updated={{ group.updated_at || '未知' }}
+                  </div>
                 </div>
 
-                <div v-if="doc.file_name" class="doc-meta">
-                  file={{ doc.file_name }} · {{ doc.file_bucket || '' }}/{{ doc.file_object_key || '' }}
-                </div>
+                <div class="doc-actions">
+                  <button type="button" @click="editDoc(group)">編輯</button>
 
-                <div class="doc-meta">created={{ doc.created_at || '未知' }}</div>
-                <div class="doc-meta">uuid={{ doc.uuid }}</div>
+                  <button
+                    class="danger"
+                    :class="{ loading: deletingDocumentId === group.document_id }"
+                    :disabled="Boolean(deletingDocumentId)"
+                    type="button"
+                    @click="deleteDoc(group.document_id)"
+                  >
+                    <span aria-hidden="true" class="spinner" />
+                    <span>{{ deletingDocumentId === group.document_id ? '刪除中' : '刪除整份' }}</span>
+                  </button>
+                </div>
               </div>
 
-              <button
-                class="danger"
-                :class="{ loading: deletingUuid === doc.uuid }"
-                :disabled="Boolean(deletingUuid)"
-                type="button"
-                @click="deleteDoc(doc.uuid)"
-              >
-                <span aria-hidden="true" class="spinner" />
-                <span>{{ deletingUuid === doc.uuid ? '刪除中' : '刪除' }}</span>
-              </button>
-            </div>
+              <p class="doc-preview">{{ previewText(group.content) }}</p>
 
-            <div class="doc-content">{{ doc.content || '' }}</div>
+              <details class="doc-details">
+                <summary>展開全文</summary>
+                <div class="doc-content">{{ group.content }}</div>
+              </details>
 
-            <details class="embedding">
-              <summary>{{ embeddingSummary(doc.embedding) }}</summary>
-              <pre v-if="doc.embedding?.dimension">{{ JSON.stringify(doc.embedding.values, null, 2) }}</pre>
-            </details>
-          </article>
+              <details class="doc-details">
+                <summary>查看 {{ group.chunks.length }} 個 chunks</summary>
+
+                <article v-for="chunk in group.chunks" :key="chunk.uuid" class="chunk-card">
+                  <div class="doc-meta">chunk={{ chunk.chunk_index || 1 }} / {{ chunk.chunk_count || 1 }} · uuid={{ chunk.uuid }}</div>
+                  <p class="doc-preview">{{ previewText(chunk.content || '', 220) }}</p>
+                  <details class="doc-details nested">
+                    <summary>展開 chunk 內容</summary>
+                    <div class="doc-content">{{ chunk.content || '' }}</div>
+                  </details>
+                  <details class="embedding nested">
+                    <summary>{{ embeddingSummary(chunk.embedding) }}</summary>
+                    <pre v-if="chunk.embedding?.dimension">{{ JSON.stringify(chunk.embedding.values, null, 2) }}</pre>
+                  </details>
+                </article>
+              </details>
+
+              <details class="doc-details">
+                <summary>技術資訊</summary>
+                <div class="doc-meta">document_id={{ group.document_id }}</div>
+                <div v-if="group.file_name" class="doc-meta">
+                  file={{ group.file_name }} · {{ group.file_bucket || '' }}/{{ group.file_object_key || '' }}
+                </div>
+              </details>
+            </article>
+          </section>
         </template>
       </div>
     </dialog>
 
     <dialog ref="docDialogEl">
       <div class="dialog-head">
-        <h2>新增資料</h2>
+        <h2>{{ editingDocumentId ? '編輯資料' : '新增資料' }}</h2>
         <button type="button" @click="closeDocDialog">關閉</button>
       </div>
 
@@ -284,7 +325,7 @@
           </label>
 
           <label>標題
-            <input v-model.trim="newDoc.title" placeholder="例如：睡眠衛教重點" required>
+            <input v-model.trim="newDoc.title" placeholder="例如：睡眠衛教重點" :required="selectedFiles.length === 0">
           </label>
         </div>
 
@@ -292,21 +333,51 @@
           <input v-model.trim="newDoc.source" placeholder="例如：內部測試資料 / sleep-guide" required>
         </label>
 
+        <div class="two">
+          <label>日期
+            <input v-model.trim="newDoc.published_date" placeholder="例如：2026-06-03">
+          </label>
+
+          <label>適用對象
+            <input v-model.trim="newDoc.audience" placeholder="例如：成人 / 孕婦 / 照護者">
+          </label>
+        </div>
+
+        <label>主題分類
+          <input v-model.trim="newDoc.topic" placeholder="例如：睡眠 / 皮膚 / 慢性病">
+        </label>
+
         <label>內容
           <textarea v-model.trim="newDoc.content" placeholder="輸入要放進 vector DB 的中文資料，或改以上傳檔案" />
         </label>
 
         <label>衛教檔案
-          <input ref="fileInputEl" accept=".txt,.pdf,text/plain,application/pdf" type="file" @change="onFileChange">
-          <span class="hint">可上傳 TXT 或 PDF；若同時填寫內容與上傳檔案，系統會合併後 embedding。</span>
+          <input ref="fileInputEl" accept=".txt,.pdf,text/plain,application/pdf" type="file" multiple @change="onFileChange">
+          <span class="hint">
+            可批次上傳 TXT 或 PDF；新增時多檔會各自成為一份文件。編輯既有文件時若選檔，會替換為該檔文字並重新 embedding。
+          </span>
         </label>
+
+        <div class="metadata-actions">
+          <button
+            type="button"
+            :class="{ loading: inferringMetadata }"
+            :disabled="!canInferMetadata || inferringMetadata || addingDoc"
+            @click="inferMetadata"
+          >
+            <span aria-hidden="true" class="spinner" />
+            <span>{{ inferringMetadata ? '讀取內容中' : '從內容自動填入' }}</span>
+          </button>
+
+          <span class="hint">會補齊內容中能判斷的欄位；抽不到的會保持空白。</span>
+        </div>
 
         <div class="dialog-actions">
           <button type="button" @click="closeDocDialog">取消</button>
 
           <button class="primary" :class="{ loading: addingDoc }" :disabled="addingDoc" type="submit">
             <span aria-hidden="true" class="spinner" />
-            <span>{{ addingDoc ? 'Embedding 中' : '新增並 embedding' }}</span>
+            <span>{{ addingDoc ? 'Embedding 中' : editingDocumentId ? '更新並 embedding' : '新增並 embedding' }}</span>
           </button>
         </div>
       </form>
@@ -347,6 +418,8 @@
       <div v-if="activeReference" class="reference-body">
         <div class="reference-meta">
           來源：{{ activeReference.source || '未知' }} · source_id={{ activeReference.source_id ?? '未知' }} · distance={{ activeReference.distance_text || '未知' }}
+          <br>
+          日期：{{ activeReference.published_date || '未填' }} · 適用對象：{{ activeReference.audience || '未填' }} · 主題：{{ activeReference.topic || '未分類' }}
         </div>
 
         <pre class="reference-content">{{ activeReference.content || '' }}</pre>
@@ -366,9 +439,16 @@
 
   interface DocumentItem {
     uuid: string
+    document_id: string
     source_id: number | string
     title: string
     source: string
+    publisher?: string
+    published_date?: string
+    version?: string
+    audience?: string
+    topic?: string
+    credibility?: string
     content: string
     file_name?: string | null
     file_object_key?: string | null
@@ -378,15 +458,57 @@
     chunk_index?: number | null
     chunk_count?: number | null
     created_at: string
+    updated_at?: string
     embedding?: Embedding
+  }
+
+  interface DocumentGroup {
+    document_id: string
+    source_id: number | string
+    title: string
+    source: string
+    publisher: string
+    published_date: string
+    version: string
+    audience: string
+    topic: string
+    credibility: string
+    file_name: string
+    file_object_key: string
+    file_bucket: string
+    created_at: string
+    updated_at: string
+    chunk_count: number
+    chunks: DocumentItem[]
+    content: string
+  }
+
+  interface DocumentSection {
+    key: string
+    label: string
+    groups: DocumentGroup[]
+  }
+
+  interface MetadataSuggestions {
+    title: string
+    published_date: string
+    audience: string
+    topic: string
   }
 
   interface ReferenceItem {
     index: number
     uuid: string
+    document_id: string
     source_id: number
     title: string
     source: string
+    publisher?: string
+    published_date?: string
+    version?: string
+    audience?: string
+    topic?: string
+    credibility?: string
     content: string
     distance: number | null
     distance_text: string
@@ -441,12 +563,15 @@
   const status = ref('準備中')
   const docs = ref<DocumentItem[]>([])
   const docsLoading = ref(false)
-  const deletingUuid = ref('')
+  const deletingDocumentId = ref('')
   const messages = ref<ChatMessage[]>([])
   const question = ref('')
   const ragEnabled = ref(true)
   const addingDoc = ref(false)
-  const selectedFile = ref<File | null>(null)
+  const inferringMetadata = ref(false)
+  const selectedFiles = ref<File[]>([])
+  const editingDocumentId = ref('')
+  const docGroupBy = ref<'topic' | 'source' | 'file'>('topic')
   const activeReference = ref<ReferenceItem | null>(null)
   const conversations = ref<ConversationItem[]>([])
   const deletingConvoId = ref<string | null>(null)
@@ -461,10 +586,19 @@
   const conversationId = ref<string>(localStorage.getItem('conversationId') || crypto.randomUUID())
   let nextMessageId = 1
 
+  function todayDate () {
+    const now = new Date()
+    const offsetMs = now.getTimezoneOffset() * 60_000
+    return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10)
+  }
+
   const newDoc = reactive({
     source_id: '',
     title: '',
     source: '',
+    published_date: todayDate(),
+    audience: '',
+    topic: '',
     content: '',
   })
 
@@ -494,33 +628,86 @@
     return `Embedding：${embedding.dimension} 維 · [${embedding.preview.join(', ')}${suffix}]`
   }
 
+  function previewText (text: string, maxLength = 320) {
+    const normalized = String(text || '').replace(/\s+/g, ' ').trim()
+    if (!normalized) return '沒有內容摘要'
+    return normalized.length > maxLength ? `${normalized.slice(0, maxLength)}...` : normalized
+  }
+
   async function loadDocs () {
     setStatus('載入資料中')
     docsLoading.value = true
     try {
       const data = await api<{ documents: DocumentItem[] }>('/api/documents')
       docs.value = data.documents
-      setStatus(`共有 ${data.documents.length} 筆資料`)
+      setStatus(`共有 ${docGroups.value.length} 份文件、${data.documents.length} 個 chunks`)
     } finally {
       docsLoading.value = false
     }
   }
 
-  async function deleteDoc (uuid: string) {
-    if (deletingUuid.value) return
-    if (!confirm('確定要刪除這筆 vector DB 資料？')) return
-    deletingUuid.value = uuid
+  const docGroups = computed<DocumentGroup[]>(() => {
+    const groups = new Map<string, DocumentItem[]>()
+    for (const doc of docs.value) {
+      const key = doc.document_id || doc.uuid
+      groups.set(key, [...(groups.get(key) || []), doc])
+    }
+
+    return Array.from(groups.entries()).map(([documentId, chunks]) => {
+      const sortedChunks = [...chunks].sort((a, b) => Number(a.chunk_index || 1) - Number(b.chunk_index || 1))
+      const first = sortedChunks[0]
+      return {
+        document_id: documentId,
+        source_id: first.source_id,
+        title: first.title || '(未命名)',
+        source: first.source || '',
+        publisher: first.publisher || '',
+        published_date: first.published_date || '',
+        version: first.version || '',
+        audience: first.audience || '',
+        topic: first.topic || '',
+        credibility: first.credibility || '',
+        file_name: first.file_name || '',
+        file_object_key: first.file_object_key || '',
+        file_bucket: first.file_bucket || '',
+        created_at: first.created_at || '',
+        updated_at: first.updated_at || first.created_at || '',
+        chunk_count: Math.max(...sortedChunks.map(chunk => Number(chunk.chunk_count || sortedChunks.length || 1))),
+        chunks: sortedChunks,
+        content: sortedChunks.map(chunk => chunk.content || '').filter(Boolean).join('\n\n'),
+      }
+    })
+  })
+
+  const groupedDocSections = computed<DocumentSection[]>(() => {
+    const sections = new Map<string, DocumentGroup[]>()
+    for (const group of docGroups.value) {
+      const value = docGroupBy.value === 'topic'
+        ? group.topic
+        : docGroupBy.value === 'source'
+          ? group.source
+          : group.file_name
+      const label = value || (docGroupBy.value === 'file' ? '未上傳檔案' : '未分類')
+      sections.set(label, [...(sections.get(label) || []), group])
+    }
+    return Array.from(sections.entries()).map(([key, groups]) => ({ key, label: key, groups }))
+  })
+
+  async function deleteDoc (documentId: string) {
+    if (deletingDocumentId.value) return
+    if (!confirm('確定要刪除整份文件與所有 chunks？')) return
+    deletingDocumentId.value = documentId
     try {
       setStatus('刪除中')
-      await api(`/api/documents/${encodeURIComponent(uuid)}`, { method: 'DELETE' })
+      await api(`/api/documents/${encodeURIComponent(documentId)}`, { method: 'DELETE' })
       await loadDocs()
-      setStatus('已刪除')
+      setStatus('已刪除整份文件')
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       setStatus(message)
       alert(message)
     } finally {
-      deletingUuid.value = ''
+      deletingDocumentId.value = ''
     }
   }
 
@@ -583,6 +770,8 @@
     return found?.title || '新對話'
   })
 
+  const canInferMetadata = computed(() => Boolean(newDoc.content.trim() || selectedFiles.value.length > 0))
+
   function openDocsDialog () {
     loadDocs()
     docsDialogEl.value?.showModal()
@@ -593,6 +782,22 @@
   }
 
   function openDocDialog () {
+    editingDocumentId.value = ''
+    resetDocForm()
+    docDialogEl.value?.showModal()
+  }
+
+  function editDoc (group: DocumentGroup) {
+    editingDocumentId.value = group.document_id
+    newDoc.source_id = String(group.source_id || '')
+    newDoc.title = group.title === '(未命名)' ? '' : group.title
+    newDoc.source = group.source
+    newDoc.published_date = group.published_date || todayDate()
+    newDoc.audience = group.audience
+    newDoc.topic = group.topic
+    newDoc.content = group.content
+    selectedFiles.value = []
+    if (fileInputEl.value) fileInputEl.value.value = ''
     docDialogEl.value?.showModal()
   }
 
@@ -603,45 +808,89 @@
 
   function onFileChange (event: Event) {
     const input = event.target as HTMLInputElement
-    selectedFile.value = input.files?.[0] || null
+    selectedFiles.value = input.files ? Array.from(input.files) : []
   }
 
   function resetDocForm () {
+    editingDocumentId.value = ''
     newDoc.source_id = ''
     newDoc.title = ''
     newDoc.source = ''
+    newDoc.published_date = todayDate()
+    newDoc.audience = ''
+    newDoc.topic = ''
     newDoc.content = ''
-    selectedFile.value = null
+    selectedFiles.value = []
     if (fileInputEl.value) fileInputEl.value.value = ''
   }
 
-  async function addDocument () {
-    if (addingDoc.value) return
-    if (!newDoc.content && !selectedFile.value) {
-      alert('請輸入內容，或上傳 TXT / PDF 衛教檔案。')
-      return
-    }
-
+  function buildDocumentPayload () {
     const payload = new FormData()
     payload.append('source_id', newDoc.source_id || '')
     payload.append('title', newDoc.title.trim())
     payload.append('source', newDoc.source.trim())
+    payload.append('publisher', '')
+    payload.append('published_date', newDoc.published_date.trim())
+    payload.append('version', '')
+    payload.append('audience', newDoc.audience.trim())
+    payload.append('topic', newDoc.topic.trim())
+    payload.append('credibility', '')
     payload.append('content', newDoc.content.trim())
-    if (selectedFile.value) payload.append('file', selectedFile.value)
+    for (const file of selectedFiles.value) payload.append('file', file)
+    return payload
+  }
+
+  function applyMetadataSuggestions (metadata: MetadataSuggestions) {
+    if (metadata.title) newDoc.title = metadata.title
+    if (metadata.published_date) newDoc.published_date = metadata.published_date
+    if (metadata.audience) newDoc.audience = metadata.audience
+    if (metadata.topic) newDoc.topic = metadata.topic
+  }
+
+  async function inferMetadata () {
+    if (inferringMetadata.value || !canInferMetadata.value) return
+    inferringMetadata.value = true
+    try {
+      setStatus('從內容抽取資料欄位')
+      const data = await api<{ metadata: MetadataSuggestions }>('/api/documents/metadata-suggestions', {
+        method: 'POST',
+        body: buildDocumentPayload(),
+      })
+      applyMetadataSuggestions(data.metadata)
+      setStatus('已自動填入可判斷欄位')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      setStatus(message)
+      alert(message)
+    } finally {
+      inferringMetadata.value = false
+    }
+  }
+
+  async function addDocument () {
+    if (addingDoc.value) return
+    if (!newDoc.content && selectedFiles.value.length === 0) {
+      alert('請輸入內容，或上傳 TXT / PDF 衛教檔案。')
+      return
+    }
+
+    const payload = buildDocumentPayload()
 
     addingDoc.value = true
     try {
-      setStatus('新增資料並產生 embedding')
-      const data = await api<{ documents?: DocumentItem[] }>('/api/documents', { method: 'POST', body: payload })
+      const isEditing = Boolean(editingDocumentId.value)
+      setStatus(isEditing ? '更新資料並重新 embedding' : '新增資料並產生 embedding')
+      const path = isEditing ? `/api/documents/${encodeURIComponent(editingDocumentId.value)}` : '/api/documents'
+      const data = await api<{ documents?: DocumentItem[] }>(path, { method: isEditing ? 'PUT' : 'POST', body: payload })
       resetDocForm()
       if (data.documents) {
         docs.value = data.documents
-        setStatus(`共有 ${data.documents.length} 筆資料`)
+        setStatus(`共有 ${docGroups.value.length} 份文件、${data.documents.length} 個 chunks`)
       } else {
         await loadDocs()
       }
       docDialogEl.value?.close()
-      setStatus('已新增資料')
+      setStatus(isEditing ? '已更新並重新 embedding' : '已新增資料')
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       setStatus(message)
@@ -1142,7 +1391,7 @@
   }
 
   .docs-dialog {
-    width: min(860px, calc(100vw - 32px));
+    width: min(1040px, calc(100vw - 32px));
     max-height: min(88vh, 860px);
     flex-direction: column;
   }
@@ -1193,6 +1442,39 @@
     background: #fbfcfd;
   }
 
+  .doc-tools {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #d9dee5;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .doc-tools label {
+    width: min(260px, 100%);
+  }
+
+  .doc-count {
+    color: #51606d;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .doc-section {
+    display: grid;
+    gap: 10px;
+  }
+
+  .doc-section h3 {
+    margin: 6px 0 0;
+    color: #51606d;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
   .doc {
     border: 1px solid #d9dee5;
     border-radius: 8px;
@@ -1206,6 +1488,13 @@
     gap: 10px;
     align-items: flex-start;
     margin-bottom: 8px;
+  }
+
+  .doc-actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .doc-title {
@@ -1231,12 +1520,54 @@
     overflow-wrap: anywhere;
   }
 
+  .doc-preview {
+    margin: 8px 0 0;
+    color: #2f3a46;
+    font-size: 13px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .doc-details {
+    margin-top: 8px;
+    border-top: 1px solid #eef1f4;
+    padding-top: 8px;
+    color: #51606d;
+    font-size: 12px;
+  }
+
+  .doc-details summary {
+    width: fit-content;
+    cursor: pointer;
+    color: #0b5f59;
+    font-weight: 700;
+  }
+
+  .doc-details.nested {
+    border-top: 0;
+    padding-top: 4px;
+  }
+
+  .chunk-card {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #d9dee5;
+    border-radius: 6px;
+    background: #fbfcfd;
+  }
+
   .embedding {
     margin-top: 10px;
     border-top: 1px solid #d9dee5;
     padding-top: 8px;
     color: #687381;
     font-size: 12px;
+  }
+
+  .embedding.nested {
+    border-top: 0;
+    margin-top: 8px;
+    padding-top: 0;
   }
 
   .embedding summary {
@@ -1313,6 +1644,19 @@
     padding-top: 4px;
   }
 
+  .metadata-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 2px;
+  }
+
+  .metadata-actions .spinner {
+    border-color: rgba(15, 118, 110, 0.22);
+    border-top-color: #0f766e;
+  }
+
   label {
     display: grid;
     gap: 5px;
@@ -1321,7 +1665,7 @@
     font-weight: 700;
   }
 
-  input, textarea {
+  input, textarea, select {
     width: 100%;
     border: 1px solid #d9dee5;
     border-radius: 6px;
