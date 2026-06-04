@@ -35,6 +35,9 @@ export function useDocuments (setStatus: SetStatus, fileInputEl: Ref<HTMLInputEl
   const selectedFiles = ref<File[]>([])
   const editingDocumentId = ref('')
   const docGroupBy = ref<'topic' | 'source' | 'file'>('topic')
+  const docSearchQuery = ref('')
+  const docDateFrom = ref('')
+  const docDateTo = ref('')
 
   const newDoc = reactive({
     source_id: '',
@@ -97,6 +100,25 @@ export function useDocuments (setStatus: SetStatus, fileInputEl: Ref<HTMLInputEl
   })
 
   const canInferMetadata = computed(() => Boolean(newDoc.content.trim() || selectedFiles.value.length > 0))
+  const docFiltersActive = computed(() => Boolean(
+    docSearchQuery.value.trim() || docDateFrom.value || docDateTo.value,
+  ))
+
+  function documentsApiPath () {
+    const params = new URLSearchParams()
+    const query = docSearchQuery.value.trim()
+    if (query) {
+      params.set('q', query)
+    }
+    if (docDateFrom.value) {
+      params.set('date_from', docDateFrom.value)
+    }
+    if (docDateTo.value) {
+      params.set('date_to', docDateTo.value)
+    }
+    const queryString = params.toString()
+    return queryString ? `/api/documents?${queryString}` : '/api/documents'
+  }
 
   function embeddingSummary (embedding?: Embedding) {
     if (!embedding?.dimension) {
@@ -118,12 +140,24 @@ export function useDocuments (setStatus: SetStatus, fileInputEl: Ref<HTMLInputEl
     setStatus('載入資料中')
     docsLoading.value = true
     try {
-      const data = await api<{ documents: DocumentItem[] }>('/api/documents')
+      const data = await api<{ documents: DocumentItem[] }>(documentsApiPath())
       docs.value = data.documents
-      setStatus(`共有 ${docGroups.value.length} 份文件、${data.documents.length} 個 chunks`)
+      const prefix = docFiltersActive.value ? '篩選結果' : '共有'
+      setStatus(`${prefix} ${docGroups.value.length} 份文件、${data.documents.length} 個 chunks`)
     } finally {
       docsLoading.value = false
     }
+  }
+
+  async function applyDocFilters () {
+    await loadDocs()
+  }
+
+  async function clearDocFilters () {
+    docSearchQuery.value = ''
+    docDateFrom.value = ''
+    docDateTo.value = ''
+    await loadDocs()
   }
 
   async function deleteDoc (documentId: string) {
@@ -261,7 +295,7 @@ export function useDocuments (setStatus: SetStatus, fileInputEl: Ref<HTMLInputEl
       const path = isEditing ? `/api/documents/${encodeURIComponent(editingDocumentId.value)}` : '/api/documents'
       const data = await api<{ documents?: DocumentItem[] }>(path, { method: isEditing ? 'PUT' : 'POST', body: payload })
       resetDocForm()
-      if (data.documents) {
+      if (data.documents && !docFiltersActive.value) {
         docs.value = data.documents
         setStatus(`共有 ${docGroups.value.length} 份文件、${data.documents.length} 個 chunks`)
       } else {
@@ -283,8 +317,12 @@ export function useDocuments (setStatus: SetStatus, fileInputEl: Ref<HTMLInputEl
     addingDoc,
     canInferMetadata,
     deletingDocumentId,
+    docDateFrom,
+    docDateTo,
+    docFiltersActive,
     docGroupBy,
     docGroups,
+    docSearchQuery,
     docs,
     docsLoading,
     editingDocumentId,
@@ -292,6 +330,8 @@ export function useDocuments (setStatus: SetStatus, fileInputEl: Ref<HTMLInputEl
     inferringMetadata,
     newDoc,
     selectedFiles,
+    applyDocFilters,
+    clearDocFilters,
     deleteDoc,
     embeddingSummary,
     inferMetadata,

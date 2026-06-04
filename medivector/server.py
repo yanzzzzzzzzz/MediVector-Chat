@@ -61,8 +61,8 @@ async def exception_handler(_request: Request, exc: Exception) -> JSONResponse:
 
 
 @app.get("/api/documents", response_model=DocumentsResponse)
-def get_documents() -> dict[str, Any]:
-    return {"documents": list_documents()}
+def get_documents(q: str = "", date_from: str = "", date_to: str = "") -> dict[str, Any]:
+    return {"documents": list_documents(q=q, date_from=date_from, date_to=date_to)}
 
 
 @app.post("/api/documents/metadata-suggestions", response_model=MetadataSuggestionsResponse)

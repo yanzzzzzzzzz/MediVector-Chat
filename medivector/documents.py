@@ -156,19 +156,92 @@ def normalize_document(
     }
 
 
-def list_documents() -> list[dict[str, Any]]:
+def validate_filter_date(value: str, label: str) -> str:
+    cleaned = value.strip()
+    if not cleaned:
+        return ""
+    try:
+        date.fromisoformat(cleaned)
+    except ValueError as exc:
+        raise ValueError(f"{label}請使用 YYYY-MM-DD 格式。") from exc
+    return cleaned
+
+
+def normalized_document_filters(q: str = "", date_from: str = "", date_to: str = "") -> dict[str, str]:
+    filters = {
+        "q": str(q or "").strip(),
+        "date_from": validate_filter_date(str(date_from or ""), "起始日期"),
+        "date_to": validate_filter_date(str(date_to or ""), "結束日期"),
+    }
+    if filters["date_from"] and filters["date_to"] and filters["date_from"] > filters["date_to"]:
+        raise ValueError("起始日期不可晚於結束日期。")
+    return filters
+
+
+def document_filter_clause(filters: dict[str, str]) -> tuple[str, list[Any]]:
+    conditions = ["TRUE"]
+    params: list[Any] = []
+    if filters["q"]:
+        pattern = f"%{filters['q']}%"
+        searchable_columns = (
+            "title",
+            "source",
+            "publisher",
+            "audience",
+            "topic",
+            "credibility",
+            "content",
+            "file_name",
+        )
+        conditions.append("(" + " OR ".join(f"{column} ILIKE %s" for column in searchable_columns) + ")")
+        params.extend(pattern for _ in searchable_columns)
+
+    if filters["date_from"]:
+        conditions.append("published_date <> '' AND published_date >= %s")
+        params.append(filters["date_from"])
+    if filters["date_to"]:
+        conditions.append("published_date <> '' AND published_date <= %s")
+        params.append(filters["date_to"])
+
+    return " AND ".join(conditions), params
+
+
+def list_documents(q: str = "", date_from: str = "", date_to: str = "") -> list[dict[str, Any]]:
+    filters = normalized_document_filters(q, date_from, date_to)
+    filter_active = any(filters.values())
+    where_clause, filter_params = document_filter_clause(filters)
     with db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("""
-                SELECT id, document_id, source_id, title, source,
-                       publisher, published_date, version, audience, topic, credibility,
-                       content,
-                       file_name, file_object_key, file_bucket, file_content_type, file_size,
-                       chunk_index, chunk_count, embedding, created_at, updated_at
-                FROM articles
-                ORDER BY updated_at DESC, created_at DESC, document_id, chunk_index
-                LIMIT 500
-            """)
+            if filter_active:
+                cur.execute(f"""
+                    WITH matched_documents AS (
+                        SELECT document_id, MAX(updated_at) AS last_updated, MAX(created_at) AS last_created
+                        FROM articles
+                        WHERE {where_clause}
+                        GROUP BY document_id
+                        ORDER BY last_updated DESC, last_created DESC, document_id
+                        LIMIT 500
+                    )
+                    SELECT id, document_id, source_id, title, source,
+                           publisher, published_date, version, audience, topic, credibility,
+                           content,
+                           file_name, file_object_key, file_bucket, file_content_type, file_size,
+                           chunk_index, chunk_count, embedding, created_at, updated_at
+                    FROM articles
+                    WHERE document_id IN (SELECT document_id FROM matched_documents)
+                    ORDER BY updated_at DESC, created_at DESC, document_id, chunk_index
+                """, filter_params)
+            else:
+                cur.execute("""
+                    SELECT id, document_id, source_id, title, source,
+                           publisher, published_date, version, audience, topic, credibility,
+                           content,
+                           file_name, file_object_key, file_bucket, file_content_type, file_size,
+                           chunk_index, chunk_count, embedding, created_at, updated_at
+                    FROM articles
+                    ORDER BY updated_at DESC, created_at DESC, document_id, chunk_index
+                    LIMIT 500
+                """)
             rows = cur.fetchall()
     documents = []
     for row in rows:

@@ -96,14 +96,99 @@
       </div>
 
       <div class="docs-dialog-body">
+        <form class="doc-filter-form" @submit.prevent="applyDocFilters">
+          <label class="doc-search-field">搜尋
+            <input
+              v-model.trim="docSearchQuery"
+              placeholder="搜尋標題、來源、主題、內容或檔名"
+              type="search"
+            >
+          </label>
+
+          <label>起始日期
+            <span class="date-input-wrap">
+              <input ref="docDateFromInputEl" v-model="docDateFrom" type="date">
+
+              <button title="選擇起始日期" type="button" @click="openDatePicker(docDateFromInputEl)">
+                <svg
+                  fill="none"
+                  height="16"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="18"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="4"
+                  />
+
+                  <line x1="16" x2="16" y1="2" y2="6" />
+                  <line x1="8" x2="8" y1="2" y2="6" />
+                  <line x1="3" x2="21" y1="10" y2="10" />
+                </svg>
+              </button>
+            </span>
+          </label>
+
+          <label>結束日期
+            <span class="date-input-wrap">
+              <input ref="docDateToInputEl" v-model="docDateTo" type="date">
+
+              <button title="選擇結束日期" type="button" @click="openDatePicker(docDateToInputEl)">
+                <svg
+                  fill="none"
+                  height="16"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="18"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="4"
+                  />
+
+                  <line x1="16" x2="16" y1="2" y2="6" />
+                  <line x1="8" x2="8" y1="2" y2="6" />
+                  <line x1="3" x2="21" y1="10" y2="10" />
+                </svg>
+              </button>
+            </span>
+          </label>
+
+          <div class="doc-filter-actions">
+            <button class="primary" :disabled="docsLoading" type="submit">搜尋</button>
+            <button :disabled="docsLoading || !docFiltersActive" type="button" @click="clearDocFilters">清除</button>
+          </div>
+        </form>
+
         <div v-if="docsLoading" aria-live="polite" class="list-loading" role="status">
           <span aria-hidden="true" class="spinner inline" />
+
           <span>載入資料中</span>
         </div>
 
         <div v-else-if="docGroups.length === 0" class="doc">
-          <div class="doc-title">目前沒有衛教資料</div>
-          <div class="doc-meta">按「新增資料」建立第一筆向量資料。</div>
+          <div class="doc-title">{{ docFiltersActive ? '沒有符合條件的資料' : '目前沒有衛教資料' }}</div>
+
+          <div class="doc-meta">
+            {{ docFiltersActive ? '請調整搜尋關鍵字或日期區間。' : '按「新增資料」建立第一筆向量資料。' }}
+          </div>
         </div>
 
         <template v-else>
@@ -317,6 +402,8 @@
   const referenceDialogEl = ref<InstanceType<typeof ReferenceDialog> | null>(null)
   const deleteConvoDialogEl = ref<HTMLDialogElement | null>(null)
   const fileInputEl = ref<HTMLInputElement | null>(null)
+  const docDateFromInputEl = ref<HTMLInputElement | null>(null)
+  const docDateToInputEl = ref<HTMLInputElement | null>(null)
   const activeReference = ref<ReferenceItem | null>(null)
 
   function setStatus (text: string) {
@@ -348,8 +435,12 @@
     addingDoc,
     canInferMetadata,
     deletingDocumentId,
+    docDateFrom,
+    docDateTo,
+    docFiltersActive,
     docGroupBy,
     docGroups,
+    docSearchQuery,
     docs,
     docsLoading,
     editingDocumentId,
@@ -357,6 +448,8 @@
     inferringMetadata,
     newDoc,
     selectedFiles,
+    applyDocFilters,
+    clearDocFilters,
     deleteDoc,
     embeddingSummary,
     inferMetadata,
@@ -385,6 +478,14 @@
   function editDoc (group: DocumentGroup) {
     startEditingDocument(group)
     docDialogEl.value?.showModal()
+  }
+
+  function openDatePicker (input: HTMLInputElement | null) {
+    if (!input) return
+    input.focus()
+    if (typeof input.showPicker === 'function') {
+      input.showPicker()
+    }
   }
 
   function closeDocDialog () {
@@ -776,6 +877,64 @@
     background: #fbfcfd;
   }
 
+  .doc-filter-form {
+    grid-template-columns: minmax(260px, 1fr) minmax(180px, 190px) minmax(180px, 190px) max-content;
+    align-items: end;
+    column-gap: 12px;
+    padding: 12px;
+    border: 1px solid #d9dee5;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .doc-filter-form label {
+    min-width: 0;
+  }
+
+  .doc-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+    min-width: 136px;
+  }
+
+  .doc-filter-actions button {
+    min-width: 72px;
+  }
+
+  .date-input-wrap {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .date-input-wrap input {
+    border-radius: 6px 0 0 6px;
+    min-width: 0;
+  }
+
+  .date-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
+  .date-input-wrap button {
+    width: 40px;
+    height: auto;
+    min-height: 38px;
+    padding: 0;
+    border-left: 0;
+    border-radius: 0 6px 6px 0;
+    color: #51606d;
+    background: #fbfcfd;
+    flex: 0 0 auto;
+  }
+
+  .date-input-wrap button:hover {
+    color: #0b5f59;
+    background: #eef7f5;
+  }
+
   dialog {
     width: min(620px, calc(100vw - 32px));
     border: 1px solid #d9dee5;
@@ -978,6 +1137,9 @@
 
     .panel { min-height: 560px; }
     .two { grid-template-columns: 1fr; }
+    .doc-filter-form { grid-template-columns: 1fr; }
+    .doc-filter-actions { justify-content: stretch; }
+    .doc-filter-actions button { flex: 1; }
     .ask-form { grid-template-columns: 1fr; }
     .ask-form button { grid-column: 1; width: 100%; }
     .status { text-align: left; min-width: 0; }

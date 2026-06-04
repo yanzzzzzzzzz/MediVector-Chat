@@ -5,6 +5,7 @@
 ## 功能
 
 - 查看目前 PostgreSQL / pgvector 裡的中文衛教資料
+- 衛教資料庫可用關鍵字搜尋，並依發布日期區間篩選
 - 新增資料時自動呼叫 OpenAI embedding，並寫入 vector DB
 - 新增資料可直接輸入文字，或上傳 TXT / PDF 衛教檔案
 - 上傳的 TXT / PDF 原始檔會保存到 MinIO

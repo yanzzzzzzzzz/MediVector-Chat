@@ -4,7 +4,7 @@ from datetime import date
 from medivector.chat import RESPONSE_SECTIONS, normalized_template_answer
 from medivector.config import MIN_REFERENCE_COUNT
 from medivector.conversations import message_metadata
-from medivector.documents import metadata_from_payload
+from medivector.documents import document_filter_clause, metadata_from_payload, normalized_document_filters
 from medivector.models import Reference, RiskAssessment
 from medivector.qa import conversation_messages_for_model
 from medivector.retrieval import assess_evidence, normalize_retrieval_terms, retrieval_query_text
@@ -77,6 +77,22 @@ class PureLogicTests(unittest.TestCase):
         self.assertEqual(metadata["topic"], "睡眠")
         self.assertEqual(metadata["published_date"], date.today().isoformat())
         self.assertEqual(metadata["publisher"], "")
+
+    def test_document_filters_validate_dates_and_keyword_clause(self) -> None:
+        filters = normalized_document_filters(" 睡眠 ", "2026-01-01", "2026-06-04")
+        clause, params = document_filter_clause(filters)
+
+        self.assertEqual(filters["q"], "睡眠")
+        self.assertIn("ILIKE", clause)
+        self.assertIn("published_date >= %s", clause)
+        self.assertEqual(params[0], "%睡眠%")
+        self.assertEqual(params[-2:], ["2026-01-01", "2026-06-04"])
+
+        with self.assertRaises(ValueError):
+            normalized_document_filters("", "2026/01/01", "")
+
+        with self.assertRaises(ValueError):
+            normalized_document_filters("", "2026-06-04", "2026-01-01")
 
     def test_assess_evidence_handles_empty_and_sufficient_reference_count(self) -> None:
         empty = assess_evidence([])
