@@ -302,205 +302,71 @@
 </template>
 
 <script setup lang="ts">
-  import type { AskResponse, ChatMessage, ConversationItem, DocumentGroup, DocumentItem, DocumentSection, Embedding, EvidenceAssessment, MetadataSuggestions, ReferenceItem, RiskAssessment } from '@/types'
-  import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+  import type { DocumentGroup, ReferenceItem } from '@/types'
+  import { nextTick, onMounted, ref } from 'vue'
   import ConversationSidebar from '@/components/ConversationSidebar.vue'
   import MessageBubble from '@/components/MessageBubble.vue'
   import ReferenceDialog from '@/components/ReferenceDialog.vue'
-  import { api } from '@/composables/useApi'
+  import { useChat } from '@/composables/useChat'
+  import { useDocuments } from '@/composables/useDocuments'
 
   const status = ref('準備中')
-  const docs = ref<DocumentItem[]>([])
-  const docsLoading = ref(false)
-  const deletingDocumentId = ref('')
-  const messages = ref<ChatMessage[]>([])
-  const question = ref('')
-  const ragEnabled = ref(true)
-  const addingDoc = ref(false)
-  const inferringMetadata = ref(false)
-  const selectedFiles = ref<File[]>([])
-  const editingDocumentId = ref('')
-  const docGroupBy = ref<'topic' | 'source' | 'file'>('topic')
-  const activeReference = ref<ReferenceItem | null>(null)
-  const conversations = ref<ConversationItem[]>([])
-  const deletingConvoId = ref<string | null>(null)
   const chatLogEl = ref<HTMLDivElement | null>(null)
   const docDialogEl = ref<HTMLDialogElement | null>(null)
   const docsDialogEl = ref<HTMLDialogElement | null>(null)
   const referenceDialogEl = ref<InstanceType<typeof ReferenceDialog> | null>(null)
   const deleteConvoDialogEl = ref<HTMLDialogElement | null>(null)
-  const pendingDeleteId = ref<string | null>(null)
-  const pendingDeleteTitle = ref('')
   const fileInputEl = ref<HTMLInputElement | null>(null)
-  const conversationId = ref<string>(localStorage.getItem('conversationId') || crypto.randomUUID())
-  let nextMessageId = 1
-
-  function todayDate () {
-    const now = new Date()
-    const offsetMs = now.getTimezoneOffset() * 60_000
-    return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10)
-  }
-
-  const newDoc = reactive({
-    source_id: '',
-    title: '',
-    source: '',
-    published_date: todayDate(),
-    audience: '',
-    topic: '',
-    content: '',
-  })
-
-  localStorage.setItem('conversationId', conversationId.value)
+  const activeReference = ref<ReferenceItem | null>(null)
 
   function setStatus (text: string) {
     status.value = text
   }
 
-  function embeddingSummary (embedding?: Embedding) {
-    if (!embedding?.dimension) return 'Embedding：無資料'
-    const suffix = embedding.dimension > embedding.preview.length ? ', ...' : ''
-    return `Embedding：${embedding.dimension} 維 · [${embedding.preview.join(', ')}${suffix}]`
-  }
+  const {
+    conversationId,
+    conversations,
+    currentConvoTitle,
+    deletingConvoId,
+    messages,
+    pendingDeleteTitle,
+    question,
+    ragEnabled,
+    askQuestion,
+    cancelDeleteConversation: cancelPendingDeleteConversation,
+    clearChat,
+    confirmDeleteConversation: confirmPendingDeleteConversation,
+    createNewConversation,
+    handleQuestionKeydown,
+    loadConversationHistory,
+    loadConversations,
+    requestDeleteConversation,
+    switchConversation,
+  } = useChat(setStatus, chatLogEl)
 
-  function previewText (text: string, maxLength = 320) {
-    const normalized = String(text || '').replace(/\s+/g, ' ').trim()
-    if (!normalized) return '沒有內容摘要'
-    return normalized.length > maxLength ? `${normalized.slice(0, maxLength)}...` : normalized
-  }
-
-  async function loadDocs () {
-    setStatus('載入資料中')
-    docsLoading.value = true
-    try {
-      const data = await api<{ documents: DocumentItem[] }>('/api/documents')
-      docs.value = data.documents
-      setStatus(`共有 ${docGroups.value.length} 份文件、${data.documents.length} 個 chunks`)
-    } finally {
-      docsLoading.value = false
-    }
-  }
-
-  function chunkIndexOf (doc: DocumentItem) {
-    return Number(doc.chunk_index || 1)
-  }
-
-  function insertChunkByIndex (sortedChunks: DocumentItem[], chunk: DocumentItem) {
-    const insertAt = sortedChunks.findIndex(item => chunkIndexOf(chunk) < chunkIndexOf(item))
-    if (insertAt === -1) return [...sortedChunks, chunk]
-    return [
-      ...sortedChunks.slice(0, insertAt),
-      chunk,
-      ...sortedChunks.slice(insertAt),
-    ]
-  }
-
-  const docGroups = computed<DocumentGroup[]>(() => {
-    const groups = new Map<string, DocumentItem[]>()
-    for (const doc of docs.value) {
-      const key = doc.document_id || doc.uuid
-      groups.set(key, [...(groups.get(key) || []), doc])
-    }
-
-    return Array.from(groups.entries()).map(([documentId, chunks]) => {
-      const sortedChunks = chunks.reduce<DocumentItem[]>(
-        (sorted, chunk) => insertChunkByIndex(sorted, chunk),
-        [],
-      )
-      const first = sortedChunks[0]
-      return {
-        document_id: documentId,
-        source_id: first.source_id,
-        title: first.title || '(未命名)',
-        source: first.source || '',
-        publisher: first.publisher || '',
-        published_date: first.published_date || '',
-        version: first.version || '',
-        audience: first.audience || '',
-        topic: first.topic || '',
-        credibility: first.credibility || '',
-        file_name: first.file_name || '',
-        file_object_key: first.file_object_key || '',
-        file_bucket: first.file_bucket || '',
-        created_at: first.created_at || '',
-        updated_at: first.updated_at || first.created_at || '',
-        chunk_count: Math.max(...sortedChunks.map(chunk => Number(chunk.chunk_count || sortedChunks.length || 1))),
-        chunks: sortedChunks,
-        content: sortedChunks.map(chunk => chunk.content || '').filter(Boolean).join('\n\n'),
-      }
-    })
-  })
-
-  const groupedDocSections = computed<DocumentSection[]>(() => {
-    const sections = new Map<string, DocumentGroup[]>()
-    for (const group of docGroups.value) {
-      const value = docGroupBy.value === 'topic'
-        ? group.topic
-        : (docGroupBy.value === 'source'
-          ? group.source
-          : group.file_name)
-      const label = value || (docGroupBy.value === 'file' ? '未上傳檔案' : '未分類')
-      sections.set(label, [...(sections.get(label) || []), group])
-    }
-    return Array.from(sections.entries()).map(([key, groups]) => ({ key, label: key, groups }))
-  })
-
-  async function deleteDoc (documentId: string) {
-    if (deletingDocumentId.value) return
-    if (!confirm('確定要刪除整份文件與所有 chunks？')) return
-    deletingDocumentId.value = documentId
-    try {
-      setStatus('刪除中')
-      await api(`/api/documents/${encodeURIComponent(documentId)}`, { method: 'DELETE' })
-      await loadDocs()
-      setStatus('已刪除整份文件')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      setStatus(message)
-      alert(message)
-    } finally {
-      deletingDocumentId.value = ''
-    }
-  }
-
-  function addMessage (
-    role: 'user' | 'assistant',
-    text: string,
-    references: ReferenceItem[] = [],
-    thinking = false,
-    evidenceAssessment: EvidenceAssessment | null = null,
-    retrievalTerms: string[] = [],
-    riskAssessment: RiskAssessment | null = null,
-  ) {
-    const message: ChatMessage = {
-      id: nextMessageId++,
-      role,
-      text,
-      references,
-      evidenceAssessment,
-      retrievalTerms,
-      thinking,
-      riskAssessment,
-    }
-    messages.value.push(message)
-    scrollChat()
-    return message
-  }
-
-  function scrollChat () {
-    nextTick(() => {
-      if (chatLogEl.value) {
-        chatLogEl.value.scrollTop = chatLogEl.value.scrollHeight
-      }
-    })
-  }
-
-  const currentConvoTitle = computed(() => {
-    const found = conversations.value.find(c => c.id === conversationId.value)
-    return found?.title || '新對話'
-  })
-
-  const canInferMetadata = computed(() => Boolean(newDoc.content.trim() || selectedFiles.value.length > 0))
+  const {
+    addingDoc,
+    canInferMetadata,
+    deletingDocumentId,
+    docGroupBy,
+    docGroups,
+    docs,
+    docsLoading,
+    editingDocumentId,
+    groupedDocSections,
+    inferringMetadata,
+    newDoc,
+    selectedFiles,
+    deleteDoc,
+    embeddingSummary,
+    inferMetadata,
+    loadDocs,
+    onFileChange,
+    previewText,
+    saveDocument,
+    startEditingDocument,
+    startNewDocument,
+  } = useDocuments(setStatus, fileInputEl)
 
   function openDocsDialog () {
     loadDocs()
@@ -512,22 +378,12 @@
   }
 
   function openDocDialog () {
-    editingDocumentId.value = ''
-    resetDocForm()
+    startNewDocument()
     docDialogEl.value?.showModal()
   }
 
   function editDoc (group: DocumentGroup) {
-    editingDocumentId.value = group.document_id
-    newDoc.source_id = String(group.source_id || '')
-    newDoc.title = group.title === '(未命名)' ? '' : group.title
-    newDoc.source = group.source
-    newDoc.published_date = group.published_date || todayDate()
-    newDoc.audience = group.audience
-    newDoc.topic = group.topic
-    newDoc.content = group.content
-    selectedFiles.value = []
-    if (fileInputEl.value) fileInputEl.value.value = ''
+    startEditingDocument(group)
     docDialogEl.value?.showModal()
   }
 
@@ -536,98 +392,9 @@
     docDialogEl.value?.close()
   }
 
-  function onFileChange (event: Event) {
-    const input = event.target as HTMLInputElement
-    selectedFiles.value = input.files ? Array.from(input.files) : []
-  }
-
-  function resetDocForm () {
-    editingDocumentId.value = ''
-    newDoc.source_id = ''
-    newDoc.title = ''
-    newDoc.source = ''
-    newDoc.published_date = todayDate()
-    newDoc.audience = ''
-    newDoc.topic = ''
-    newDoc.content = ''
-    selectedFiles.value = []
-    if (fileInputEl.value) fileInputEl.value.value = ''
-  }
-
-  function buildDocumentPayload () {
-    const payload = new FormData()
-    payload.append('source_id', newDoc.source_id || '')
-    payload.append('title', newDoc.title.trim())
-    payload.append('source', newDoc.source.trim())
-    payload.append('publisher', '')
-    payload.append('published_date', newDoc.published_date.trim())
-    payload.append('version', '')
-    payload.append('audience', newDoc.audience.trim())
-    payload.append('topic', newDoc.topic.trim())
-    payload.append('credibility', '')
-    payload.append('content', newDoc.content.trim())
-    for (const file of selectedFiles.value) payload.append('file', file)
-    return payload
-  }
-
-  function applyMetadataSuggestions (metadata: MetadataSuggestions) {
-    if (metadata.title) newDoc.title = metadata.title
-    if (metadata.published_date) newDoc.published_date = metadata.published_date
-    if (metadata.audience) newDoc.audience = metadata.audience
-    if (metadata.topic) newDoc.topic = metadata.topic
-  }
-
-  async function inferMetadata () {
-    if (inferringMetadata.value || !canInferMetadata.value) return
-    inferringMetadata.value = true
-    try {
-      setStatus('從內容抽取資料欄位')
-      const data = await api<{ metadata: MetadataSuggestions }>('/api/documents/metadata-suggestions', {
-        method: 'POST',
-        body: buildDocumentPayload(),
-      })
-      applyMetadataSuggestions(data.metadata)
-      setStatus('已自動填入可判斷欄位')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      setStatus(message)
-      alert(message)
-    } finally {
-      inferringMetadata.value = false
-    }
-  }
-
   async function addDocument () {
-    if (addingDoc.value) return
-    if (!newDoc.content && selectedFiles.value.length === 0) {
-      alert('請輸入內容，或上傳 TXT / PDF 衛教檔案。')
-      return
-    }
-
-    const payload = buildDocumentPayload()
-
-    addingDoc.value = true
-    try {
-      const isEditing = Boolean(editingDocumentId.value)
-      setStatus(isEditing ? '更新資料並重新 embedding' : '新增資料並產生 embedding')
-      const path = isEditing ? `/api/documents/${encodeURIComponent(editingDocumentId.value)}` : '/api/documents'
-      const data = await api<{ documents?: DocumentItem[] }>(path, { method: isEditing ? 'PUT' : 'POST', body: payload })
-      resetDocForm()
-      if (data.documents) {
-        docs.value = data.documents
-        setStatus(`共有 ${docGroups.value.length} 份文件、${data.documents.length} 個 chunks`)
-      } else {
-        await loadDocs()
-      }
-      docDialogEl.value?.close()
-      setStatus(isEditing ? '已更新並重新 embedding' : '已新增資料')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      setStatus(message)
-      alert(message)
-    } finally {
-      addingDoc.value = false
-    }
+    const saved = await saveDocument()
+    if (saved) docDialogEl.value?.close()
   }
 
   function openReferenceDialog (refItem: ReferenceItem) {
@@ -639,149 +406,19 @@
     referenceDialogEl.value?.close()
   }
 
-  async function askQuestion () {
-    const trimmedQuestion = question.value.trim()
-    if (!trimmedQuestion) return
-
-    const useRag = ragEnabled.value
-    addMessage('user', `${trimmedQuestion}\n\n模式：${useRag ? 'RAG 開啟' : 'RAG 關閉'}`)
-    const thinkingMessage = addMessage('assistant', '', [], true)
-    question.value = ''
-    setStatus(useRag ? '搜尋參考並詢問 GPT' : '直接詢問 GPT')
-
-    try {
-      const data = await api<AskResponse>('/api/ask', {
-        method: 'POST',
-        body: JSON.stringify({
-          conversation_id: conversationId.value,
-          question: trimmedQuestion,
-          rag_enabled: useRag,
-        }),
-      })
-      messages.value = messages.value.filter(message => message.id !== thinkingMessage.id)
-      addMessage(
-        'assistant',
-        data.answer,
-        data.references || [],
-        false,
-        data.evidence_assessment || null,
-        data.retrieval_terms || [],
-        data.risk_assessment || null,
-      )
-      if (data.risk_assessment?.diverted) {
-        setStatus(`急症分流：${data.risk_assessment.reason}`)
-      } else if (data.rag_enabled) {
-        const riskLabel = data.risk_assessment ? `風險=${data.risk_assessment.label}` : '風險=一般'
-        const referenceLabel = data.references.length > 0 ? `使用 ${data.references.length} 筆參考` : '未使用參考索引'
-        const evidenceLabel = data.evidence_assessment?.sufficient ? '證據充足' : '證據不足'
-        const retrievalTerms = data.retrieval_terms || []
-        const retrievalLabel = retrievalTerms.length > 0 ? `檢索詞=${retrievalTerms.length} 組` : '檢索詞=無'
-        setStatus(`${riskLabel} · ${referenceLabel} · ${evidenceLabel} · ${retrievalLabel}`)
-      } else {
-        setStatus('RAG 關閉，未搜尋向量資料庫')
-      }
-      loadConversations()
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      thinkingMessage.thinking = false
-      thinkingMessage.text = `發生錯誤：${message}`
-      setStatus(message)
-    }
-  }
-
-  function handleQuestionKeydown (event: KeyboardEvent) {
-    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return
-    event.preventDefault()
-    askQuestion()
-  }
-
-  async function loadConversationHistory () {
-    try {
-      const data = await api<{ messages: { role: string, content: string }[] }>(
-        `/api/conversations/${encodeURIComponent(conversationId.value)}`,
-      )
-      for (const msg of data.messages) {
-        if (msg.role === 'user' || msg.role === 'assistant') {
-          addMessage(msg.role as 'user' | 'assistant', msg.content)
-        }
-      }
-      if (data.messages.length > 0) {
-        setStatus(`已還原 ${data.messages.length} 則對話記錄`)
-      }
-    } catch {
-      // 歷史載入失敗不中斷，靜默忽略
-    }
-  }
-
-  async function loadConversations () {
-    try {
-      const data = await api<{ conversations: ConversationItem[] }>('/api/conversations')
-      conversations.value = data.conversations
-    } catch {
-      // 對話列表載入失敗，靜默忽略
-    }
-  }
-
-  async function createNewConversation () {
-    const newId = crypto.randomUUID()
-    conversationId.value = newId
-    localStorage.setItem('conversationId', newId)
-    messages.value = []
-    setStatus('新對話已建立')
-  }
-
-  async function switchConversation (id: string) {
-    if (id === conversationId.value) return
-    conversationId.value = id
-    localStorage.setItem('conversationId', id)
-    messages.value = []
-    await loadConversationHistory()
-  }
-
   async function deleteConversation (id: string) {
-    const convo = conversations.value.find(c => c.id === id)
-    pendingDeleteId.value = id
-    pendingDeleteTitle.value = convo?.title || '此對話'
+    requestDeleteConversation(id)
     deleteConvoDialogEl.value?.showModal()
   }
 
   function cancelDeleteConversation () {
     deleteConvoDialogEl.value?.close()
-    pendingDeleteId.value = null
+    cancelPendingDeleteConversation()
   }
 
   async function confirmDeleteConversation () {
-    const id = pendingDeleteId.value
-    if (!id) return
-    deletingConvoId.value = id
-    try {
-      await api(`/api/conversations/${encodeURIComponent(id)}`, { method: 'DELETE' })
-      deleteConvoDialogEl.value?.close()
-      pendingDeleteId.value = null
-      if (id === conversationId.value) {
-        const newId = crypto.randomUUID()
-        conversationId.value = newId
-        localStorage.setItem('conversationId', newId)
-        messages.value = []
-        setStatus('對話已刪除，已開新對話')
-      }
-      await loadConversations()
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      setStatus(message)
-    } finally {
-      deletingConvoId.value = null
-    }
-  }
-
-  async function clearChat () {
-    await api(`/api/conversations/${encodeURIComponent(conversationId.value)}`, { method: 'DELETE' })
-    const newId = crypto.randomUUID()
-    conversationId.value = newId
-    localStorage.setItem('conversationId', newId)
-    messages.value = []
-    setStatus('已清除對話記憶')
-    loadConversations()
+    const deleted = await confirmPendingDeleteConversation()
+    if (deleted) deleteConvoDialogEl.value?.close()
   }
 
   onMounted(() => {

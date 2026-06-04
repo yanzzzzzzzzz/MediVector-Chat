@@ -23,5 +23,5 @@ COPY medivector ./medivector
 COPY --from=frontend-build /frontend/dist ./frontend/medivector-chat-app/dist
 
 EXPOSE 8000
-CMD ["python", "app.py"]
+CMD ["python", "-m", "uvicorn", "medivector.server:app", "--host", "0.0.0.0", "--port", "8000"]
 

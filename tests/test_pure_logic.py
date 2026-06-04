@@ -7,6 +7,8 @@ from medivector.documents import metadata_from_payload
 from medivector.models import Reference, RiskAssessment
 from medivector.retrieval import assess_evidence, normalize_retrieval_terms, retrieval_query_text
 from medivector.risk import level_to_action, level_to_label, parse_risk_level
+from medivector.schemas import AskRequest
+from medivector.server import app
 from medivector.text_processing import split_text_for_embedding
 
 
@@ -83,6 +85,13 @@ class PureLogicTests(unittest.TestCase):
         enough = assess_evidence(references)
         self.assertTrue(enough.sufficient)
         self.assertEqual(enough.reference_count, MIN_REFERENCE_COUNT)
+
+    def test_fastapi_app_and_ask_schema_are_available(self) -> None:
+        request = AskRequest(question="頭痛怎麼辦")
+
+        self.assertEqual(app.title, "MediVector API")
+        self.assertEqual(request.conversation_id, "default")
+        self.assertTrue(request.rag_enabled)
 
 
 if __name__ == "__main__":

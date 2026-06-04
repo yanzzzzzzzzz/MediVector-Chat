@@ -102,6 +102,7 @@ export interface AskResponse {
   references: ReferenceItem[]
   evidence_assessment?: EvidenceAssessment
   retrieval_terms?: string[]
+  memory_messages: number
   risk_assessment?: RiskAssessment
 }
 
