@@ -1,4 +1,4 @@
-import type { AskResponse, ChatMessage, ConversationItem, EvidenceAssessment, ReferenceItem, RiskAssessment } from '@/types'
+import type { AskResponse, ChatMessage, ConversationItem, ConversationMessageItem, EvidenceAssessment, ReferenceItem, RiskAssessment } from '@/types'
 import { computed, nextTick, ref, type Ref } from 'vue'
 import { api } from '@/composables/useApi'
 
@@ -123,12 +123,20 @@ export function useChat (setStatus: SetStatus, chatLogEl: Ref<HTMLDivElement | n
 
   async function loadConversationHistory () {
     try {
-      const data = await api<{ messages: { role: string, content: string }[] }>(
+      const data = await api<{ messages: ConversationMessageItem[] }>(
         `/api/conversations/${encodeURIComponent(conversationId.value)}`,
       )
       for (const msg of data.messages) {
         if (msg.role === 'user' || msg.role === 'assistant') {
-          addMessage(msg.role as 'user' | 'assistant', msg.content)
+          addMessage(
+            msg.role,
+            msg.content,
+            msg.references || [],
+            false,
+            msg.evidence_assessment || null,
+            msg.retrieval_terms || [],
+            msg.risk_assessment || null,
+          )
         }
       }
       if (data.messages.length > 0) {

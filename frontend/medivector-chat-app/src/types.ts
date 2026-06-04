@@ -127,3 +127,12 @@ export interface ConversationItem {
   title: string
   created_at: string
 }
+
+export interface ConversationMessageItem {
+  role: string
+  content: string
+  references?: ReferenceItem[]
+  evidence_assessment?: EvidenceAssessment | null
+  retrieval_terms?: string[]
+  risk_assessment?: RiskAssessment | null
+}

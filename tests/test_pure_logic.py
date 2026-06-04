@@ -3,8 +3,10 @@ from datetime import date
 
 from medivector.chat import RESPONSE_SECTIONS, normalized_template_answer
 from medivector.config import MIN_REFERENCE_COUNT
+from medivector.conversations import message_metadata
 from medivector.documents import metadata_from_payload
 from medivector.models import Reference, RiskAssessment
+from medivector.qa import conversation_messages_for_model
 from medivector.retrieval import assess_evidence, normalize_retrieval_terms, retrieval_query_text
 from medivector.risk import level_to_action, level_to_label, parse_risk_level
 from medivector.schemas import AskRequest
@@ -92,6 +94,30 @@ class PureLogicTests(unittest.TestCase):
         self.assertEqual(app.title, "MediVector API")
         self.assertEqual(request.conversation_id, "default")
         self.assertTrue(request.rag_enabled)
+
+    def test_message_metadata_keeps_reference_payload_for_history_restore(self) -> None:
+        metadata = message_metadata({
+            "role": "assistant",
+            "content": "回答[1]",
+            "references": [{"index": 1, "title": "ref"}],
+            "retrieval_terms": ["頭痛 headache"],
+            "ignored": "不要存",
+        })
+
+        self.assertEqual(metadata["references"], [{"index": 1, "title": "ref"}])
+        self.assertEqual(metadata["retrieval_terms"], ["頭痛 headache"])
+        self.assertNotIn("ignored", metadata)
+
+    def test_conversation_messages_for_model_strips_history_metadata(self) -> None:
+        messages = conversation_messages_for_model([
+            {
+                "role": "assistant",
+                "content": "回答[1]",
+                "references": [{"index": 1}],
+            },
+        ])
+
+        self.assertEqual(messages, [{"role": "assistant", "content": "回答[1]"}])
 
 
 if __name__ == "__main__":

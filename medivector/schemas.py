@@ -125,6 +125,10 @@ class ConversationsResponse(BaseModel):
 class MessageItemSchema(BaseModel):
     role: str
     content: str
+    references: list[ReferenceItemSchema] = Field(default_factory=list)
+    evidence_assessment: EvidenceAssessmentSchema | None = None
+    retrieval_terms: list[str] = Field(default_factory=list)
+    risk_assessment: RiskAssessmentSchema | None = None
 
 
 class ConversationMessagesResponse(BaseModel):

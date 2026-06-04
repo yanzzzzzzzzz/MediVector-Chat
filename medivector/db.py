@@ -114,9 +114,11 @@ def init_db() -> None:
                     conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
                     role TEXT NOT NULL,
                     content TEXT NOT NULL,
+                    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            cur.execute("ALTER TABLE messages ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS messages_conv_idx
                 ON messages (conversation_id, created_at)

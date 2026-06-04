@@ -1,4 +1,5 @@
 import psycopg
+from psycopg.types.json import Jsonb
 
 from .config import MEMORY_MESSAGES
 from .db import db_connection
@@ -38,29 +39,41 @@ def ensure_conversation(conn: psycopg.Connection, conversation_id: str) -> None:
         )
 
 
-def load_conversation_history(conversation_id: str) -> list[dict[str, str]]:
+def load_conversation_history(conversation_id: str) -> list[dict]:
     with db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT role, content FROM messages
+                SELECT role, content, metadata FROM messages
                 WHERE conversation_id = %s
                 ORDER BY created_at
                 """,
                 (conversation_id,),
             )
             rows = cur.fetchall()
-    return [{"role": row[0], "content": row[1]} for row in rows]
+    return [
+        {
+            "role": row[0],
+            "content": row[1],
+            **(row[2] if isinstance(row[2], dict) else {}),
+        }
+        for row in rows
+    ]
 
 
-def save_messages(conversation_id: str, new_messages: list[dict[str, str]]) -> None:
+def save_messages(conversation_id: str, new_messages: list[dict]) -> None:
     with db_connection() as conn:
         ensure_conversation(conn, conversation_id)
         with conn.cursor() as cur:
             for msg in new_messages:
                 cur.execute(
-                    "INSERT INTO messages (conversation_id, role, content) VALUES (%s, %s, %s)",
-                    (conversation_id, msg["role"], msg["content"]),
+                    "INSERT INTO messages (conversation_id, role, content, metadata) VALUES (%s, %s, %s, %s)",
+                    (
+                        conversation_id,
+                        msg["role"],
+                        msg["content"],
+                        Jsonb(message_metadata(msg)),
+                    ),
                 )
             cur.execute(
                 """
@@ -81,3 +94,16 @@ def delete_conversation(conversation_id: str) -> None:
     with db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM conversations WHERE id = %s", (conversation_id,))
+
+
+def message_metadata(message: dict) -> dict:
+    return {
+        key: message[key]
+        for key in (
+            "references",
+            "evidence_assessment",
+            "retrieval_terms",
+            "risk_assessment",
+        )
+        if key in message
+    }
