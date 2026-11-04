@@ -1,0 +1,85 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Python ${{ matrix.python }} / PostgreSQL integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: medivector_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d medivector_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PG_HOST: 127.0.0.1
+      PG_PORT: '5432'
+      PG_USER: postgres
+      PG_PASSWORD: test-only-password
+      PG_DATABASE: medivector_test
+      RUN_DB_TESTS: '1'
+      API_USERS: '{}'
+      OPENAI_API_KEY: ''
+      TIKTOKEN_CACHE_DIR: ${{ runner.temp }}/tiktoken-cache
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            evaluation/requirements.txt
+      - name: Install test dependencies
+        run: python -m pip install -r evaluation/requirements.txt
+      - name: Prepare tokenizer data (tests make no OpenAI API calls)
+        run: python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
+      - name: Unit and real PostgreSQL integration tests
+        run: python -m unittest discover -s tests -v
+
+  frontend:
+    name: Frontend tests, lint and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend/medivector-chat-app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: '10'
+          run_install: false
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm test
+      - run: pnpm run lint
+      - run: pnpm run build

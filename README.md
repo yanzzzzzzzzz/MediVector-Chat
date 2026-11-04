@@ -373,3 +373,81 @@ DELETE /api/conversations/{conversation_id}
 - 使用 Docker Compose 時，PostgreSQL 與 MinIO 資料會保存在 Docker volume。
 - `test.py` 是舊版 Weaviate CLI 測試稿，和目前 Docker Compose 的 PostgreSQL / pgvector 主流程不同。
 - 問答引用時會對內容相同的參考資料做去重，避免重複列出相同來源。
+
+## 純 Retrieval 評估 API
+
+`POST /api/retrieval/search` 不產生答案、不評估急症、不讀寫對話。
+OpenAPI schema 位於 `/docs`。參數 `retrieval_terms` 可重播已保存的詞組（最多 8 組），
+避免比較不同策略時重複改寫；若同時啟用 query_expansion，則使用新的改寫輸出。範例：
+
+```sh
+curl http://127.0.0.1:8000/api/retrieval/search \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"睡眠不足怎麼辦","top_k":10,"candidate_limit":20,"mode":"raw","query_expansion":false}'
+```
+
+- `mode=raw`：依向量距離回傳前 K 筆，不套用 distance 門檻或去重。
+- `mode=filtered`（預設）：依 `max_distance`、`distance_margin`、`dedup` 過濾再取前 K 筆；預設沿用聊天設定。
+- `candidate_limit` 實際使用值至少為 `top_k`；兩者上限 1000。
+- `query_expansion=false`（預設）只呼叫 embedding；啟用時另呼叫查詢改寫模型，沒有聊天歷史。
+- 回應包含 `document_id`、`chunk_id`（articles.id）、`rank`、`raw_rank`、distance、content、實際 query/terms、耗時與設定。Filtered rank 會重新編號，raw_rank 保留候選排名。
+- `elapsed_ms` 包含查詢改寫、embedding、資料庫查詢與過濾，不包含 HTTP 傳輸。
+
+未設定 `RETRIEVAL_API_TOKEN` 時只接受 loopback peer；設定後所有請求都需
+`Authorization: Bearer <token>`。透過 Docker port mapping 或反向代理呼叫時應設定 token。
+`python app.py` 停用 forwarded header 信任；自行啟動 Uvicorn 時也應使用
+`--no-proxy-headers`，避免將代理提供的位址當作授權依據。
+此限制只保護純檢索端點，既有其他 API 仍屬本機 Demo，不應直接公開。
+
+比較 Top-K 或過濾策略時，應固定 query expansion 輸出、embedding model、corpus
+及索引版本。回應設定不代表 corpus 快照；測試端需另行保存資料庫版本。
+
+離線測試（不需要 OpenAI Key 或執行中的資料庫）：
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+## API 安全與部署邊界
+
+預設未設定 `API_USERS` 時，所有 API 僅接受 loopback peer。Docker Compose 對外 port
+綁定 `127.0.0.1`；Docker 容器收到的 peer 通常是 bridge gateway，因此使用 Docker 前
+請設定 `API_USERS`，再於頁面上方輸入 Token。Token 只存在該分頁的 sessionStorage。
+
+`API_USERS` 是 JSON object，key 為穩定帳號 ID，value 包含 `role` 和 `token`：
+
+```dotenv
+API_USERS={"alice":{"role":"admin","token":"替換為至少32個ASCII字元的隨機Token"},"bob":{"role":"user","token":"替換為另一個至少32字元的隨機Token"}}
+```
+
+請用密碼管理器或 `python -c 'import secrets; print(secrets.token_urlsafe(32))'` 產生 Token，
+不要直接使用上述範例文字。設定後重啟服務；每個請求須帶 `Authorization: Bearer <token>`。
+`admin` 能新增／編輯／刪除自己命名空間的文件，`user` 能檢索自己的文件並操作自己的對話。
+可先以 admin 匯入資料後將同一帳號降為 user；帳號 ID 不變就沿用同一份資料。
+admin 也無法透過 API 讀取其他帳號的資料。
+
+各帳號的 articles/conversations/messages 存在獨立 PostgreSQL schema，查詢不會回退到
+public tables。舊 Demo 資料留在 public，不會自動搬移或指派給任何帳號。開啟授權模式後
+看不到舊資料是預期行為；資料搬移必須先明確確認擁有者並備份。更換 token 保留資料，
+更換帳號 ID 會建立新命名空間。資料庫憑證為服務端秘密，不提供給一般使用者。
+
+`RETRIEVAL_API_TOKEN` 可單獨授權只讀評估端點存取 legacy public corpus；設定 API_USERS
+時以帳號 Token 為準。其他 API 不接受這個評估 Token。
+`API_RATE_LIMIT_PER_MINUTE` 預設 120，為單程序記憶體限流；多個 worker 或正式部署需在
+入口加共享限流、HTTPS 與適當身分服務。`MAX_REQUEST_BYTES` 預設 10 MiB，包含 multipart
+開銷，超過回 413。上傳格式仍限 TXT/PDF；未授權回 401，權限不足回 403。
+
+## RAG 實驗與診斷
+
+[evaluation/README.md](evaluation/README.md) 提供分塊 manifest、版本化實驗索引、
+Exact/HNSW benchmark、引用標註檢查與 Retrieval 匯出指令。它們是獨立 Evaluation Lab 的
+資料介面與小型診斷工具，沒有把 .NET Benchmark 平台嵌入此專案。
+
+畫面的「檢索證據估計」僅依 count/distance 判定，**沒有驗證答案正確性或引用支持關係**。
+Generation faithfulness 與 Retrieval quality 必須分開評估。
+OpenAI 呼叫最多嘗試三次，僅對網路錯誤、429、500/502/503/504 重試，採 backoff/jitter，
+尊重 Retry-After，並在 60 秒預算耗盡後停止嘗試。每次 HTTP 呼叫最多 20 秒 inactivity timeout，
+外層另以可取消的 async deadline 限制每次外部呼叫整體 60 秒（含重試等待）；這不是完整問答的總時間上限。每次外部呼叫記錄 category/status/attempts/retries/elapsed_ms，
+不記錄問題內容、API Key 或服務端錯誤本文。開啟 Python INFO logging 可收集這些診斷。
+
+逐項實作與待辦：[GitHub issue 處理紀錄](evaluation/ISSUE_STATUS.md)。
