@@ -6,16 +6,22 @@ from .conversations import load_conversation_history, save_messages
 from .models import EvidenceAssessment, Reference, RiskAssessment
 from .openai_client import require_openai_api_key
 from .retrieval import assess_evidence, get_retrieval_query, search_references
+from .retrieval_context import context_for_request
+from .knowledge import KnowledgeError
 from .risk import assess_question_risk, emergency_diversion_answer
 
 
 def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
+    context = context_for_request(payload.get("branch_id"), payload.get("department_id"))
+    if context and not payload.get("rag_enabled", True):
+        raise KnowledgeError("Institutional answers require approved retrieval evidence")
     api_key = require_openai_api_key()
     question = str(payload.get("question") or "").strip()
     if not question:
         raise ValueError("問題不可為空。")
     rag_enabled = bool(payload.get("rag_enabled", True))
-    risk = assess_question_risk(api_key, question)
+    risk = (RiskAssessment("green", "未做臨床分診", "僅供院所核准衛教資訊查詢。", False, "不提供診斷或個人化診療。")
+            if context else assess_question_risk(api_key, question))
 
     conversation_id = str(payload.get("conversation_id") or "default")
     history = load_conversation_history(conversation_id)[-MEMORY_MESSAGES:]
@@ -52,7 +58,7 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
     if rag_enabled:
         retrieval_query = get_retrieval_query(api_key, question, chat_history)
         retrieval_terms = retrieval_query.terms
-        references = search_references(api_key, retrieval_query.question, retrieval_terms)
+        references = search_references(api_key, retrieval_query.question, retrieval_terms, **({"context": context} if context else {}))
         evidence = assess_evidence(references)
     else:
         evidence = EvidenceAssessment(
@@ -63,12 +69,17 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
         )
 
     try:
-        answer = chat_with_gpt(api_key, question, references, chat_history, risk, evidence, rag_enabled=rag_enabled)
+        if context and not references:
+            answer = "目前沒有符合此院區、科別且已核准有效的參考資料，無法確認院所規範。請向院方專業人員確認。"
+        else:
+            answer = chat_with_gpt(api_key, question, references, chat_history, risk, evidence,
+                                   rag_enabled=rag_enabled, **({"institutional": True} if context else {}))
     except Exception:
         raise
 
     response = {
         "answer": answer,
+        "applied_filters": context.payload() if context else None,
         "rag_enabled": rag_enabled,
         "references": references_payload(references),
         "evidence_assessment": evidence_payload(evidence),
@@ -106,6 +117,8 @@ def references_payload(references: list[Reference]) -> list[dict[str, Any]]:
             "index": ref.index,
             "uuid": ref.uuid,
             "document_id": ref.document_id,
+            "document_version_id": ref.chunk_metadata.get("version_id"),
+            "chunk_metadata": ref.chunk_metadata,
             "source_id": ref.source_id,
             "title": ref.title,
             "source": ref.source,

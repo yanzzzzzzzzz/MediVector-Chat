@@ -1,7 +1,13 @@
 import psycopg
 from psycopg.types.json import Jsonb
 
+from .api_auth import current_principal
 from .config import MEMORY_MESSAGES
+
+
+def conversation_owner():
+    principal = current_principal.get()
+    return principal.name if principal and principal.organization_id else None
 from .db import db_connection
 
 
@@ -20,9 +26,11 @@ def list_conversations() -> list[dict]:
                        ) AS title,
                        c.created_at
                 FROM conversations c
+                WHERE (%s::text IS NULL OR c.owner_id = %s)
                 ORDER BY c.created_at DESC
                 LIMIT 50
                 """,
+                (conversation_owner(), conversation_owner()),
             )
             rows = cur.fetchall()
     return [
@@ -34,9 +42,14 @@ def list_conversations() -> list[dict]:
 def ensure_conversation(conn: psycopg.Connection, conversation_id: str) -> None:
     with conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO conversations (id) VALUES (%s) ON CONFLICT (id) DO NOTHING",
-            (conversation_id,),
+            "INSERT INTO conversations (id, owner_id) VALUES (%s, %s) ON CONFLICT (id) DO NOTHING",
+            (conversation_id, conversation_owner() or ""),
         )
+        if conversation_owner() is not None:
+            cur.execute("SELECT 1 FROM conversations WHERE id=%s AND owner_id=%s", (conversation_id, conversation_owner()))
+            if cur.fetchone() is None:
+                from .knowledge import KnowledgeError
+                raise KnowledgeError("Conversation belongs to another account", 403)
 
 
 def load_conversation_history(conversation_id: str) -> list[dict]:
@@ -46,19 +59,21 @@ def load_conversation_history(conversation_id: str) -> list[dict]:
                 """
                 SELECT role, content, metadata FROM messages
                 WHERE conversation_id = %s
+                  AND conversation_id IN (SELECT id FROM conversations WHERE (%s::text IS NULL OR owner_id=%s))
                 ORDER BY created_at
                 """,
-                (conversation_id,),
+                (conversation_id, conversation_owner(), conversation_owner()),
             )
             rows = cur.fetchall()
-    return [
+    from .knowledge import redact_inaccessible_history
+    return redact_inaccessible_history([
         {
             "role": row[0],
             "content": row[1],
             **(row[2] if isinstance(row[2], dict) else {}),
         }
         for row in rows
-    ]
+    ])
 
 
 def save_messages(conversation_id: str, new_messages: list[dict]) -> None:
@@ -93,7 +108,8 @@ def save_messages(conversation_id: str, new_messages: list[dict]) -> None:
 def delete_conversation(conversation_id: str) -> None:
     with db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM conversations WHERE id = %s", (conversation_id,))
+            cur.execute("DELETE FROM conversations WHERE id = %s AND (%s::text IS NULL OR owner_id=%s)",
+                        (conversation_id, conversation_owner(), conversation_owner()))
 
 
 def message_metadata(message: dict) -> dict:

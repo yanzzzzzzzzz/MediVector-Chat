@@ -19,6 +19,8 @@ from .config import FRONTEND_DIST_DIR
 from .conversations import delete_conversation, list_conversations, load_conversation_history
 from .db import init_db
 from .documents import add_documents, delete_document, infer_document_metadata, list_documents, update_document
+from .knowledge import KnowledgeError
+from .knowledge_routes import router as knowledge_router
 from .qa import ask_question
 from .retrieval_api import retrieval_search
 from .schemas import (
@@ -45,6 +47,12 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="MediVector API", lifespan=lifespan)
 app.add_middleware(APIProtection)
+app.include_router(knowledge_router)
+
+
+@app.exception_handler(KnowledgeError)
+async def knowledge_error_handler(_request: Request, exc: KnowledgeError) -> JSONResponse:
+    return JSONResponse({"error": str(exc)}, status_code=exc.status_code)
 
 
 @app.exception_handler(ValueError)

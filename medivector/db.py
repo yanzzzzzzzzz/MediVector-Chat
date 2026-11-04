@@ -6,6 +6,7 @@ import psycopg
 from psycopg import sql
 
 from .api_auth import Principal, configured_users, current_principal
+from .governance_schema import initialize_governance
 from pgvector.psycopg import register_vector
 
 from .config import EMBEDDING_DIM, PG_DATABASE, PG_HOST, PG_PASSWORD, PG_PORT, PG_USER
@@ -58,7 +59,7 @@ def init_db() -> None:
     users = configured_users()
     if users:
         for name, user in users.items():
-            token = current_principal.set(Principal(name, user["role"]))
+            token = current_principal.set(Principal.from_config(name, user))
             try:
                 init_tables()
             finally:
@@ -145,3 +146,6 @@ def init_tables() -> None:
                 CREATE INDEX IF NOT EXISTS messages_conv_idx
                 ON messages (conversation_id, created_at)
             """)
+
+            principal = current_principal.get()
+            initialize_governance(cur, principal.organization_id if principal and principal.organization_id else "legacy")

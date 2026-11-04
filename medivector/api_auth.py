@@ -17,10 +17,18 @@ from starlette.responses import JSONResponse
 class Principal:
     name: str
     role: str
+    organization_id: str | None = None
+    branch_ids: tuple[str, ...] = ()
+    department_ids: tuple[str, ...] = ()
+
+    @classmethod
+    def from_config(cls, name, user):
+        return cls(name, user["role"], user.get("organization_id"),
+                   tuple(user.get("branch_ids", [])), tuple(user.get("department_ids", [])))
 
     @property
     def schema(self):
-        return "tenant_" + hashlib.sha256(self.name.encode()).hexdigest()[:24]
+        return "tenant_" + hashlib.sha256(("organization:" + self.organization_id if self.organization_id else self.name).encode()).hexdigest()[:24]
 
 
 current_principal: ContextVar[Principal | None] = ContextVar("principal", default=None)
@@ -32,8 +40,15 @@ def configured_users() -> dict:
         raise ValueError("API_USERS must be an object")
     tokens = set()
     for name, user in users.items():
-        if not name or not isinstance(user, dict) or user.get("role") not in {"user", "admin"}:
+        if not name or not isinstance(user, dict) or user.get("role") not in {"user", "admin", "reviewer", "nurse"}:
             raise ValueError("Invalid API_USERS principal or role")
+        organization = user.get("organization_id")
+        if organization is not None and (not isinstance(organization, str) or not organization.strip() or len(organization) > 128):
+            raise ValueError("Invalid organization_id")
+        for field in ("branch_ids", "department_ids"):
+            values = user.get(field, [])
+            if not isinstance(values, list) or any(not isinstance(v, str) or not v.strip() or len(v) > 128 for v in values):
+                raise ValueError("Invalid scope grants")
         token = user.get("token")
         if not isinstance(token, str) or len(token) < 32 or not token.isascii() or token in tokens:
             raise ValueError("API_USERS requires unique tokens of at least 32 characters")
@@ -64,9 +79,11 @@ class APIProtection:
             supplied = headers.get(b"authorization", b"")
             for name, user in users.items():
                 if hmac.compare_digest(supplied, ("Bearer " + user["token"]).encode("ascii")):
-                    principal = Principal(name, user["role"])
+                    principal = Principal.from_config(name, user)
             if principal is None:
                 return await JSONResponse({"error": "API authorization required"}, status_code=401)(scope, receive, send)
+            if principal.organization_id and scope["path"].startswith("/api/documents"):
+                return await JSONResponse({"error": "Organization accounts must use versioned /api/knowledge endpoints"}, status_code=403)(scope, receive, send)
             if (scope["path"].startswith("/api/documents") and scope["method"] in {"POST", "PUT", "DELETE"}
                     and principal.role != "admin"):
                 return await JSONResponse({"error": "Document administration requires admin role"}, status_code=403)(scope, receive, send)

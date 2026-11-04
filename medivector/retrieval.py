@@ -130,23 +130,54 @@ def retrieve_candidates(
     retrieval_terms: list[str] | None = None,
     *,
     candidate_limit: int = REFERENCE_CANDIDATE_LIMIT,
+    context=None,
 ) -> list[Reference]:
     if candidate_limit < 1:
         raise ValueError("candidate_limit must be positive")
+    from .api_auth import current_principal
+    from .retrieval_context import context_for_request
+    principal = current_principal.get()
+    if principal and principal.organization_id:
+        # Refuse unscoped access even if an internal caller forgets to pass context.
+        checked = context_for_request(context.branch_id if context else None, context.department_id if context else None)
+        context = replace(checked, query_at=context.query_at) if context else checked
     question_vector = embed_texts(api_key, [retrieval_query_text(question, retrieval_terms)])[0]
     with db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT id, document_id, source_id, title, source,
-                       publisher, published_date, version, audience, topic, credibility,
-                       content, embedding OPERATOR(public.<=>) %s::public.vector AS distance, chunk_metadata
-                FROM articles
-                ORDER BY distance
-                LIMIT %s
-                """,
-                (question_vector, candidate_limit),
-            )
+            if context:
+                from .knowledge import eligible_version_sql
+                where, params = eligible_version_sql(context.principal, context.branch_id, context.department_id, context.query_at)
+                # Materialize eligibility before exact ranking: ANN post-filtering cannot drop
+                # a valid scoped match merely because unrelated chunks dominate HNSW candidates.
+                cur.execute(f"""
+                    WITH eligible AS MATERIALIZED (
+                        SELECT a.id,a.document_id,a.source_id,a.title,a.source,a.publisher,
+                               a.published_date,a.version,a.audience,a.topic,a.credibility,a.content,a.embedding,
+                               a.chunk_metadata || jsonb_build_object(
+                                   'version_id',v.id::text,'version_label',v.version_label,'status',v.status,
+                                   'approved_at',v.approved_at,'organization_id',d.organization_id,
+                                   'branch_id',%s::text,'department_id',%s::text,'source_url',v.source_url) AS chunk_metadata
+                        FROM articles a JOIN document_versions v ON v.id=a.document_version_id
+                        JOIN knowledge_documents d ON d.id=v.document_id
+                        WHERE {where}
+                    )
+                    SELECT id,document_id,source_id,title,source,publisher,published_date,version,
+                           audience,topic,credibility,content,
+                           embedding OPERATOR(public.<=>) %s::public.vector AS distance,chunk_metadata
+                    FROM eligible ORDER BY distance,id LIMIT %s
+                """, [context.branch_id, context.department_id, *params, question_vector, candidate_limit])
+            else:
+                cur.execute(
+                    """
+                    SELECT id, document_id, source_id, title, source,
+                           publisher, published_date, version, audience, topic, credibility,
+                           content, embedding OPERATOR(public.<=>) %s::public.vector AS distance, chunk_metadata
+                    FROM articles
+                    ORDER BY distance
+                    LIMIT %s
+                    """,
+                    (question_vector, candidate_limit),
+                )
             rows = cur.fetchall()
     return [
         Reference(
@@ -203,10 +234,11 @@ def search_references(
     max_distance: float = MAX_REFERENCE_DISTANCE,
     distance_margin: float = REFERENCE_DISTANCE_MARGIN,
     dedup: bool = True,
+    context=None,
 ) -> list[Reference]:
     return filter_references(
         retrieve_candidates(api_key, question, retrieval_terms,
-                            candidate_limit=max(candidate_limit, top_k)),
+                            candidate_limit=max(candidate_limit, top_k), **({"context": context} if context is not None else {})),
         top_k=top_k, max_distance=max_distance, distance_margin=distance_margin, dedup=dedup,
     )
 

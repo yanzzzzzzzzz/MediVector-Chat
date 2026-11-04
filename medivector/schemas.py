@@ -66,6 +66,8 @@ class MetadataSuggestionsResponse(BaseModel):
 
 
 class ReferenceItemSchema(BaseModel):
+    document_version_id: str | None = None
+    chunk_metadata: dict[str, Any] = Field(default_factory=dict)
     index: int
     uuid: str
     document_id: str
@@ -99,12 +101,15 @@ class RiskAssessmentSchema(BaseModel):
 
 
 class AskRequest(BaseModel):
+    branch_id: str | None = None
+    department_id: str | None = None
     conversation_id: str = "default"
     question: str
     rag_enabled: bool = True
 
 
 class AskResponse(BaseModel):
+    applied_filters: dict[str, Any] | None = None
     answer: str
     rag_enabled: bool
     references: list[ReferenceItemSchema] = Field(default_factory=list)
@@ -142,6 +147,8 @@ class DeleteConversationResponse(BaseModel):
 
 
 class RetrievalSearchRequest(BaseModel):
+    branch_id: str | None = None
+    department_id: str | None = None
     question: str = Field(min_length=1, max_length=20000)
     top_k: int = Field(default=TOP_K, ge=1, le=1000)
     candidate_limit: int = Field(default=REFERENCE_CANDIDATE_LIMIT, ge=1, le=1000)
@@ -162,6 +169,8 @@ class RetrievalSearchRequest(BaseModel):
 
 
 class RetrievalResultSchema(BaseModel):
+    document_version_id: str | None = None
+    version: str = ""
     chunk_metadata: dict[str, Any] = Field(default_factory=dict)
     document_id: str
     chunk_id: str
