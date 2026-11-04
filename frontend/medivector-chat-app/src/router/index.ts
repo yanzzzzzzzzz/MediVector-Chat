@@ -12,6 +12,10 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/knowledge',
+      component: () => import('@/pages/knowledge.vue'),
+    },
+    {
       path: '/',
       component: Index,
     },

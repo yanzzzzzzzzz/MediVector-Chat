@@ -15,6 +15,8 @@
         <button type="submit">套用並重新載入</button>
       </form>
 
+      <nav><RouterLink to="/knowledge">院所文件與審核</RouterLink></nav>
+
       <router-view />
     </v-main>
   </v-app>

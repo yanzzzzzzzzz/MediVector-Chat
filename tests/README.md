@@ -9,7 +9,7 @@ python -m unittest discover -s tests -v
 ```
 
 The tokenizer dictionary is downloaded once; set TIKTOKEN_CACHE_DIR for a writable/offline cache.
-No OpenAI API Key is needed. Calls to OpenAI are mocked. The default command skips three tests that
+No OpenAI API Key is needed. Calls to OpenAI are mocked. The default command skips the integration test classes that
 need a real PostgreSQL service. Tests cover retrieval schemas/ranking/filtering, authorization and
 body/rate limits, baseline/token chunking, existing chat behavior (including disabled RAG, emergency
 diversion and generation failure), citation annotations, metrics and bounded retries/deadlines.
@@ -28,7 +28,8 @@ docker stop medivector-tests
 ```
 
 DB tests verify actual document/conversation/retrieval isolation and cross-account deletion,
-versioned manifest import with refusal to overwrite, and distinct Exact/HNSW execution plans.
+versioned manifest import with refusal to overwrite, distinct Exact/HNSW execution plans, and the
+institutional metadata/migration/review workflow with scope/role/validity/ACL and provenance checks.
 Each integration test initializes its own prerequisites and can be run independently.
 
 Frontend tests use Node's built-in test runner and native TypeScript stripping (Node 24+):

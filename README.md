@@ -451,3 +451,18 @@ OpenAI 呼叫最多嘗試三次，僅對網路錯誤、429、500/502/503/504 重
 不記錄問題內容、API Key 或服務端錯誤本文。開啟 Python INFO logging 可收集這些診斷。
 
 逐項實作與待辦：[GitHub issue 處理紀錄](evaluation/ISSUE_STATUS.md)。
+
+
+## 院所文件與正式檢索（#13–#15）
+
+新增 `/knowledge` 文件管理頁與 `/api/knowledge` API。院所帳號透過 `API_USERS` 設定穩定的
+`organization_id`、`branch_ids`、`department_ids`；同機構共用來源文件，個人對話仍依擁有者隔離。
+新增角色 `nurse` 與 `reviewer`：護理人員建立待審版本，審核者核准／退回／撤回；Admin 管理院區科別名稱。
+
+既有資料只會遷移為 **Draft**，不會自動核准。新修訂保留原版本，正式查詢只使用符合院區、科別、
+ACL 與有效期間的核准版本；沒有來源時直接回覆無法確認院所規範，不呼叫答案模型補寫。
+院所帳號不使用舊 `/api/documents` 路徑，避免繞過版本治理。匯入格式目前為文字，PDF 附件工作流仍待補齊。
+
+[資料關係、角色設定、狀態機、API 與操作說明](docs/knowledge-governance.md)。
+這一階段是來源文件的審核與檢索；產生衛教草稿後的獨立人工審核／發布流程（#17）、完整品質規則及
+Release Gate（#18/#19）仍未完成，亦未進行真人 Pilot（#20）。

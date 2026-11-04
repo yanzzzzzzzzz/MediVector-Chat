@@ -28,3 +28,25 @@ HTTP client tests, ESLint and production build on Node 24. CI status is reported
 run rather than inferred from local checks. See [test instructions](../tests/README.md).
 
 See [experiment instructions](README.md) and [measured synthetic benchmark](reports/hnsw-synthetic.md).
+
+
+## Institutional source-governance increment (#13–#15)
+
+- #13: additive normalized organization/branch/department/document/version/chunk schema, stable
+  version identities, source/license/checksum/validity/ACL metadata, ERD and migration tests.
+  Legacy data becomes unapproved/unscoped Draft; an authorized corpus manifest supports evaluation.
+- #14: Draft → In Review → Approved / returned Draft → Superseded / Archived, role/scope checks,
+  reason/actor/timestamps, atomic superseding with history retention and append-only event guards.
+  Future-dated publication scheduling is not implemented; approval waits until effective_from.
+- #15: server-owned identity/grants and required institutional scope; approved/effective ACL filtering
+  occurs before exact vector ranking, raw mode cannot bypass it, and no evidence means no answer-model
+  fallback. Shared organization schemas retain private conversation ownership.
+- #16 partial: citation version IDs, offsets and access revalidation/redaction are implemented,
+  with a source-inspection UI. Full PDF attachment flow and ten-query source-viewer coverage remain.
+- #17 partial foundation: the source-version workspace exists; generated education drafts and their
+  own review/publication/feedback flow remain pending. #18/#19 full rules/snapshots/release gate and
+  #20 real interviews/Pilot remain pending. #8 still requires independent human labels.
+
+Validation for this increment: 53 backend tests, including real PostgreSQL migration/state/ACL/ownership,
+source provenance/event integrity and scoped export protocol cases. Frontend HTTP tests, full lint,
+TypeScript and production build are checked by CI. See [governance design](../docs/knowledge-governance.md).

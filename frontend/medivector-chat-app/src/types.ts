@@ -64,6 +64,8 @@ export interface MetadataSuggestions {
 }
 
 export interface ReferenceItem {
+  document_version_id?: string | null
+  chunk_metadata?: Record<string, unknown>
   index: number
   uuid: string
   document_id: string
@@ -97,6 +99,7 @@ export interface EvidenceAssessment {
 }
 
 export interface AskResponse {
+  applied_filters?: Record<string, unknown> | null
   answer: string
   rag_enabled: boolean
   references: ReferenceItem[]
