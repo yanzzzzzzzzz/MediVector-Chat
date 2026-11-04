@@ -3,6 +3,9 @@ import time
 from contextlib import contextmanager
 
 import psycopg
+from psycopg import sql
+
+from .api_auth import Principal, configured_users, current_principal
 from pgvector.psycopg import register_vector
 
 from .config import EMBEDDING_DIM, PG_DATABASE, PG_HOST, PG_PASSWORD, PG_PORT, PG_USER
@@ -17,6 +20,11 @@ def db_connection():
     conn = psycopg.connect(get_pg_conninfo())
     register_vector(conn)
     try:
+        principal = current_principal.get()
+        if principal is not None:
+            with conn.cursor() as cur:
+                cur.execute(sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(sql.Identifier(principal.schema)))
+                cur.execute(sql.SQL("SET LOCAL search_path TO {}").format(sql.Identifier(principal.schema)))
         yield conn
         conn.commit()
     except Exception:
@@ -47,13 +55,26 @@ def init_db() -> None:
             else:
                 raise
 
+    users = configured_users()
+    if users:
+        for name, user in users.items():
+            token = current_principal.set(Principal(name, user["role"]))
+            try:
+                init_tables()
+            finally:
+                current_principal.reset(token)
+    else:
+        init_tables()
+
+
+def init_tables() -> None:
     # Step 2: 建立資料表（extension 已存在，可安全 register_vector）
     with db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(f"""
                 CREATE TABLE IF NOT EXISTS articles (
-                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                    document_id UUID NOT NULL DEFAULT gen_random_uuid(),
+                    id UUID PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid(),
+                    document_id UUID NOT NULL DEFAULT pg_catalog.gen_random_uuid(),
                     source_id BIGINT NOT NULL DEFAULT 0,
                     title TEXT NOT NULL DEFAULT '',
                     source TEXT NOT NULL DEFAULT '',
@@ -71,14 +92,14 @@ def init_db() -> None:
                     file_size BIGINT NOT NULL DEFAULT 0,
                     chunk_index INT NOT NULL DEFAULT 1,
                     chunk_count INT NOT NULL DEFAULT 1,
-                    embedding VECTOR({EMBEDDING_DIM}),
+                    embedding public.VECTOR({EMBEDDING_DIM}),
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
             cur.execute("ALTER TABLE articles ADD COLUMN IF NOT EXISTS document_id UUID")
             cur.execute("UPDATE articles SET document_id = id WHERE document_id IS NULL")
-            cur.execute("ALTER TABLE articles ALTER COLUMN document_id SET DEFAULT gen_random_uuid()")
+            cur.execute("ALTER TABLE articles ALTER COLUMN document_id SET DEFAULT pg_catalog.gen_random_uuid()")
             cur.execute("ALTER TABLE articles ALTER COLUMN document_id SET NOT NULL")
             for column_name in (
                 "publisher",
@@ -89,10 +110,11 @@ def init_db() -> None:
                 "credibility",
             ):
                 cur.execute(f"ALTER TABLE articles ADD COLUMN IF NOT EXISTS {column_name} TEXT NOT NULL DEFAULT ''")
+            cur.execute("ALTER TABLE articles ADD COLUMN IF NOT EXISTS chunk_metadata JSONB NOT NULL DEFAULT '{}'::jsonb")
             cur.execute("ALTER TABLE articles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS articles_embedding_idx
-                ON articles USING hnsw (embedding vector_cosine_ops)
+                ON articles USING hnsw (embedding public.vector_cosine_ops)
             """)
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS articles_document_id_idx
@@ -110,7 +132,7 @@ def init_db() -> None:
             """)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS messages (
-                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    id UUID PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid(),
                     conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
                     role TEXT NOT NULL,
                     content TEXT NOT NULL,

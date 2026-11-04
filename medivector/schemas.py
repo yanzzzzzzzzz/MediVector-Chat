@@ -1,6 +1,8 @@
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from .config import TOP_K, REFERENCE_CANDIDATE_LIMIT, MAX_REFERENCE_DISTANCE, REFERENCE_DISTANCE_MARGIN
 
 
 class EmbeddingSchema(BaseModel):
@@ -137,3 +139,44 @@ class ConversationMessagesResponse(BaseModel):
 
 class DeleteConversationResponse(BaseModel):
     deleted: bool
+
+
+class RetrievalSearchRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=20000)
+    top_k: int = Field(default=TOP_K, ge=1, le=1000)
+    candidate_limit: int = Field(default=REFERENCE_CANDIDATE_LIMIT, ge=1, le=1000)
+    mode: Literal["raw", "filtered"] = "filtered"
+    query_expansion: bool = False
+    retrieval_terms: list[str] = Field(default_factory=list, max_length=8)
+    max_distance: float = Field(default=MAX_REFERENCE_DISTANCE, ge=0, le=2, allow_inf_nan=False)
+    distance_margin: float = Field(default=REFERENCE_DISTANCE_MARGIN, ge=0, le=2, allow_inf_nan=False)
+    dedup: bool = True
+
+    @field_validator("question")
+    @classmethod
+    def nonempty_question(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("問題不可為空。")
+        return value
+
+
+class RetrievalResultSchema(BaseModel):
+    chunk_metadata: dict[str, Any] = Field(default_factory=dict)
+    document_id: str
+    chunk_id: str
+    rank: int
+    raw_rank: int
+    distance: float | None
+    content: str
+    title: str
+    source: str
+
+
+class RetrievalSearchResponse(BaseModel):
+    results: list[RetrievalResultSchema]
+    standalone_query: str
+    terms: list[str]
+    query_text: str
+    elapsed_ms: float
+    settings: dict[str, Any]

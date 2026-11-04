@@ -1,11 +1,14 @@
 export async function api<T> (path: string, options: RequestInit = {}): Promise<T> {
   const requestOptions: RequestInit = { ...options }
-  if (!(options.body instanceof FormData)) {
-    requestOptions.headers = {
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string> | undefined),
-    }
+  const headers = new Headers(options.headers)
+  const token = sessionStorage.getItem('apiToken')
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
   }
+  if (!(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json')
+  }
+  requestOptions.headers = headers
   const response = await fetch(path, requestOptions)
   const body = await response.json().catch(() => ({}))
   if (!response.ok) {

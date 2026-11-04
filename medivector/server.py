@@ -1,3 +1,5 @@
+import hmac
+import ipaddress
 import json
 import os
 import sys
@@ -7,19 +9,23 @@ from pathlib import Path
 from typing import Any
 
 import uvicorn
-from fastapi import FastAPI, Request, UploadFile
+from fastapi import FastAPI, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
+from .api_auth import APIProtection, current_principal
 from .config import FRONTEND_DIST_DIR
 from .conversations import delete_conversation, list_conversations, load_conversation_history
 from .db import init_db
 from .documents import add_documents, delete_document, infer_document_metadata, list_documents, update_document
 from .qa import ask_question
+from .retrieval_api import retrieval_search
 from .schemas import (
     AddDocumentsResponse,
     AskRequest,
+    RetrievalSearchRequest,
+    RetrievalSearchResponse,
     AskResponse,
     ConversationMessagesResponse,
     ConversationsResponse,
@@ -38,6 +44,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="MediVector API", lifespan=lifespan)
+app.add_middleware(APIProtection)
 
 
 @app.exception_handler(ValueError)
@@ -94,6 +101,29 @@ def delete_document_route(document_id: str) -> dict[str, Any]:
 @app.post("/api/ask", response_model=AskResponse)
 def post_ask(payload: AskRequest) -> dict[str, Any]:
     return ask_question(payload.model_dump())
+
+
+def authorize_retrieval(request: Request) -> None:
+    if current_principal.get() is not None:
+        return
+    token = os.getenv("RETRIEVAL_API_TOKEN", "")
+    if token:
+        if not hmac.compare_digest(request.headers.get("Authorization", "").encode("utf-8"), f"Bearer {token}".encode("utf-8")):
+            raise HTTPException(status_code=401, detail="Retrieval API authorization required")
+        return
+    # Use the peer address only; forwarded headers must not grant loopback access.
+    try:
+        local = request.client is not None and ipaddress.ip_address(request.client.host).is_loopback
+    except ValueError:
+        local = False
+    if not local:
+        raise HTTPException(status_code=403, detail="Retrieval API is restricted to loopback or token access")
+
+
+@app.post("/api/retrieval/search", response_model=RetrievalSearchResponse)
+def post_retrieval_search(payload: RetrievalSearchRequest, request: Request) -> dict[str, Any]:
+    authorize_retrieval(request)
+    return retrieval_search(payload)
 
 
 @app.get("/api/conversations", response_model=ConversationsResponse)
@@ -190,4 +220,4 @@ def main() -> None:
     port = int(os.getenv("PORT", "8000"))
     host = os.getenv("HOST", "127.0.0.1")
     reload = "--reload" in sys.argv or os.getenv("RELOAD", "").lower() in {"1", "true", "yes"}
-    uvicorn.run("medivector.server:app", host=host, port=port, reload=reload)
+    uvicorn.run("medivector.server:app", host=host, port=port, reload=reload, proxy_headers=False)

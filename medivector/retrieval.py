@@ -1,3 +1,4 @@
+from dataclasses import replace
 import json
 import re
 
@@ -123,11 +124,15 @@ def retrieval_query_text(question: str, retrieval_terms: list[str] | None = None
         return question
     return f"{question}\n\n檢索關鍵詞：{' '.join(normalized_terms)}"
 
-def search_references(
+def retrieve_candidates(
     api_key: str,
     question: str,
     retrieval_terms: list[str] | None = None,
+    *,
+    candidate_limit: int = REFERENCE_CANDIDATE_LIMIT,
 ) -> list[Reference]:
+    if candidate_limit < 1:
+        raise ValueError("candidate_limit must be positive")
     question_vector = embed_texts(api_key, [retrieval_query_text(question, retrieval_terms)])[0]
     with db_connection() as conn:
         with conn.cursor() as cur:
@@ -135,58 +140,75 @@ def search_references(
                 """
                 SELECT id, document_id, source_id, title, source,
                        publisher, published_date, version, audience, topic, credibility,
-                       content,
-                       embedding <=> %s::vector AS distance
+                       content, embedding OPERATOR(public.<=>) %s::public.vector AS distance, chunk_metadata
                 FROM articles
                 ORDER BY distance
                 LIMIT %s
                 """,
-                (question_vector, REFERENCE_CANDIDATE_LIMIT),
+                (question_vector, candidate_limit),
             )
             rows = cur.fetchall()
-
-    distances = [float(row[12]) for row in rows if row[12] is not None]
-    best_distance = min(distances) if distances else None
-    max_allowed_distance = MAX_REFERENCE_DISTANCE
-    if best_distance is not None:
-        max_allowed_distance = min(MAX_REFERENCE_DISTANCE, best_distance + REFERENCE_DISTANCE_MARGIN)
-
-    references: list[Reference] = []
-    seen_reference_keys: set[tuple[str, str, str]] = set()
-    for row in rows:
-        (id_, document_id, source_id, title, source,
-         publisher, published_date, version, audience, topic, credibility,
-         content, distance) = row
-        distance = float(distance) if distance is not None else None
-        if distance is not None and distance > max_allowed_distance:
-            continue
-
-        reference_key = (str(title or ""), str(source or ""), str(content or ""))
-        if reference_key in seen_reference_keys:
-            continue
-        seen_reference_keys.add(reference_key)
-
-        references.append(
-            Reference(
-                index=len(references) + 1,
-                uuid=str(id_),
-                document_id=str(document_id),
-                source_id=int(source_id or 0),
-                title=str(title or ""),
-                source=str(source or ""),
-                publisher=str(publisher or ""),
-                published_date=str(published_date or ""),
-                version=str(version or ""),
-                audience=str(audience or ""),
-                topic=str(topic or ""),
-                credibility=str(credibility or ""),
-                content=str(content or ""),
-                distance=distance,
-            )
+    return [
+        Reference(
+            index=rank, uuid=str(row[0]), document_id=str(row[1]),
+            source_id=int(row[2] or 0), title=str(row[3] or ""),
+            source=str(row[4] or ""), publisher=str(row[5] or ""),
+            published_date=str(row[6] or ""), version=str(row[7] or ""),
+            audience=str(row[8] or ""), topic=str(row[9] or ""),
+            credibility=str(row[10] or ""), content=str(row[11] or ""),
+            distance=float(row[12]) if row[12] is not None else None,
+            chunk_metadata=row[13] or {},
         )
-        if len(references) >= TOP_K:
+        for rank, row in enumerate(rows, 1)
+    ]
+
+
+def filter_references(
+    candidates: list[Reference],
+    *,
+    top_k: int = TOP_K,
+    max_distance: float = MAX_REFERENCE_DISTANCE,
+    distance_margin: float = REFERENCE_DISTANCE_MARGIN,
+    dedup: bool = True,
+) -> list[Reference]:
+    if top_k < 1 or max_distance < 0 or distance_margin < 0:
+        raise ValueError("Invalid retrieval limits")
+    ordered = sorted(candidates, key=lambda ref: (
+        ref.distance is None, ref.distance if ref.distance is not None else 0, ref.index,
+    ))
+    distances = [ref.distance for ref in ordered if ref.distance is not None]
+    cutoff = min(max_distance, min(distances) + distance_margin) if distances else max_distance
+    references: list[Reference] = []
+    seen: set[tuple[str, str, str]] = set()
+    for ref in ordered:
+        if ref.distance is not None and ref.distance > cutoff:
+            continue
+        key = (ref.title, ref.source, ref.content)
+        if dedup and key in seen:
+            continue
+        seen.add(key)
+        references.append(replace(ref, index=len(references) + 1))
+        if len(references) >= top_k:
             break
     return references
+
+
+def search_references(
+    api_key: str,
+    question: str,
+    retrieval_terms: list[str] | None = None,
+    *,
+    top_k: int = TOP_K,
+    candidate_limit: int = REFERENCE_CANDIDATE_LIMIT,
+    max_distance: float = MAX_REFERENCE_DISTANCE,
+    distance_margin: float = REFERENCE_DISTANCE_MARGIN,
+    dedup: bool = True,
+) -> list[Reference]:
+    return filter_references(
+        retrieve_candidates(api_key, question, retrieval_terms,
+                            candidate_limit=max(candidate_limit, top_k)),
+        top_k=top_k, max_distance=max_distance, distance_margin=distance_margin, dedup=dedup,
+    )
 
 
 def assess_evidence(references: list[Reference]) -> EvidenceAssessment:

@@ -6,6 +6,7 @@ from datetime import date
 from typing import Any
 
 import psycopg
+from psycopg.types.json import Jsonb
 
 from .config import RISK_MODEL
 from .db import db_connection
@@ -288,8 +289,8 @@ def insert_document_chunks(
             INSERT INTO articles
                 (document_id, source_id, title, source, publisher, published_date, version,
                  audience, topic, credibility, content, file_name, file_object_key,
-                 file_bucket, file_content_type, file_size, chunk_index, chunk_count, embedding)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 file_bucket, file_content_type, file_size, chunk_index, chunk_count, embedding, chunk_metadata)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (
             item.get("document_id"),
@@ -311,6 +312,7 @@ def insert_document_chunks(
             item.get("chunk_index", 1),
             item.get("chunk_count", 1),
             vector,
+            Jsonb(item.get("chunk_metadata", {})),
         ))
         row = cur.fetchone()
         inserted_documents.append({"uuid": str(row[0]), **item})

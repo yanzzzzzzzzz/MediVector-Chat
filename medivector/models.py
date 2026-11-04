@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -17,6 +17,7 @@ class Reference:
     credibility: str
     content: str
     distance: float | None
+    chunk_metadata: dict = field(default_factory=dict)
 
 
 @dataclass
