@@ -44,7 +44,7 @@ jobs:
       RUN_DB_TESTS: '1'
       API_USERS: '{}'
       OPENAI_API_KEY: ''
-      TIKTOKEN_CACHE_DIR: ${{ runner.temp }}/tiktoken-cache
+      TIKTOKEN_CACHE_DIR: /tmp/medivector-tiktoken-cache
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
