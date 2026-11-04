@@ -107,7 +107,7 @@ export function useChat (setStatus: SetStatus, chatLogEl: Ref<HTMLDivElement | n
 
     const riskLabel = data.risk_assessment ? `風險=${data.risk_assessment.label}` : '風險=一般'
     const referenceLabel = data.references.length > 0 ? `使用 ${data.references.length} 筆參考` : '未使用參考索引'
-    const evidenceLabel = data.evidence_assessment?.sufficient ? '證據充足' : '證據不足'
+    const evidenceLabel = data.evidence_assessment?.sufficient ? '檢索證據估計充足' : '檢索證據估計不足'
     const retrievalTerms = data.retrieval_terms || []
     const retrievalLabel = retrievalTerms.length > 0 ? `檢索詞=${retrievalTerms.length} 組` : '檢索詞=無'
     setStatus(`${riskLabel} · ${referenceLabel} · ${evidenceLabel} · ${retrievalLabel}`)

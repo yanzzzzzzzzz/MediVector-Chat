@@ -21,10 +21,10 @@
       <span
         :class="['evidence-badge', message.evidenceAssessment.sufficient ? 'evidence-sufficient' : 'evidence-insufficient']"
       >
-        證據{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }}
+        檢索證據估計{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }}
       </span>
 
-      <div class="evidence-detail">{{ message.evidenceAssessment.reason }}</div>
+      <div class="evidence-detail">{{ message.evidenceAssessment.reason }} 此為數量與距離的估計，未驗證答案或引用是否正確。</div>
     </div>
 
     <div v-if="message.role === 'assistant' && message.retrievalTerms && message.retrievalTerms.length > 0" class="retrieval-wrap">
@@ -49,7 +49,7 @@
       </div>
 
       <div v-if="message.evidenceAssessment" class="refs-evidence">
-        證據狀態：{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }} · {{ message.evidenceAssessment.reason }}
+        檢索證據估計：{{ message.evidenceAssessment.sufficient ? '充足' : '不足' }} · {{ message.evidenceAssessment.reason }}
       </div>
 
       <div v-if="message.retrievalTerms && message.retrievalTerms.length > 0" class="refs-retrieval">

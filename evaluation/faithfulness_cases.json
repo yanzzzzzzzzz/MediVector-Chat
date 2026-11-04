@@ -1,0 +1,8 @@
+[
+  {"id":"supported","question":"誰開門？","references":[{"index":1,"content":"小明開門。"}],"answer":"小明開門。[1]","claims":[{"text":"小明開門。","citations":[1],"support":{"1":true}}]},
+  {"id":"missing","question":"誰開門？","references":[{"index":1,"content":"小明開門。"}],"answer":"小明開門。","claims":[{"text":"小明開門。","citations":[]}]},
+  {"id":"nonexistent","question":"誰開門？","references":[{"index":1,"content":"小明開門。"}],"answer":"小明開門。[2]","claims":[{"text":"小明開門。","citations":[2],"support":{"2":false}}]},
+  {"id":"unsupported","question":"誰開門？","references":[{"index":1,"content":"小明開門。"}],"answer":"小華開門。[1]","claims":[{"text":"小華開門。","citations":[1],"support":{"1":false}}]},
+  {"id":"no-evidence","question":"誰開門？","references":[],"answer":"小華開門。","claims":[{"text":"小華開門。","citations":[]}]},
+  {"id":"unreviewed","question":"誰開門？","references":[{"index":1,"content":"小明開門。"}],"answer":"小明開門。[1]","claims":[{"text":"小明開門。","citations":[1]}]}
+]

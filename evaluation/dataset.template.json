@@ -1,0 +1,17 @@
+{
+  "dataset_version": "DRAFT-fill-before-use",
+  "corpus_version": "",
+  "index_version": "",
+  "embedding_model": "text-embedding-3-small",
+  "cases": [
+    {
+      "id": "q001",
+      "query": "填入真實測試問題",
+      "answerable": true,
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": ""
+    }
+  ]
+}
