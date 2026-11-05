@@ -359,7 +359,7 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         self.assertEqual(version['attachment']['sha256'], hashlib.sha256(data).hexdigest())
         self.assertGreaterEqual(len(manifest['chunks']), 10)
         for i in [n * (len(manifest["chunks"]) - 1) // 9 for n in range(10)]:
-            with self.subTest(question=i), patch('medivector.retrieval.embed_texts', return_value=[vectors[i]]), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery(f'Find instruction {i}', [], False)), patch('medivector.qa.chat_with_gpt', return_value='Synthetic answer [1]'):
+            with self.subTest(question=i), patch('medivector.qa.require_openai_api_key', return_value='fake'), patch('medivector.retrieval.embed_texts', return_value=[vectors[i]]), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery(f'Find instruction {i}', [], False)), patch('medivector.qa.chat_with_gpt', return_value='Synthetic answer [1]'):
                 answer = self.request('POST', '/api/ask', {'conversation_id': str(uuid.uuid4()), 'question': f'Find instruction {i}', 'branch_id': 'a', 'department_id': 'general'}, 'reader')
             self.assertEqual(answer.status_code, 200, answer.text)
             ref = answer.json()['references'][0]
