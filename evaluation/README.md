@@ -95,3 +95,31 @@ RUN_DB_TESTS=1 PG_HOST=127.0.0.1 PG_PORT=55439 PG_USER=postgres PG_PASSWORD=... 
 ```
 
 DB tests create randomized test schemas and drop only those schemas. Use a disposable test database.
+
+## Medical source rules (#18)
+
+Run without a key, database or LLM:
+
+```sh
+python -m evaluation.medical_rules evaluation/medical_rules_cases.json /tmp/medical-rules.json
+```
+
+The 19 synthetic cases include five stale/unapproved/expired/future versions, five wrong
+organization/branch/department/role/named-user scopes, five deliberately unsupported no-answer responses,
+and four Pass/Review controls. Expected fixture outcomes are test assertions, not a clinical benchmark.
+The report intentionally records 15 Fail outcomes for polluted examples, plus two Pass and two Review
+Required controls. It includes rule IDs, document/version/chunk IDs, query context and trace in JSON;
+Markdown lists each rule, outcome, reason and affected version. Files are exclusively created, not overwritten.
+
+The source catalog is supplied as a frozen artifact, independently from answer references. Rules check
+identity binding, approved/effective status at the recorded query time, scope/ACL, labelled expected
+versions, citation marker existence and expected evidence. Canonical no-evidence refusals without references
+can pass the refusal rule. Noncanonical refusals and unknown semantic support require review; no distance,
+reference count or lexical overlap is used as proof of entailment. Optional support reviews require reviewer
+and timezone-aware review time, but their authenticity/clinical competence is not established by this tool.
+
+For a reviewed retrieval dataset, add `--medical-rules path/to/rules.json` to the existing
+`evaluation.retrieval_baseline` command. The corpus version must exactly match; mismatched corpora are
+rejected. Rules then appear in the same JSON/Markdown run report while generation faithfulness remains
+separate. Use only synthetic or appropriately authorized nonpersonal cases; do not put personal health
+information in stored evaluation traces. Release gating is handled separately in #19.

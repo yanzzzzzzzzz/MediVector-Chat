@@ -53,14 +53,24 @@ def validate_dataset(dataset):
             raise ValueError("Answerability and document labels disagree")
 
 
+def medical_rules_for_run(path, corpus_version):
+    from evaluation.medical_rules import evaluate_suite
+    dataset = json.loads(Path(path).read_text())
+    if dataset.get("corpus_version") != corpus_version:
+        raise ValueError("Medical rules and retrieval must use the same frozen corpus version")
+    return evaluate_suite(dataset)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("dataset", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument("--medical-rules", type=Path, help="Run deterministic rules for the same frozen corpus in this report")
     args = parser.parse_args()
     dataset = json.loads(args.dataset.read_text())
     validate_dataset(dataset)
+    medical_report = medical_rules_for_run(args.medical_rules, dataset["corpus_version"]) if args.medical_rules else None
     if args.output.exists() or args.output.with_suffix(".md").exists():
         raise FileExistsError("Use a fresh report path")
     headers = {"Authorization": "Bearer " + os.environ["EVALUATION_API_TOKEN"]} if os.getenv("EVALUATION_API_TOKEN") else {}
@@ -114,6 +124,8 @@ def main():
         verify_manifest()
     report = {"dataset": dataset, "corpus_manifest": corpus_manifest, "experiments": experiments, "generation_faithfulness": "Not measured by retrieval evaluation",
               "limitations": "Human labels are supplied, not verified by this script. Freeze DB externally; synthetic data is not clinical validation. K is the first K chunk results; documents are counted once for recall. The same standalone query and terms are replayed across raw/filtered; K runs reuse results. Freeze corpus and index externally during the run."}
+    if medical_report is not None:
+        report["medical_rules"] = medical_report
     with args.output.open("x") as stream:
         json.dump(report, stream, ensure_ascii=False, indent=2)
     failures = [r for exp in experiments for r in exp["runs"] if r["metrics"]["10"].get("recall", 1) < 1]
@@ -125,6 +137,9 @@ def main():
     lines += [f"- {r['case_id']} (Recall@10={r['metrics']['10']['recall']})" for r in failures[:5]]
     if not failures:
         lines.append("No labelled retrieval failures in this run; do not invent five failures.")
+    if medical_report is not None:
+        from evaluation.medical_rules import markdown
+        lines += ["", markdown(medical_report)]
     with args.output.with_suffix(".md").open("x") as stream:
         stream.write("\n".join(lines) + "\n")
 

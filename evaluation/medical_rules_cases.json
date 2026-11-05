@@ -1,0 +1,895 @@
+{
+  "format_version": 1,
+  "dataset_version": "synthetic-medical-rules-v1",
+  "notice": "合成規則測試；標籤為程式測試預期，不是人工醫療標註或臨床驗證。",
+  "source_catalog": {
+    "v-current": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-old-version-0": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "superseded",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-old-version-1": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "archived",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-old-version-2": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "draft",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-old-version-3": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": "2026-11-01T00:00:00Z",
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-old-version-4": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-11-02T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-wrong-scope-0": {
+      "document_id": "doc-preparation",
+      "organization_id": "other-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-wrong-scope-1": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "b",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-wrong-scope-2": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "lab"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-wrong-scope-3": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-wrong-scope-4": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [
+        "other-nurse"
+      ],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-no-answer-0": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-no-answer-1": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-no-answer-2": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-no-answer-3": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    },
+    "v-no-answer-4": {
+      "document_id": "doc-preparation",
+      "organization_id": "synthetic-hospital",
+      "status": "approved",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_until": null,
+      "scopes": [
+        {
+          "branch_id": "a",
+          "department_id": "general"
+        }
+      ],
+      "allowed_roles": [
+        "nurse",
+        "reviewer",
+        "user",
+        "admin"
+      ],
+      "allowed_users": [],
+      "chunk_ids": [
+        "chunk-preparation"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "old-version-01",
+      "question": "合成流程測試 old-version 1：檢查前須攜帶什麼？",
+      "category": "old-version",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-old-version-0"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-old-version-0",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "old-version-02",
+      "question": "合成流程測試 old-version 2：檢查前須攜帶什麼？",
+      "category": "old-version",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-old-version-1"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-old-version-1",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "old-version-03",
+      "question": "合成流程測試 old-version 3：檢查前須攜帶什麼？",
+      "category": "old-version",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-old-version-2"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-old-version-2",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "old-version-04",
+      "question": "合成流程測試 old-version 4：檢查前須攜帶什麼？",
+      "category": "old-version",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-old-version-3"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-old-version-3",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "old-version-05",
+      "question": "合成流程測試 old-version 5：檢查前須攜帶什麼？",
+      "category": "old-version",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-old-version-4"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-old-version-4",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "wrong-scope-01",
+      "question": "合成流程測試 wrong-scope 1：檢查前須攜帶什麼？",
+      "category": "wrong-scope",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-wrong-scope-0"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-wrong-scope-0",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "wrong-scope-02",
+      "question": "合成流程測試 wrong-scope 2：檢查前須攜帶什麼？",
+      "category": "wrong-scope",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-wrong-scope-1"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-wrong-scope-1",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "wrong-scope-03",
+      "question": "合成流程測試 wrong-scope 3：檢查前須攜帶什麼？",
+      "category": "wrong-scope",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-wrong-scope-2"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-wrong-scope-2",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "wrong-scope-04",
+      "question": "合成流程測試 wrong-scope 4：檢查前須攜帶什麼？",
+      "category": "wrong-scope",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-wrong-scope-3"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-wrong-scope-3",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "wrong-scope-05",
+      "question": "合成流程測試 wrong-scope 5：檢查前須攜帶什麼？",
+      "category": "wrong-scope",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-wrong-scope-4"
+      ],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。 [1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-wrong-scope-4",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "no-answer-01",
+      "question": "合成流程測試 no-answer 1：檢查前須攜帶什麼？",
+      "category": "no-answer",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": false,
+      "expectedDocumentVersionIds": [],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。",
+        "references": []
+      },
+      "support_review": {
+        "verdict": "unsupported",
+        "reviewer": "synthetic-fixture-label-not-human-review",
+        "reviewed_at": "2026-11-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "no-answer-02",
+      "question": "合成流程測試 no-answer 2：檢查前須攜帶什麼？",
+      "category": "no-answer",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": false,
+      "expectedDocumentVersionIds": [],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。",
+        "references": []
+      },
+      "support_review": {
+        "verdict": "unsupported",
+        "reviewer": "synthetic-fixture-label-not-human-review",
+        "reviewed_at": "2026-11-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "no-answer-03",
+      "question": "合成流程測試 no-answer 3：檢查前須攜帶什麼？",
+      "category": "no-answer",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": false,
+      "expectedDocumentVersionIds": [],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。",
+        "references": []
+      },
+      "support_review": {
+        "verdict": "unsupported",
+        "reviewer": "synthetic-fixture-label-not-human-review",
+        "reviewed_at": "2026-11-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "no-answer-04",
+      "question": "合成流程測試 no-answer 4：檢查前須攜帶什麼？",
+      "category": "no-answer",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": false,
+      "expectedDocumentVersionIds": [],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。",
+        "references": []
+      },
+      "support_review": {
+        "verdict": "unsupported",
+        "reviewer": "synthetic-fixture-label-not-human-review",
+        "reviewed_at": "2026-11-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "no-answer-05",
+      "question": "合成流程測試 no-answer 5：檢查前須攜帶什麼？",
+      "category": "no-answer",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": false,
+      "expectedDocumentVersionIds": [],
+      "expected_rule_outcome": "Fail",
+      "trace": {
+        "answer": "本院規定所有檢查均須禁食十二小時。",
+        "references": []
+      },
+      "support_review": {
+        "verdict": "unsupported",
+        "reviewer": "synthetic-fixture-label-not-human-review",
+        "reviewed_at": "2026-11-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "canonical-refusal",
+      "question": "合成正向或待審案例",
+      "category": "control",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": false,
+      "expectedDocumentVersionIds": [],
+      "expected_rule_outcome": "Pass",
+      "trace": {
+        "answer": "沒有可用核准資料，無法確認院所規範。",
+        "references": []
+      }
+    },
+    {
+      "id": "unknown-abstention",
+      "question": "合成正向或待審案例",
+      "category": "control",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": false,
+      "expectedDocumentVersionIds": [],
+      "expected_rule_outcome": "Review Required",
+      "trace": {
+        "answer": "請先向院方確認。",
+        "references": []
+      }
+    },
+    {
+      "id": "valid-citation-unreviewed",
+      "question": "合成正向或待審案例",
+      "category": "control",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-current"
+      ],
+      "expected_rule_outcome": "Review Required",
+      "trace": {
+        "answer": "請攜帶通知單。[1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-current",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "annotated-synthetic-positive",
+      "question": "合成正向或待審案例",
+      "category": "control",
+      "context": {
+        "organization_id": "synthetic-hospital",
+        "branch_id": "a",
+        "department_id": "general",
+        "role": "nurse",
+        "principal": "synthetic-nurse",
+        "query_at": "2026-11-01T00:00:00Z"
+      },
+      "answerable": true,
+      "expectedDocumentVersionIds": [
+        "v-current"
+      ],
+      "expected_rule_outcome": "Pass",
+      "trace": {
+        "answer": "請攜帶通知單。[1]",
+        "references": [
+          {
+            "index": 1,
+            "document_version_id": "v-current",
+            "document_id": "doc-preparation",
+            "uuid": "chunk-preparation"
+          }
+        ]
+      },
+      "support_review": {
+        "verdict": "supported",
+        "reviewer": "synthetic-fixture-label-not-human-review",
+        "reviewed_at": "2026-11-01T00:00:00Z"
+      }
+    }
+  ],
+  "corpus_version": "synthetic-source-catalog-v1"
+}

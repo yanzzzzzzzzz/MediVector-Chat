@@ -66,3 +66,10 @@ Nurse editing/submission, return, publish and withdrawal are covered end-to-end.
 to published copy whose sources remain valid/authorized. Source/query feedback is linked to exact version
 and owned conversation IDs. See `docs/education-workspace.md`; semantic and clinical review remain human
 responsibilities, not an automatic consequence of syntactically valid citations.
+
+## Medical evaluation rules (#18)
+
+Added a network-free deterministic source/version/scope/ACL/citation evaluator, JSON/Markdown reports,
+19 synthetic controls (five per required negative category), explicit Pass/Fail/Review Required and
+same-corpus integration with the retrieval baseline CLI. Unknown semantics do not become Pass.
+Rule fixtures remain separate from #8's still-pending independently human-reviewed baseline.
