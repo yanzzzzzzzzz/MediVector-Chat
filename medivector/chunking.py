@@ -12,12 +12,17 @@ def page_text(file_bytes: bytes) -> tuple[str, list[dict]]:
     from pypdf import PdfReader
     pages, parts, offset = [], [], 0
     for number, page in enumerate(PdfReader(BytesIO(file_bytes)).pages, 1):
-        text = (page.extract_text() or "").strip()
+        try:
+            text = (page.extract_text() or "").strip()
+            status = "extracted" if text else "no_text"
+        except Exception:
+            text, status = "", "extraction_failed"
         if not text:
+            pages.append({"page": number, "start": offset, "end": offset, "status": status})
             continue
         if parts:
             offset += 2
-        pages.append({"page": number, "start": offset, "end": offset + len(text)})
+        pages.append({"page": number, "start": offset, "end": offset + len(text), "status": status})
         parts.append(text)
         offset += len(text)
     return "\n\n".join(parts), pages
@@ -75,7 +80,7 @@ def chunk_manifest(text: str, *, document_id: str, version: str, strategy: str =
     for index, chunk in enumerate(chunks, 1):
         chunk.update({"document_id": document_id, "chunk_index": index,
                       "chunk_id": f"{document_id}:{version}:{strategy}:{index}",
-                      "pages": [p["page"] for p in pages or [] if p["start"] < chunk["end"] and p["end"] > chunk["start"]]})
+                      "pages": [p["page"] for p in pages or [] if p["end"] > p["start"] and p["start"] < chunk["end"] and p["end"] > chunk["start"]]})
     return {"document_id": document_id, "version": version, "source_sha256": digest,
             "strategy": strategy, "max_chars": max_chars, "max_tokens": max_tokens,
             "overlap_tokens": overlap, "encoding": "cl100k_base" if strategy == "token" else None,

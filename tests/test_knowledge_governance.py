@@ -334,3 +334,75 @@ class KnowledgeGovernanceTests(unittest.TestCase):
             risk.assert_not_called()
         response = self.request("POST", "/api/ask", {"question": "test", "rag_enabled": False, "branch_id": "a", "department_id": "general"}, "reader")
         self.assertEqual(response.status_code, 400)
+
+    def upload_pdf(self, data, user='nurse', **changes):
+        payload = self.payload(**changes)
+        payload.pop('content', None)
+        return self.client.post('/api/knowledge/versions/pdf',
+                                data={'metadata': json.dumps(payload)}, files={'file': ('demo.pdf', data, 'application/pdf')},
+                                headers={'Authorization': 'Bearer ' + self.users[user]['token']})
+
+    def test_ten_pdf_queries_trace_to_exact_version_offsets_pages_and_original(self):
+        from pdf_fixture import pdf_bytes
+        from medivector.chunking import page_text, chunk_manifest
+        from medivector.models import RetrievalQuery
+        data = pdf_bytes([[f'Synthetic instruction {i}: verify appointment location and notice.' for i in range(6)],
+                          [], [f'Synthetic instruction {i}: bring the appointment document.' for i in range(6, 12)]])
+        text, pages = page_text(data)
+        manifest = chunk_manifest(text, document_id='test', version='test', strategy='token', max_tokens=32, overlap=0, pages=pages)
+        vectors = [[float(i == n) for i in range(1536)] for n in range(len(manifest['chunks']))]
+        with patch('medivector.knowledge.embed_texts', return_value=vectors):
+            response = self.upload_pdf(data, chunk_strategy='token', max_tokens=32, overlap_tokens=0)
+        self.assertEqual(response.status_code, 201, response.text)
+        version = self.approve(response.json())
+        self.assertEqual(version['pages'][1]['status'], 'no_text')
+        self.assertEqual(version['attachment']['sha256'], hashlib.sha256(data).hexdigest())
+        self.assertGreaterEqual(len(manifest['chunks']), 10)
+        for i in [n * (len(manifest["chunks"]) - 1) // 9 for n in range(10)]:
+            with self.subTest(question=i), patch('medivector.retrieval.embed_texts', return_value=[vectors[i]]), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery(f'Find instruction {i}', [], False)), patch('medivector.qa.chat_with_gpt', return_value='Synthetic answer [1]'):
+                answer = self.request('POST', '/api/ask', {'conversation_id': str(uuid.uuid4()), 'question': f'Find instruction {i}', 'branch_id': 'a', 'department_id': 'general'}, 'reader')
+            self.assertEqual(answer.status_code, 200, answer.text)
+            ref = answer.json()['references'][0]
+            self.assertEqual(ref['document_version_id'], version['id'])
+            path = f"/api/knowledge/chunks/{ref['uuid']}?branch_id=a&department_id=general"
+            source = self.request('GET', path, user='reader')
+            self.assertEqual(source.status_code, 200, source.text)
+            meta = source.json()['chunk_metadata']
+            self.assertEqual(source.json()['content'], text[meta['start']:meta['end']])
+            self.assertEqual(meta['pages'], manifest['chunks'][i]['pages'])
+            self.assertNotIn(2, meta['pages'])
+            original = self.request('GET', f"/api/knowledge/versions/{version['id']}/attachment?chunk_id={ref['uuid']}&branch_id=a&department_id=general", user='reader')
+            self.assertEqual(original.content, data)
+            self.assertEqual(original.headers['x-source-sha256'], hashlib.sha256(data).hexdigest())
+            self.assertEqual(original.headers['cache-control'], 'no-store')
+        # Original bytes cannot be overwritten, even by an application SQL update.
+        token = current_principal.set(Principal.from_config('admin', self.users['admin']))
+        try:
+            with self.assertRaises(Exception):
+                with db_connection() as conn, conn.cursor() as cur:
+                    cur.execute('UPDATE source_attachments SET data=%s WHERE version_id=%s', (b'changed', version['id']))
+        finally:
+            current_principal.reset(token)
+        self.assertEqual(self.action(version, 'withdraw').status_code, 200)
+        self.assertEqual(self.request('GET', path, user='reader').status_code, 404)
+        self.assertEqual(self.request('GET', f"/api/knowledge/versions/{version['id']}/attachment", user='reader').status_code, 404)
+
+    def test_pdf_rejects_invalid_empty_encrypted_and_foreign_access(self):
+        from pdf_fixture import pdf_bytes
+        from pypdf import PdfReader, PdfWriter
+        from io import BytesIO
+        for data in (b'not a pdf', b'%PDF-broken', pdf_bytes([[]])):
+            self.assertEqual(self.upload_pdf(data).status_code, 400)
+        writer = PdfWriter(); writer.append(PdfReader(BytesIO(pdf_bytes([['Synthetic']])))); writer.encrypt('secret')
+        output = BytesIO(); writer.write(output)
+        self.assertEqual(self.upload_pdf(output.getvalue()).status_code, 400)
+        self.assertEqual(self.upload_pdf(pdf_bytes([['Synthetic']]), user='reader').status_code, 403)
+        version = self.upload_pdf(pdf_bytes([['Synthetic source']])).json()
+        path = f"/api/knowledge/versions/{version['id']}/attachment"
+        self.assertEqual(self.request('GET', path, user='outsider').status_code, 404)
+        self.assertEqual(self.request('GET', path, user='reader').status_code, 404)
+        self.approve(version)
+        self.assertEqual(self.request('GET', path, user='reader').status_code, 200)
+        foreign = self.create(scopes=[{'branch_id': 'b', 'department_id': 'general'}])
+        self.assertEqual(self.request('GET', f"/api/knowledge/versions/{foreign['id']}/attachment", user='reader').status_code, 404)
+        self.assertEqual(self.request('GET', path + '?chunk_id=' + str(uuid.uuid4()) + '&branch_id=a&department_id=general', user='reader').status_code, 404)

@@ -70,3 +70,22 @@ test('reports HTTP status when the server returns a non-JSON error', async () =>
   mock.method(globalThis, 'fetch', async () => new Response('gateway unavailable', { status: 502 }))
   await assert.rejects(api('/api/documents'), /HTTP 502/)
 })
+
+test('PDF source reads send authorization, disable caching and preserve binary bytes', async () => {
+  const { apiBlob } = await import('../src/composables/useApi.ts')
+  token = 'test-source-token'
+  mock.method(globalThis, 'fetch', async (_path: string, options: RequestInit) => {
+    assert.equal(new Headers(options.headers).get('Authorization'), 'Bearer test-source-token')
+    assert.equal(options.cache, 'no-store')
+    return new Response('%PDF-fixture', { headers: { 'Content-Type': 'application/pdf' } })
+  })
+  const blob = await apiBlob('/api/knowledge/versions/test/attachment')
+  assert.equal(blob.type, 'application/pdf')
+  assert.equal(await blob.text(), '%PDF-fixture')
+})
+
+test('withdrawn or forbidden PDF reads fail without yielding a blob', async () => {
+  const { apiBlob } = await import('../src/composables/useApi.ts')
+  mock.method(globalThis, 'fetch', async () => Response.json({ error: 'Source is inaccessible' }, { status: 404 }))
+  await assert.rejects(apiBlob('/api/knowledge/versions/test/attachment'), /Source is inaccessible/)
+})

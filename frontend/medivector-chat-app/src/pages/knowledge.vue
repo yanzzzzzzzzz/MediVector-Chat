@@ -157,7 +157,35 @@
                                                                          @click="editorDialog?.close()"
                                                                        ><i aria-hidden="true" class="mdi mdi-close" /></button></header>
 
-        <div class="editor-body"><div v-if="notice?.tone === 'error'" class="notice error" role="alert"><i aria-hidden="true" class="mdi mdi-alert-circle-outline" />{{ notice.text }}</div><section class="form-section"><h3><span>01</span>基本資訊</h3><label class="field-label">文件標題<input v-model.trim="form.title" placeholder="輸入清楚、易於辨識的標題" required></label><div class="field-grid"><label class="field-label">版本名稱<input v-model.trim="form.version_label" placeholder="例如：v1.0" required></label><label class="field-label">文件來源<input v-model.trim="form.source" placeholder="例如：護理部、檢驗科" required></label></div><label class="field-label">來源網址<span class="optional">選填</span><input v-model.trim="form.source_url" placeholder="https://" type="url"></label></section><section class="form-section"><h3><span>02</span>適用範圍與效期</h3><div class="field-grid"><label class="field-label">院區<select v-model="branchId" required><option disabled value="">選擇院區</option><option v-for="branch in catalog?.branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option></select></label><label class="field-label">科別<select v-model="departmentId" required><option disabled value="">選擇科別</option><option v-for="department in catalog?.departments" :key="department.id" :value="department.id">{{ department.name }}</option></select></label><label class="field-label">生效時間<input v-model="effectiveFrom" required type="datetime-local"></label><label class="field-label">失效時間<span class="optional">選填</span><input v-model="effectiveUntil" type="datetime-local"></label></div><p v-if="form.document_id" class="field-help">新版本發布後，會取代同一文件的舊核准版本；請再次確認本次適用範圍。</p></section><section class="form-section"><h3><span>03</span>原文與授權</h3><label class="field-label">文件原文<textarea v-model="form.content" placeholder="貼上經授權的原始文件內容，請勿輸入病歷或個人健康資料。" required rows="8" /><span class="field-counter">{{ [...form.content].length.toLocaleString() }} 字</span></label><label class="field-label">授權或使用依據<input v-model.trim="form.license" placeholder="說明文件的授權來源或可使用依據" required></label><label class="field-label">{{ form.document_id ? '修訂理由' : '建立說明' }}<input v-model.trim="form.change_reason" placeholder="簡述本次建立或修訂的原因" required></label></section></div><footer class="dialog-footer"><span><i aria-hidden="true" class="mdi mdi-lock-outline" />先儲存為草稿</span><div><button class="button secondary" :disabled="busy" type="button" @click="editorDialog?.close()">取消</button><button class="button primary" :disabled="busy || !branchId || !departmentId" type="submit"><i aria-hidden="true" :class="['mdi', busy ? 'mdi-loading spinning' : 'mdi-content-save-outline']" />{{ busy ? '正在儲存…' : '儲存草稿' }}</button></div></footer></form>
+        <div class="editor-body"><div v-if="notice?.tone === 'error'" class="notice error" role="alert"><i aria-hidden="true" class="mdi mdi-alert-circle-outline" />{{ notice.text }}</div><section class="form-section"><h3><span>01</span>基本資訊</h3><label class="field-label">文件標題<input v-model.trim="form.title" placeholder="輸入清楚、易於辨識的標題" required></label><div class="field-grid"><label class="field-label">版本名稱<input v-model.trim="form.version_label" placeholder="例如：v1.0" required></label><label class="field-label">文件來源<input v-model.trim="form.source" placeholder="例如：護理部、檢驗科" required></label></div><label class="field-label">來源網址<span class="optional">選填</span><input v-model.trim="form.source_url" placeholder="https://" type="url"></label></section><section class="form-section"><h3><span>02</span>適用範圍與效期</h3><div class="field-grid"><label class="field-label">院區<select v-model="branchId" required><option disabled value="">選擇院區</option><option v-for="branch in catalog?.branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option></select></label><label class="field-label">科別<select v-model="departmentId" required><option disabled value="">選擇科別</option><option v-for="department in catalog?.departments" :key="department.id" :value="department.id">{{ department.name }}</option></select></label><label class="field-label">生效時間<input v-model="effectiveFrom" required type="datetime-local"></label><label class="field-label">失效時間<span class="optional">選填</span><input v-model="effectiveUntil" type="datetime-local"></label></div><p v-if="form.document_id" class="field-help">新版本發布後，會取代同一文件的舊核准版本；請再次確認本次適用範圍。</p></section>
+
+          <section class="form-section"><h3><span>03</span>原文與授權</h3>
+
+            <label class="field-label">PDF 附件<span class="optional">選填，最多 8 MiB</span>
+
+              <input
+                ref="pdfInput"
+                accept="application/pdf,.pdf"
+                :disabled="busy"
+                type="file"
+                @change="choosePdf"
+              >
+
+              <span v-if="pdfFile">{{ pdfFile.name }} · 系統將擷取原文；掃描圖片需先完成 OCR。</span></label>
+
+            <label class="field-label">文件原文<textarea
+              v-model="form.content"
+              :disabled="!!pdfFile"
+              placeholder="貼上經授權的原始文件內容，請勿輸入病歷或個人健康資料。"
+              :required="!pdfFile"
+              rows="8"
+            />
+
+              <span class="field-counter">{{ [...form.content].length.toLocaleString() }} 字</span></label>
+
+            <label class="field-label">授權或使用依據<input v-model.trim="form.license" placeholder="說明文件的授權來源或可使用依據" required></label><label class="field-label">{{ form.document_id ? '修訂理由' : '建立說明' }}<input v-model.trim="form.change_reason" placeholder="簡述本次建立或修訂的原因" required></label></section></div>
+
+        <footer class="dialog-footer"><span><i aria-hidden="true" class="mdi mdi-lock-outline" />先儲存為草稿</span><div><button class="button secondary" :disabled="busy" type="button" @click="editorDialog?.close()">取消</button><button class="button primary" :disabled="busy || !branchId || !departmentId" type="submit"><i aria-hidden="true" :class="['mdi', busy ? 'mdi-loading spinning' : 'mdi-content-save-outline']" />{{ busy ? '正在儲存…' : '儲存草稿' }}</button></div></footer></form>
     </dialog>
 
     <dialog ref="reviewDialog" aria-labelledby="review-title" class="review-dialog"><form v-if="reviewTarget" @submit.prevent="run(confirmTransition)"><header class="dialog-heading compact"><div><span class="dialog-eyebrow">DOCUMENT REVIEW</span><h2 id="review-title">{{ actionLabels[reviewTarget.action] }}</h2></div>
@@ -172,9 +200,9 @@
 
       <div class="review-body"><div class="review-document"><i aria-hidden="true" class="mdi mdi-file-document-outline" /><div><strong>{{ reviewTarget.version.title }}</strong><small>{{ reviewTarget.version.version_label }} · {{ scopeNames(reviewTarget.version, 'branch') }}</small></div></div><p>{{ actionDescriptions[reviewTarget.action] }}</p><div v-if="notice?.tone === 'error'" class="notice error" role="alert">{{ notice.text }}</div><label class="field-label">操作理由<textarea v-model.trim="reason" placeholder="請填寫理由，這段紀錄將保留於版本歷史中。" required rows="3" /></label></div><footer class="dialog-footer"><button class="button secondary" :disabled="busy" type="button" @click="reviewDialog?.close()">取消</button><button :class="['button', reviewTarget.action === 'withdraw' ? 'danger' : 'primary']" :disabled="busy || !reason" type="submit">{{ busy ? '正在處理…' : actionLabels[reviewTarget.action] }}</button></footer></form></dialog>
 
-    <dialog ref="sourceDialog" aria-labelledby="source-title" class="source-dialog"><template v-if="sourcePreview"><header class="dialog-heading"><div><span class="dialog-eyebrow">SOURCE DOCUMENT</span><h2 id="source-title">{{ sourcePreview.title }}</h2><p>{{ sourcePreview.version }} · {{ sourcePreview.source }}</p></div><button aria-label="關閉原文核對" class="icon-button" type="button" @click="sourceDialog?.close()"><i aria-hidden="true" class="mdi mdi-close" /></button></header>
+    <dialog ref="sourceDialog" aria-labelledby="source-title" class="source-dialog" @close="clearPdf"><template v-if="sourcePreview"><header class="dialog-heading"><div><span class="dialog-eyebrow">SOURCE DOCUMENT</span><h2 id="source-title">{{ sourcePreview.title }}</h2><p>{{ sourcePreview.version }} · {{ sourcePreview.source }}</p></div><button aria-label="關閉原文核對" class="icon-button" type="button" @click="sourceDialog?.close()"><i aria-hidden="true" class="mdi mdi-close" /></button></header>
 
-      <div class="source-body"><div class="source-meta"><span :class="['status-pill', sourcePreview.status]"><span />{{ labels[sourcePreview.status] || sourcePreview.status }}</span><span v-if="sourcePreview.location"><i aria-hidden="true" class="mdi mdi-book-open-page-variant-outline" />{{ sourcePreview.location }}</span></div>
+      <div class="source-body"><div class="source-meta"><span :class="['status-pill', sourcePreview.status]"><span />{{ labels[sourcePreview.status] || sourcePreview.status }}</span><span v-if="sourcePreview.scope">{{ sourcePreview.scope }}</span><span v-if="sourcePreview.location"><i aria-hidden="true" class="mdi mdi-book-open-page-variant-outline" />{{ sourcePreview.location }}</span></div>
 
         <a
           v-if="sourcePreview.sourceUrl"
@@ -184,6 +212,26 @@
           target="_blank"
         >查看來源網址<i aria-hidden="true" class="mdi mdi-open-in-new" /></a>
 
+        <div v-if="sourcePreview.attachment" class="pdf-source"><p>原始 PDF：{{ sourcePreview.attachment.filename }}</p>
+
+          <button
+            v-if="!pdfUrl"
+            class="button secondary"
+            :disabled="busy"
+            type="button"
+            @click="run(loadPdf)"
+          >載入原始 PDF</button>
+
+          <a
+            v-else
+            class="source-link"
+            :href="`${pdfUrl}#page=${sourcePreview.page || 1}`"
+            rel="noopener"
+            target="_blank"
+          >開啟原始 PDF（第 {{ sourcePreview.page || 1 }} 頁）</a>
+
+          <p v-if="sourcePreview.unparsedPages?.length">第 {{ sourcePreview.unparsedPages.join('、') }} 頁無可用文字或解析失敗，未用於檢索；請核對原件。</p></div>
+
         <pre>{{ sourcePreview.content }}</pre><details class="trace-details"><summary>查看版本追溯資訊</summary><dl><dt>文件 ID</dt><dd>{{ sourcePreview.documentId }}</dd><dt>版本 ID</dt><dd>{{ sourcePreview.versionId }}</dd></dl></details></div>
 
       <footer class="source-footer"><i aria-hidden="true" class="mdi mdi-information-outline" />引用原文可供核對，不代表生成答案已通過事實驗證。</footer></template></dialog>
@@ -192,13 +240,15 @@
 
 <script setup lang="ts">
   import type { AskResponse, ReferenceItem } from '@/types'
-  import { computed, inject, onMounted, ref, watch } from 'vue'
-  import { api } from '@/composables/useApi'
+  import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
+  import { api, apiBlob } from '@/composables/useApi'
 
   interface Entry { id: string, name: string }
   interface Catalog { ai_available?: boolean, organization_id: string, principal: string, role: string, branches: Entry[], departments: Entry[] }
-  interface Version { index_status?: 'ready' | 'pending', id: string, document_id: string, version_label: string, status: string, title: string, source: string, source_url: string, license: string, content?: string, effective_from: string, effective_until: string | null, approved_by: string | null, approved_at: string | null, scopes: { branch_id: string, department_id: string }[] }
-  interface SourcePreview { title: string, version: string, status: string, source: string, sourceUrl?: string, content: string, documentId: string, versionId: string, location?: string }
+  interface PageMapping { page: number, status?: string }
+  interface Attachment { filename: string, sha256: string }
+  interface Version { attachment?: Attachment | null, pages?: PageMapping[], index_status?: 'ready' | 'pending', id: string, document_id: string, version_label: string, status: string, title: string, source: string, source_url: string, license: string, content?: string, effective_from: string, effective_until: string | null, approved_by: string | null, approved_at: string | null, scopes: { branch_id: string, department_id: string }[] }
+  interface SourcePreview { title: string, version: string, status: string, source: string, sourceUrl?: string, content: string, documentId: string, versionId: string, location?: string, attachment?: Attachment | null, attachmentPath?: string, page?: number, scope?: string, unparsedPages?: number[] }
   type View = 'documents' | 'review' | 'query' | 'settings'
   type Filter = 'all' | 'draft' | 'in_review' | 'approved' | 'history'
   type Action = 'submit' | 'approve' | 'return' | 'withdraw'
@@ -219,6 +269,24 @@
   const sourceDialog = ref<HTMLDialogElement | null>(null)
   const reviewTarget = ref<{ version: Version, action: Action } | null>(null)
   const sourcePreview = ref<SourcePreview | null>(null)
+  const pdfFile = ref<File | null>(null)
+  const pdfInput = ref<HTMLInputElement | null>(null)
+  const pdfUrl = ref('')
+  function clearPdf () {
+    if (pdfUrl.value) URL.revokeObjectURL(pdfUrl.value)
+    pdfUrl.value = ''
+  }
+  function choosePdf (event: Event) {
+    pdfFile.value = (event.target as HTMLInputElement).files?.[0] || null
+  }
+  async function loadPdf () {
+    clearPdf()
+    const preview = sourcePreview.value
+    if (!preview?.attachmentPath) return
+    const blob = await apiBlob(preview.attachmentPath)
+    pdfUrl.value = URL.createObjectURL(blob)
+  }
+  onUnmounted(clearPdf)
   const reason = ref('')
   const blankForm = () => ({ document_id: null as string | null, title: '', version_label: 'v1.0', source: '', source_url: '', license: '', content: '', change_reason: '' })
   const form = ref(blankForm())
@@ -324,6 +392,8 @@
     notify('適用範圍名稱已儲存。')
   }
   function startNew () {
+    pdfFile.value = null
+    if (pdfInput.value) pdfInput.value.value = ''
     form.value = blankForm()
     effectiveFrom.value = localDatetime()
     effectiveUntil.value = ''
@@ -331,7 +401,16 @@
     editorDialog.value?.showModal()
   }
   async function createVersion () {
-    const created = await api<Version>('/api/knowledge/versions', { method: 'POST', body: JSON.stringify({ ...form.value, scopes: [{ branch_id: branchId.value, department_id: departmentId.value }], effective_from: new Date(effectiveFrom.value).toISOString(), effective_until: effectiveUntil.value ? new Date(effectiveUntil.value).toISOString() : null }) })
+    const payload = { ...form.value, scopes: [{ branch_id: branchId.value, department_id: departmentId.value }], effective_from: new Date(effectiveFrom.value).toISOString(), effective_until: effectiveUntil.value ? new Date(effectiveUntil.value).toISOString() : null }
+    let created: Version
+    if (pdfFile.value) {
+      const data = new FormData()
+      data.set('metadata', JSON.stringify({ ...payload, content: '' }))
+      data.set('file', pdfFile.value)
+      created = await api<Version>('/api/knowledge/versions/pdf', { method: 'POST', body: data })
+    } else {
+      created = await api<Version>('/api/knowledge/versions', { method: 'POST', body: JSON.stringify(payload) })
+    }
     editorDialog.value?.close()
     changeView('documents')
     await load()
@@ -359,6 +438,9 @@
     notify(`${target.version.title}：${actionLabels[target.action]}已完成。`)
   }
   async function inspect (version: Version, revise: boolean) {
+    clearPdf()
+    pdfFile.value = null
+    if (pdfInput.value) pdfInput.value.value = ''
     const detail = await api<Version>(`/api/knowledge/versions/${version.id}`)
     notice.value = null
     if (revise) {
@@ -367,7 +449,7 @@
       effectiveUntil.value = ''
       editorDialog.value?.showModal()
     } else {
-      sourcePreview.value = { title: detail.title, version: detail.version_label, status: detail.status, source: detail.source, sourceUrl: detail.source_url, content: detail.content || '', documentId: detail.document_id, versionId: detail.id }
+      sourcePreview.value = { title: detail.title, version: detail.version_label, status: detail.status, source: detail.source, sourceUrl: detail.source_url, content: detail.content || '', documentId: detail.document_id, versionId: detail.id, scope: `${scopeNames(detail, 'branch')}／${scopeNames(detail, 'department')}`, attachment: detail.attachment, attachmentPath: `/api/knowledge/versions/${detail.id}/attachment`, unparsedPages: detail.pages?.filter(page => page.status !== 'extracted').map(page => page.page) }
       sourceDialog.value?.showModal()
     }
   }
@@ -377,12 +459,13 @@
     answer.value = await api<AskResponse>('/api/ask', { method: 'POST', body: JSON.stringify({ conversation_id: crypto.randomUUID(), question: question.value, branch_id: branchId.value, department_id: departmentId.value, rag_enabled: true }) })
   }
   async function openCitation (reference: ReferenceItem) {
+    clearPdf()
     const metadata = reference.chunk_metadata || {}
     const params = new URLSearchParams({ branch_id: String(metadata.branch_id || ''), department_id: String(metadata.department_id || '') })
-    const excerpt = await api<{ content: string, version_label: string, document_id: string, document_version_id: string, source: string, source_url: string, chunk_metadata: Record<string, unknown> }>(`/api/knowledge/chunks/${reference.uuid}?${params}`)
+    const excerpt = await api<{ content: string, version_label: string, document_id: string, document_version_id: string, source: string, source_url: string, chunk_metadata: Record<string, unknown>, attachment?: Attachment | null }>(`/api/knowledge/chunks/${reference.uuid}?${params}`)
     if (excerpt.document_version_id !== reference.document_version_id) throw new Error('引用版本不一致，請重新查詢。')
     const pages = excerpt.chunk_metadata.pages
-    sourcePreview.value = { title: reference.title, version: excerpt.version_label, status: 'approved', source: excerpt.source, sourceUrl: excerpt.source_url, content: excerpt.content, documentId: excerpt.document_id, versionId: excerpt.document_version_id, location: `${Array.isArray(pages) && pages.length > 0 ? `第 ${pages.join('、')} 頁` : '純文字來源'} · 字元 ${excerpt.chunk_metadata.start}–${excerpt.chunk_metadata.end}` }
+    sourcePreview.value = { title: reference.title, version: excerpt.version_label, status: 'approved', source: excerpt.source, sourceUrl: excerpt.source_url, content: excerpt.content, documentId: excerpt.document_id, versionId: excerpt.document_version_id, scope: `${branchName(String(metadata.branch_id))}／${departmentName(String(metadata.department_id))}`, attachment: excerpt.attachment, attachmentPath: `/api/knowledge/versions/${excerpt.document_version_id}/attachment?${params}&chunk_id=${encodeURIComponent(reference.uuid)}`, page: Array.isArray(pages) ? Number(pages[0]) || 1 : 1, location: `${Array.isArray(pages) && pages.length > 0 ? `第 ${pages.join('、')} 頁` : '純文字來源'} · 字元 ${excerpt.chunk_metadata.start}–${excerpt.chunk_metadata.end}` }
     sourceDialog.value?.showModal()
   }
   watch([branchId, departmentId], () => {

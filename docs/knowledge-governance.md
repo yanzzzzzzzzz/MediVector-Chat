@@ -134,3 +134,27 @@ run, replays expanded queries across modes and preserves the manifest in its rep
 or mismatched corpora. The manifest contains hashes and stable IDs, not an independent review of source
 correctness. Human-reviewed datasets, full #16 citation coverage, #17 generated drafts and #18/#19 gates
 are not claimed complete by this source-governance change.
+
+## PDF source provenance (#16)
+
+`POST /api/knowledge/versions/pdf` accepts multipart `metadata` (the version JSON, omitting content)
+and `file`. Only authorized staff may create a source; the server extracts the content itself with
+pypdf. PDF bytes (up to 8 MiB) and their SHA256 are stored transactionally in `source_attachments`,
+with an immutable one-to-one version binding. This bounded MVP uses PostgreSQL bytea rather than
+requiring a separate public object store. Existing text versions remain unchanged.
+
+Every original page retains a mapping/status: `extracted`, `no_text`, or `extraction_failed`.
+Empty/failed pages are not assigned to chunks. An all-image/empty PDF is rejected; OCR is not
+implemented. Damaged/encrypted PDFs fail clearly. Revision uploads create fresh version IDs and never
+overwrite prior bytes. Chunk metadata includes original Unicode offsets and overlapping source pages.
+
+The workspace accepts a PDF in the source editor, shows extraction diagnostics and opens original bytes
+at the cited page. `GET /api/knowledge/versions/{version_id}/attachment` requires authorization; citation
+reads also pass the chunk ID and scope and revalidate that exact version. Drafts/history remain staff-only;
+expired/withdrawn/foreign sources are unavailable to readers. Responses disable caching, have fixed PDF
+content type and never put credentials into URLs. Previously downloaded bytes cannot be revoked.
+
+Tests run ten deterministic question→retrieval→citation→original-PDF paths across multiple pages, check
+version/checksum/offset identity, retain blank-page diagnostics, reject invalid/encrypted files and exercise
+withdrawal, foreign organization, scope and draft access. Embedding and generation are mocked in these
+regression tests: they establish provenance and permissions, not semantic retrieval or clinical quality.

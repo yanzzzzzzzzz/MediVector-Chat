@@ -50,3 +50,10 @@ See [experiment instructions](README.md) and [measured synthetic benchmark](repo
 Validation for this increment: 53 backend tests, including real PostgreSQL migration/state/ACL/ownership,
 source provenance/event integrity and scoped export protocol cases. Frontend HTTP tests, full lint,
 TypeScript and production build are checked by CI. See [governance design](../docs/knowledge-governance.md).
+
+## Citation completion (#16)
+
+Added immutable version-bound PDF ingestion/original bytes, page extraction diagnostics, authenticated
+attachment reads and source links with cited page/offset/scope. Ten deterministic multi-page QA traces
+and permission/withdrawal/invalid-PDF regression cases exercise provenance. OCR is explicitly unsupported;
+all-image PDFs are rejected. See `docs/knowledge-governance.md` for endpoint and storage details.

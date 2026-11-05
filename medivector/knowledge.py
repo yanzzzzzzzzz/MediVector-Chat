@@ -79,6 +79,9 @@ def serialize_version(cur, row, *, include_content=True):
     counts = cur.fetchone()
     row["index_status"] = "ready" if counts["total"] > 0 and counts["total"] == counts["indexed"] else "pending"
     row["chunk_count"], row["indexed_chunk_count"] = counts["total"], counts["indexed"]
+    cur.execute("SELECT filename,content_type,sha256 FROM source_attachments WHERE version_id=%s", (row["id"],))
+    attachment = cur.fetchone()
+    row["attachment"] = dict(attachment) if attachment else None
     if not include_content:
         row.pop("content", None)
     return row
@@ -115,7 +118,7 @@ def validate_catalog_scopes(cur, principal, scopes):
             raise KnowledgeError("Branch or department is not registered for this organization")
 
 
-def create_version(payload: CreateVersion):
+def create_version(payload: CreateVersion, *, attachment=None, pages=None):
     principal = organization_principal({"admin", "nurse", "reviewer"})
     check_scopes(principal, payload.scopes)
     if principal.role not in payload.allowed_roles or (payload.allowed_users and principal.name not in payload.allowed_users):
@@ -131,7 +134,7 @@ def create_version(payload: CreateVersion):
             if not cur.fetchone():
                 raise KnowledgeError("Document not found or inaccessible", 404)
     manifest = chunk_manifest(payload.content, document_id=str(document_id), version=str(version_id), strategy=payload.chunk_strategy,
-                              max_tokens=payload.max_tokens, overlap=payload.overlap_tokens)
+                              max_tokens=payload.max_tokens, overlap=payload.overlap_tokens, pages=pages)
     # Source governance is available without an AI credential. NULL means not indexed,
     # never a placeholder embedding. Configured upstream failures still fail explicitly.
     try:
@@ -159,6 +162,11 @@ def create_version(payload: CreateVersion):
               payload.effective_from, payload.effective_until, principal.name, payload.change_reason,
               payload.allowed_roles, payload.allowed_users))
         row = cur.fetchone()
+        if attachment:
+            cur.execute("UPDATE document_versions SET pages=%s WHERE id=%s RETURNING *", (Jsonb(pages), version_id))
+            row = cur.fetchone()
+            cur.execute("INSERT INTO source_attachments(version_id,filename,content_type,sha256,data) VALUES (%s,%s,'application/pdf',%s,%s)",
+                        (version_id, attachment["filename"], hashlib.sha256(attachment["data"]).hexdigest(), attachment["data"]))
         for scope in {(s.branch_id, s.department_id) for s in payload.scopes}:
             cur.execute("INSERT INTO document_version_scopes VALUES (%s,%s,%s)", (version_id, *scope))
         for chunk, vector in zip(manifest["chunks"], vectors):
@@ -261,7 +269,9 @@ def citation_chunk(chunk_id, branch_id, department_id):
         row = cur.fetchone()
         if not row:
             raise KnowledgeError("Citation not found, withdrawn, expired or inaccessible", 404)
-        return {**dict(row), "applied_filters": context.payload()}
+        cur.execute("SELECT filename,sha256 FROM source_attachments WHERE version_id=%s", (row["document_version_id"],))
+        attachment = cur.fetchone()
+        return {**dict(row), "attachment": dict(attachment) if attachment else None, "applied_filters": context.payload()}
 
 
 def redact_inaccessible_history(messages):
@@ -339,3 +349,42 @@ def index_version(version_id, reason: str):
         cur.execute("INSERT INTO knowledge_events(document_id,version_id,actor,action,from_status,to_status,reason) VALUES (%s,%s,%s,'index',%s,%s,%s)",
                     (row["document_id"], version_id, principal.name, row["status"], row["status"], reason))
         return serialize_version(cur, row)
+
+
+def create_pdf_version(metadata: dict, data: bytes, filename: str):
+    """Extract original bytes server-side; clients cannot forge PDF offsets or pages."""
+    organization_principal({"admin", "nurse", "reviewer"})
+    if not data or len(data) > 8 * 1024 * 1024:
+        raise KnowledgeError("PDF must be between 1 byte and 8 MiB", 413)
+    if not filename.lower().endswith(".pdf") or not data.startswith(b"%PDF-"):
+        raise KnowledgeError("Only PDF attachments are accepted")
+    from .chunking import page_text
+    try:
+        text, pages = page_text(data)
+    except Exception as exc:
+        raise KnowledgeError("PDF cannot be parsed; encrypted or damaged files are not supported") from exc
+    if not text:
+        raise KnowledgeError("PDF contains no extractable text; OCR is not available")
+    if metadata.get("content"):
+        raise KnowledgeError("PDF content is extracted by the server; omit content")
+    payload = CreateVersion.model_validate({**metadata, "content": text})
+    # Discard client paths and controls from display metadata.
+    filename = filename.replace("\\", "/").split("/")[-1]
+    filename = "".join(c for c in filename if c.isprintable())[:255] or "document.pdf"
+    return create_version(payload, attachment={"filename": filename, "data": data}, pages=pages)
+
+
+def source_attachment(version_id, *, chunk_id=None, branch_id=None, department_id=None):
+    principal = organization_principal()
+    # Citation access always revalidates the exact version/scope at request time.
+    if chunk_id:
+        citation = citation_chunk(chunk_id, branch_id, department_id)
+        if citation["document_version_id"] != version_id:
+            raise KnowledgeError("Citation version mismatch", 404)
+    with db_connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        visible_version(cur, version_id, principal)
+        cur.execute("SELECT data,sha256 FROM source_attachments WHERE version_id=%s", (version_id,))
+        row = cur.fetchone()
+        if not row:
+            raise KnowledgeError("Source attachment not found", 404)
+        return bytes(row["data"]), row["sha256"]

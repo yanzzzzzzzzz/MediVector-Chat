@@ -34,3 +34,17 @@ class ChunkingTests(unittest.TestCase):
     def test_invalid_configuration(self):
         with self.assertRaises(ValueError):
             chunk_manifest("x", document_id="doc", version="v1", max_tokens=8, overlap=8)
+
+    def test_pdf_keeps_blank_page_and_failed_page_diagnostics_without_false_citations(self):
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        from medivector.chunking import page_text
+        good = SimpleNamespace(extract_text=lambda: 'original text')
+        blank = SimpleNamespace(extract_text=lambda: '')
+        def failed():
+            raise ValueError('broken page')
+        with patch('pypdf.PdfReader', return_value=SimpleNamespace(pages=[good, blank, SimpleNamespace(extract_text=failed), good])):
+            text, pages = page_text(b'fixture')
+        self.assertEqual([page['status'] for page in pages], ['extracted', 'no_text', 'extraction_failed', 'extracted'])
+        manifest = chunk_manifest(text, document_id='doc', version='v1', pages=pages)
+        self.assertEqual(manifest['chunks'][0]['pages'], [1, 4])
