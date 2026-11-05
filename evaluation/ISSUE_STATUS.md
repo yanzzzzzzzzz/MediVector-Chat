@@ -82,3 +82,11 @@ publication blocks deterministic Fail and requires explicit Reviewer/Admin revie
 Offline/CI gates replay frozen traces, bind manual approvals to the exact report hash, cannot override
 Fail, emit non-overwriting JSON/Markdown and retain CI reports in run summaries. See `docs/quality-audit.md`.
 Human-reviewed clinical baseline and real professional Pilot remain #8/#20 requirements.
+
+## #8 human-review preparation (still open)
+
+Prepared 30 stable-ID candidate cases with a frozen synthetic preview source/manifest packet and human
+review worksheet. Python and the independent .NET Lab reject pending-human data; review provenance remains
+blank. The separate .NET 10 checkout passes its Release build and synthetic metric/contract self-tests,
+but remote repository creation/push is pending. No human-reviewed baseline, clinical claim or five-failure
+analysis is fabricated. These external/human completion requirements keep #8 open.

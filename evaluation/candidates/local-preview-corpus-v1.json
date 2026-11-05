@@ -1,0 +1,85 @@
+{
+  "notice": "30 題候選標註由程式準備；尚未人工檢查，不是 ground truth 或已驗證 baseline。來源均為合成操作示範，非臨床文件。",
+  "manifest": {
+    "format_version": 1,
+    "organization_id": "local-preview-hospital",
+    "branch_id": "main",
+    "department_id": "general",
+    "embedding_model": "text-embedding-3-small",
+    "versions": [
+      {
+        "version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+        "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+        "version_label": "示範 v1.1",
+        "version_number": 2,
+        "checksum": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+        "status": "approved",
+        "effective_from": "2026-11-05T07:54:00+00:00",
+        "effective_until": null,
+        "chunk_ids": [
+          "dba96957-0aed-44bf-802d-97db8a1ecf1e"
+        ]
+      },
+      {
+        "version_id": "d91afc94-9f82-449a-82dd-87cba2872233",
+        "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+        "version_label": "PDF 示範 v1",
+        "version_number": 1,
+        "checksum": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+        "status": "approved",
+        "effective_from": "2026-11-04T14:51:06.342409+00:00",
+        "effective_until": null,
+        "chunk_ids": [
+          "5db022be-d7ef-4c38-9f14-64363b608f36"
+        ]
+      }
+    ],
+    "query_at": "2026-11-05T15:28:33.318932+00:00",
+    "manifest_sha256": "6b9bfdfedd2667bde21bc7accf551b1f25e9858f22c7617566884e705333dc8c"
+  },
+  "sources": [
+    {
+      "id": "abcd691e-7fa5-4057-a696-9797efc87465",
+      "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+      "version_label": "示範 v1.1",
+      "title": "【示範】手部清潔與洗手步驟",
+      "source": "合成示範摘要｜參考 CDC 公開資訊",
+      "source_url": "https://www.cdc.gov/clean-hands/about/index.html",
+      "license": "自行撰寫之流程示範摘要；保留參考來源連結，不代表引用機構授權或院所正式核准。",
+      "content": "【本機操作示範】未經院所醫療專業審查，不得作為正式衛教或個人化建議。\n\n一般衛教摘要\n以流動清水和肥皂清潔雙手，搓洗手背、指縫與指甲周圍至少 20 秒，再沖淨並擦乾。\n\n留意手部清潔的時機\n\n版本示範註記：本修訂新增操作說明，衛教摘要未變更。\n準備食物及用餐前後、如廁後、擤鼻涕或咳嗽打噴嚏後。\n\n示範用途\n展示建立草稿、送審、核准與來源追溯流程；實際使用前仍須由院所專業人員審查。",
+      "checksum": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+      "pages": []
+    },
+    {
+      "id": "d91afc94-9f82-449a-82dd-87cba2872233",
+      "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+      "version_label": "PDF 示範 v1",
+      "title": "【示範】PDF 頁碼與原件核對",
+      "source": "自行建立的合成流程範例",
+      "source_url": "",
+      "license": "合成操作測試；不供臨床使用",
+      "content": "Synthetic source - workflow demonstration only.\nPage one: verify appointment location.\n\nSynthetic source - workflow demonstration only.\nPage three: bring the appointment notice.",
+      "checksum": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+      "pages": [
+        {
+          "end": 86,
+          "page": 1,
+          "start": 0,
+          "status": "extracted"
+        },
+        {
+          "end": 86,
+          "page": 2,
+          "start": 86,
+          "status": "no_text"
+        },
+        {
+          "end": 177,
+          "page": 3,
+          "start": 88,
+          "status": "extracted"
+        }
+      ]
+    }
+  ]
+}

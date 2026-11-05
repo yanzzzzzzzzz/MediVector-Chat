@@ -25,3 +25,13 @@ class RetrievalMetricTests(unittest.TestCase):
     def test_unreviewed_dataset_rejected(self):
         with self.assertRaises(ValueError):
             validate_dataset({"cases": []})
+
+    def test_candidate_packet_has_thirty_stable_unreviewed_cases_and_is_rejected(self):
+        import json
+        from pathlib import Path
+        packet = json.loads((Path(__file__).parents[1] / 'evaluation/candidates/local-preview-v1.json').read_text())
+        self.assertEqual(len(packet['cases']), 30)
+        self.assertEqual(len({case['id'] for case in packet['cases']}), 30)
+        self.assertTrue(all(not case['reviewed_by'] and not case['reviewed_at'] for case in packet['cases']))
+        with self.assertRaisesRegex(ValueError, 'human review'):
+            validate_dataset(packet)

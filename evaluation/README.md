@@ -123,3 +123,19 @@ For a reviewed retrieval dataset, add `--medical-rules path/to/rules.json` to th
 rejected. Rules then appear in the same JSON/Markdown run report while generation faithfulness remains
 separate. Use only synthetic or appropriately authorized nonpersonal cases; do not put personal health
 information in stored evaluation traces. Release gating is handled separately in #19.
+
+## Human-review handoff for #8
+
+`candidates/local-preview-v1.json` contains 30 proposed cases against the frozen synthetic preview corpus.
+`candidates/local-preview-corpus-v1.json` preserves the authorized nonpersonal source text/version/page
+snapshot; `candidates/REVIEW.md` is the review worksheet. All review identities/times are intentionally
+empty and `review_status` is `pending_human`. The exporter refuses this state. Real reviewers must correct
+answerability, document/version and evidence spans, enter actual reviewer IDs/timezones, set a new dataset
+version and mark it reviewed. Do not bulk-fill fake provenance. Corpus changes require refreezing/review.
+
+An independent .NET 10 `rag-evaluation-lab` checkout has been prepared separately (not embedded in this
+repository). Its dependency-free Release build/self-tests independently cover Recall/MRR/Hit/evidence
+coverage/no-answer/P50/P95 and controlled export contracts. Remote repository creation/push is pending;
+no independent Lab CI or reviewed baseline is claimed until that handoff is complete. The Lab consumes
+this export contract without any OpenAI credential. At least five real failure analyses remain dependent
+on a valid reviewed run; do not fabricate failures to fill the queue.

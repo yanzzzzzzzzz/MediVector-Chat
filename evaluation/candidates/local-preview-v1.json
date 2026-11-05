@@ -1,0 +1,564 @@
+{
+  "dataset_version": "DRAFT-local-preview-candidates-v1",
+  "review_status": "pending_human",
+  "notice": "30 題候選標註由程式準備；尚未人工檢查，不是 ground truth 或已驗證 baseline。來源均為合成操作示範，非臨床文件。",
+  "corpus_version": "6b9bfdfedd2667bde21bc7accf551b1f25e9858f22c7617566884e705333dc8c",
+  "index_version": "preview-6b9bfdfedd2667bde21bc7accf551b1f25e9858f22c7617566884e705333dc8c",
+  "embedding_model": "text-embedding-3-small",
+  "retrieval_context": {
+    "branch_id": "main",
+    "department_id": "general"
+  },
+  "cases": [
+    {
+      "id": "candidate-001",
+      "query": "洗手時至少要搓洗多久？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 68,
+          "end": 75
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-002",
+      "query": "洗手應清潔哪些部位？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 58,
+          "end": 68
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-003",
+      "query": "示範文件提到以哪些用品洗手？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 44,
+          "end": 51
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-004",
+      "query": "搓洗完成後接著做什麼？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 76,
+          "end": 82
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-005",
+      "query": "準備食物前後是否應注意手部清潔？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 122,
+          "end": 131
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-006",
+      "query": "用餐前後是否應注意手部清潔？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 122,
+          "end": 131
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-007",
+      "query": "如廁後是否應注意手部清潔？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 132,
+          "end": 135
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-008",
+      "query": "擤鼻涕後是否應注意手部清潔？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 136,
+          "end": 139
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-009",
+      "query": "咳嗽或打噴嚏後是否應注意手部清潔？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 140,
+          "end": 146
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-010",
+      "query": "這份洗手文件是否已經醫療專業審查？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 8,
+          "end": 18
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-011",
+      "query": "洗手範例可以當個人化建議嗎？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 19,
+          "end": 33
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-012",
+      "query": "洗手文件的示範用途是什麼？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 154,
+          "end": 173
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-013",
+      "query": "v1.1 示範註記是否變更衛教摘要？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 113,
+          "end": 120
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-014",
+      "query": "洗手範例實際使用前還須誰審查？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "568a84f7-6fe8-4436-8a8e-2967011f7a0b"
+      ],
+      "expected_document_version_ids": [
+        "abcd691e-7fa5-4057-a696-9797efc87465"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+          "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+          "start": 174,
+          "end": 190
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-015",
+      "query": "PDF 合成範例在預約前要確認什麼地點？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "dc0a24b6-73fc-41cc-a32e-0b69fd09f869"
+      ],
+      "expected_document_version_ids": [
+        "d91afc94-9f82-449a-82dd-87cba2872233"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+          "source_sha256": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+          "start": 58,
+          "end": 85
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-016",
+      "query": "PDF 合成範例要攜帶什麼文件？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "dc0a24b6-73fc-41cc-a32e-0b69fd09f869"
+      ],
+      "expected_document_version_ids": [
+        "d91afc94-9f82-449a-82dd-87cba2872233"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+          "source_sha256": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+          "start": 148,
+          "end": 176
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-017",
+      "query": "PDF 範例屬於正式臨床文件還是流程示範？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "dc0a24b6-73fc-41cc-a32e-0b69fd09f869"
+      ],
+      "expected_document_version_ids": [
+        "d91afc94-9f82-449a-82dd-87cba2872233"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+          "source_sha256": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+          "start": 19,
+          "end": 46
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-018",
+      "query": "PDF 第一頁的準備事項是什麼？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "dc0a24b6-73fc-41cc-a32e-0b69fd09f869"
+      ],
+      "expected_document_version_ids": [
+        "d91afc94-9f82-449a-82dd-87cba2872233"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+          "source_sha256": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+          "start": 48,
+          "end": 86
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-019",
+      "query": "PDF 第三頁的準備事項是什麼？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "dc0a24b6-73fc-41cc-a32e-0b69fd09f869"
+      ],
+      "expected_document_version_ids": [
+        "d91afc94-9f82-449a-82dd-87cba2872233"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+          "source_sha256": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+          "start": 136,
+          "end": 177
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-020",
+      "query": "PDF 範例有提到預約地點與通知單嗎？",
+      "answerable": true,
+      "relevant_document_ids": [
+        "dc0a24b6-73fc-41cc-a32e-0b69fd09f869"
+      ],
+      "expected_document_version_ids": [
+        "d91afc94-9f82-449a-82dd-87cba2872233"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+          "source_sha256": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+          "start": 0,
+          "end": 177
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-021",
+      "query": "依本院規範，居家血壓每天要量幾次？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-022",
+      "query": "本院是否允許血壓偏高時自行停藥？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-023",
+      "query": "本院 MRI 檢查前需禁食幾小時？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-024",
+      "query": "本院大腸鏡檢查前何時停用藥物？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-025",
+      "query": "本院糖尿病衛教建議每餐吃多少澱粉？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-026",
+      "query": "本院出院後傷口紅腫要採取什麼處置？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-027",
+      "query": "這個藥物依本院規定每次應吃多少？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-028",
+      "query": "其他院區的檢查前準備流程為何？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-029",
+      "query": "本院最新門診服務時間是幾點？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "candidate-030",
+      "query": "本院規定沒有肥皂時應使用幾％酒精？",
+      "answerable": false,
+      "relevant_document_ids": [],
+      "expected_document_version_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    }
+  ]
+}

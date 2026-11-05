@@ -39,6 +39,9 @@ def metrics(case, results, k):
 
 
 def validate_dataset(dataset):
+    from datetime import datetime
+    if dataset.get("review_status") == "pending_human":
+        raise ValueError("Candidate labels still require human review; do not publish a baseline")
     if not dataset.get("dataset_version") or not dataset.get("corpus_version") or not dataset.get("index_version") or not dataset.get("embedding_model"):
         raise ValueError("Freeze corpus/index/model versions before evaluation")
     cases = dataset.get("cases", [])
@@ -47,6 +50,12 @@ def validate_dataset(dataset):
     for case in cases:
         if not case.get("query", "").strip() or not case.get("reviewed_by") or not case.get("reviewed_at"):
             raise ValueError("Every case must include human review provenance")
+        try:
+            reviewed_at = datetime.fromisoformat(case["reviewed_at"].replace("Z", "+00:00"))
+            if reviewed_at.tzinfo is None or not isinstance(case["reviewed_by"], str) or not case["reviewed_by"].strip():
+                raise ValueError()
+        except (ValueError, TypeError, AttributeError):
+            raise ValueError("Human review needs a reviewer and timezone-aware review time") from None
         if not isinstance(case.get("answerable"), bool) or not isinstance(case.get("relevant_document_ids"), list):
             raise ValueError("Invalid answerability or relevance labels")
         if bool(case["relevant_document_ids"]) != case["answerable"]:
