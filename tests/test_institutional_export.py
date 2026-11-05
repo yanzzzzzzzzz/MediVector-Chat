@@ -26,7 +26,7 @@ class InstitutionalExportTests(unittest.TestCase):
                 self.assertEqual(payload['retrieval_terms'], ['term'])
             return httpx.Response(200, json={"results": [{"document_id": "doc"}], "standalone_query": "standalone", "terms": ["term"], "settings": {"embedding_model": "fake-model"}, "elapsed_ms": 1})
         dataset = {"dataset_version": "SYNTHETIC-TEST-ONLY", "corpus_version": "frozen", "index_version": "fake-index", "embedding_model": "fake-model", "retrieval_context": {"branch_id": "a", "department_id": "lab"}, "cases": [
-            {"id": f"q{i:02}", "query": "synthetic", "reviewed_by": "TEST-FIXTURE-NOT-A-REAL-REVIEW", "reviewed_at": "2026-11-04", "answerable": True, "relevant_document_ids": ["doc"]} for i in range(30)]}
+            {"id": f"q{i:02}", "query": "synthetic", "reviewed_by": "TEST-FIXTURE-NOT-A-REAL-REVIEW", "reviewed_at": "2026-11-04T00:00:00Z", "answerable": True, "relevant_document_ids": ["doc"]} for i in range(30)]}
         with tempfile.TemporaryDirectory() as directory:
             source, output = Path(directory)/'fixture.json', Path(directory)/'report.json'
             source.write_text(json.dumps(dataset))
