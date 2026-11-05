@@ -124,6 +124,11 @@ def main():
         verify_manifest()
     report = {"dataset": dataset, "corpus_manifest": corpus_manifest, "experiments": experiments, "generation_faithfulness": "Not measured by retrieval evaluation",
               "limitations": "Human labels are supplied, not verified by this script. Freeze DB externally; synthetic data is not clinical validation. K is the first K chunk results; documents are counted once for recall. The same standalone query and terms are replayed across raw/filtered; K runs reuse results. Freeze corpus and index externally during the run."}
+    from medivector.experiment_snapshot import build_snapshot
+    report["snapshot"] = build_snapshot(corpus_manifest or {"corpus_version": dataset["corpus_version"]},
+                                        test_dataset_version=dataset["dataset_version"], index_version=dataset["index_version"],
+                                        embedding_model=dataset["embedding_model"],
+                                        retriever={"k": [3, 5, 10], "modes": ["raw", "filtered"], "query_expansion": [False, True]})
     if medical_report is not None:
         report["medical_rules"] = medical_report
     with args.output.open("x") as stream:

@@ -39,3 +39,9 @@ def feedback(payload: SourceFeedback):
 @router.get('/feedback')
 def reports():
     return {'feedback': education.list_feedback()}
+
+
+@router.get('/drafts/{draft_id}/release-reviews')
+def release_reviews(draft_id: UUID):
+    from .quality_audit import publication_reviews
+    return {'reviews': publication_reviews(draft_id)}

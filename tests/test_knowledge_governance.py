@@ -430,6 +430,8 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         self.assertEqual(draft['revision_number'], 2)
         self.assertIn('+流程示範', draft['revisions'][1]['diff'])
         self.assertEqual(draft['revisions'][0]['sources'], draft['revisions'][1]['sources'])
+        self.assertEqual(draft['revisions'][0]['generation_snapshot'], draft['revisions'][1]['generation_snapshot'])
+        self.assertEqual(draft['revisions'][0]['generation_snapshot']['retriever']['mode'], 'explicit_selected_sources')
         self.assertEqual(self.education_action(draft, 'approve', user='nurse').status_code, 403)
         self.assertEqual(self.education_action(draft, 'approve').status_code, 409)
         draft = self.education_action(draft, 'submit', user='nurse').json()
@@ -507,6 +509,7 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         reports = self.request('GET', '/api/education/feedback', user='reviewer').json()['feedback']
         self.assertEqual(len(reports), 1)
         self.assertEqual(reports[0]['conversation_id'], trace)
+        self.assertIsNotNone(reports[0]['query_trace_id'])
         self.action(source, 'withdraw')
         self.assertEqual(self.request('POST', '/api/education/feedback', {**payload, 'category': 'outdated_source'}, 'reader').status_code, 201)
 
@@ -517,3 +520,80 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         self.assertEqual(self.request('GET', f"/api/education/drafts/{draft['id']}", user='admin').status_code, 404)
         self.assertEqual(self.request('GET', '/api/education/drafts', user='admin').json()['drafts'], [])
         self.assertEqual(self.education_action(draft, 'submit', user='admin').status_code, 404)
+
+    def test_query_trace_records_config_ids_and_hashes_without_raw_question_or_answer(self):
+        from medivector.models import RetrievalQuery
+        source = self.approve(self.create())
+        question = 'SYNTHETIC_PRIVATE_QUESTION_123'
+        answer_text = 'SYNTHETIC_PRIVATE_ANSWER_456 [1]'
+        trace = str(uuid.uuid4())
+        with patch('medivector.qa.require_openai_api_key', return_value='fake'), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery('preparation', [], False)), patch('medivector.qa.chat_with_gpt', return_value=answer_text):
+            response = self.request('POST', '/api/ask', {'conversation_id': trace, 'question': question, 'branch_id': 'a', 'department_id': 'general'}, 'reader')
+        self.assertEqual(response.status_code, 200, response.text)
+        trace_id = response.json()['query_trace_id']
+        path = '/api/knowledge/query-traces/' + trace_id
+        audit = self.request('GET', path, user='reader')
+        self.assertEqual(audit.status_code, 200, audit.text)
+        self.assertNotIn(question, audit.text)
+        self.assertNotIn(answer_text, audit.text)
+        self.assertNotIn(self.users['reader']['token'], audit.text)
+        data = audit.json()
+        self.assertGreaterEqual(data['elapsed_ms'], 0)
+        self.assertEqual(data['references_metadata'][0]['document_version_id'], source['id'])
+        self.assertIn(source['id'], data['snapshot']['corpus'])
+        self.assertEqual(len(data['snapshot']['source_sha256']), 64)
+        self.assertIn('chat.py', data['snapshot']['prompt_versions'])
+        self.assertEqual(self.request('GET', path, user='nurse').status_code, 404)
+        self.assertEqual(self.request('GET', path, user='outsider').status_code, 404)
+        self.assertEqual(self.request('GET', '/api/knowledge/query-traces?conversation_id=' + trace, user='nurse').json()['traces'], [])
+        self.assertEqual(self.request('GET', '/api/knowledge/query-traces?conversation_id=' + trace, user='reader').json()['traces'][0]['id'], trace_id)
+        self.assertEqual(self.request('DELETE', '/api/conversations/' + trace, user='reader').status_code, 200)
+        self.assertEqual(self.request('GET', path, user='reader').status_code, 200)
+        token = current_principal.set(Principal.from_config('admin', self.users['admin']))
+        try:
+            with self.assertRaises(Exception):
+                with db_connection() as conn, conn.cursor() as cur:
+                    cur.execute('DELETE FROM query_traces WHERE id=%s', (trace_id,))
+        finally:
+            current_principal.reset(token)
+
+    def test_publication_records_human_review_and_blocks_identity_quality_failure(self):
+        source = self.approve(self.create())
+        draft = self.generate_education(source).json()
+        draft = self.education_action(draft, 'submit', user='nurse').json()
+        published = self.education_action(draft, 'approve')
+        self.assertEqual(published.status_code, 200, published.text)
+        path = f"/api/education/drafts/{draft['id']}/release-reviews"
+        reviews = self.request('GET', path, user='reviewer').json()['reviews']
+        self.assertEqual(len(reviews), 1)
+        self.assertEqual(reviews[0]['report']['status'], 'Review Required')
+        self.assertEqual(reviews[0]['report']['human_approval']['actor'], 'reviewer')
+        self.assertEqual(reviews[0]['revision_number'], 1)
+        self.assertEqual(self.request('GET', path, user='reader').status_code, 403)
+        # Remove a chunk only in the isolated test schema to simulate a polluted source index.
+        second = self.generate_education(source).json()
+        second = self.education_action(second, 'submit', user='nurse').json()
+        token = current_principal.set(Principal.from_config('admin', self.users['admin']))
+        try:
+            with db_connection() as conn, conn.cursor() as cur:
+                cur.execute('DELETE FROM articles WHERE document_version_id=%s', (source['id'],))
+            with self.assertRaises(Exception):
+                with db_connection() as conn, conn.cursor() as cur:
+                    cur.execute("UPDATE release_reviews SET reason='changed' WHERE draft_id=%s", (draft['id'],))
+        finally:
+            current_principal.reset(token)
+        denied = self.education_action(second, 'approve')
+        self.assertEqual(denied.status_code, 409, denied.text)
+        self.assertIn('quality', denied.text)
+        self.assertEqual(self.request('GET', f"/api/education/drafts/{second['id']}", user='nurse').json()['status'], 'in_review')
+
+    def test_audit_write_failure_rolls_back_conversation_with_answer(self):
+        from medivector.models import RetrievalQuery
+        from medivector.knowledge import KnowledgeError
+        self.approve(self.create())
+        conversation_id = str(uuid.uuid4())
+        with patch('medivector.qa.require_openai_api_key', return_value='fake'), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery('preparation', [], False)), patch('medivector.qa.chat_with_gpt', return_value='Synthetic [1]'), patch('medivector.quality_audit.record_query', side_effect=KnowledgeError('Synthetic audit failure', 503)):
+            response = self.request('POST', '/api/ask', {'conversation_id': conversation_id, 'question': 'preparation', 'branch_id': 'a', 'department_id': 'general'}, 'reader')
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(self.request('GET', '/api/conversations/' + conversation_id, user='reader').json()['messages'], [])
+        self.assertEqual(self.request('GET', '/api/knowledge/query-traces?conversation_id=' + conversation_id, user='reader').json()['traces'], [])

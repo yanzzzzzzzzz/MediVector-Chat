@@ -109,6 +109,7 @@ class AskRequest(BaseModel):
 
 
 class AskResponse(BaseModel):
+    query_trace_id: str | None = None
     applied_filters: dict[str, Any] | None = None
     answer: str
     rag_enabled: bool

@@ -10,6 +10,7 @@ def initialize_governance(cur, organization_id="legacy"):
     cur.execute(MIGRATION.read_text())
     cur.execute(MIGRATION.with_name("002_source_attachments.sql").read_text())
     cur.execute(MIGRATION.with_name("003_education_workspace.sql").read_text())
+    cur.execute(MIGRATION.with_name("004_quality_audit.sql").read_text())
     cur.execute("INSERT INTO organizations(id, name) VALUES (%s, %s) ON CONFLICT DO NOTHING", (organization_id, organization_id))
     cur.execute("""
         SELECT document_id, string_agg(content, E'\\n\\n' ORDER BY chunk_index, id),

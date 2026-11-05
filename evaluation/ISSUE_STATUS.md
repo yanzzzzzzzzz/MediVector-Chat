@@ -73,3 +73,12 @@ Added a network-free deterministic source/version/scope/ACL/citation evaluator, 
 19 synthetic controls (five per required negative category), explicit Pass/Fail/Review Required and
 same-corpus integration with the retrieval baseline CLI. Unknown semantics do not become Pass.
 Rule fixtures remain separate from #8's still-pending independently human-reviewed baseline.
+
+## Experiment audit and release gate (#19)
+
+Added allowlisted model/prompt/corpus/index/dataset/Git/source-code snapshots, private immutable query
+trace IDs without copied raw questions/answers, and authenticated publication-review records. Online
+publication blocks deterministic Fail and requires explicit Reviewer/Admin review for uncertain semantics.
+Offline/CI gates replay frozen traces, bind manual approvals to the exact report hash, cannot override
+Fail, emit non-overwriting JSON/Markdown and retain CI reports in run summaries. See `docs/quality-audit.md`.
+Human-reviewed clinical baseline and real professional Pilot remain #8/#20 requirements.

@@ -60,6 +60,26 @@ jobs:
         run: python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
       - name: Unit and real PostgreSQL integration tests
         run: python -m unittest discover -s tests -v
+      - name: Synthetic rule reports and release gate regression
+        run: |
+          python -m evaluation.medical_rules evaluation/medical_rules_cases.json "$RUNNER_TEMP/medical-rules.json"
+          if python -m evaluation.release_gate "$RUNNER_TEMP/medical-rules.json" "$RUNNER_TEMP/release-gate.json"; then
+            exit 1
+          else
+            test "$?" -eq 2
+          fi
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          directory = Path(os.environ['RUNNER_TEMP'])
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('## Synthetic negative quality-gate regression\n\nExpected: Fail blocks release. This is not the clinical release baseline.\n\n')
+              for stem in ('medical-rules', 'release-gate'):
+                  summary.write((directory / (stem + '.md')).read_text())
+                  summary.write('\n<details><summary>JSON report: ' + stem + '</summary>\n\n```json\n')
+                  summary.write((directory / (stem + '.json')).read_text())
+                  summary.write('\n```\n</details>\n')
+          PY
 
   frontend:
     name: Frontend tests, lint and production build

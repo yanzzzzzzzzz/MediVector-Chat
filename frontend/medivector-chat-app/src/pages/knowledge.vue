@@ -126,7 +126,7 @@
 
                                                                        <template v-if="answer"><div class="answer-heading"><span class="status-pill approved"><span />查詢完成</span><small>{{ branchName(String(answer.applied_filters?.branch_id || '')) }}／{{ departmentName(String(answer.applied_filters?.department_id || '')) }}</small></div><div class="answer-content">{{ answer.answer }}</div>
 
-                                                                         <div v-if="answer.references.length > 0" class="answer-references"><h3>核對參考原文</h3><button v-if="answer.references[0]?.document_version_id" class="source-link" type="button" @click="startReport(answer.references[0].document_version_id, answerTrace)">回報此答案</button>
+                                                                         <div v-if="answer.references.length > 0" class="answer-references"><button v-if="answer.query_trace_id" class="source-link" type="button" @click="run(inspectTrace)">查看模型與查詢追溯</button><h3>核對參考原文</h3><button v-if="answer.references[0]?.document_version_id" class="source-link" type="button" @click="startReport(answer.references[0].document_version_id, answerTrace)">回報此答案</button>
 
                                                                            <button
                                                                              v-for="reference in answer.references"
@@ -237,6 +237,7 @@
 
       <footer class="source-footer"><i aria-hidden="true" class="mdi mdi-information-outline" />引用原文可供核對，不代表生成答案已通過事實驗證。</footer></template></dialog>
 
+    <dialog ref="traceDialog" class="source-dialog"><header class="dialog-heading"><h2>查詢追溯</h2><button type="button" @click="traceDialog?.close()">關閉</button></header><div class="source-body"><p>保留模型、設定、文件版本與雜湊；稽核記錄不另複製原始問題與答案。</p><pre>{{ tracePreview }}</pre></div></dialog>
     <dialog ref="feedbackDialog" class="review-dialog"><form @submit.prevent="run(sendReport)"><header class="dialog-heading"><h2>回報內容問題</h2><button type="button" @click="feedbackDialog?.close()">關閉</button></header><div class="review-body"><p>回報會連結來源版本與本次查詢（如有）。請勿輸入病歷或個人健康資料。</p><label class="field-label">問題類型<select v-model="reportCategory"><option value="inappropriate_answer">回答不適切</option><option value="outdated_source">文件過期</option><option value="other">其他內容問題</option></select></label><label class="field-label">問題說明<textarea v-model.trim="reportReason" maxlength="2000" required rows="4" /></label><p v-if="notice?.tone === 'error'" role="alert">{{ notice.text }}</p></div><footer class="dialog-footer"><button class="button primary" :disabled="busy || !reportReason" type="submit">送出回報</button></footer></form></dialog>
   </div>
 </template>
@@ -302,6 +303,14 @@
   const question = ref('')
   const answer = ref<AskResponse | null>(null)
   const answerTrace = ref('')
+  const traceDialog = ref<HTMLDialogElement | null>(null)
+  const tracePreview = ref('')
+  async function inspectTrace () {
+    if (!answer.value?.query_trace_id) return
+    const trace = await api(`/api/knowledge/query-traces/${answer.value.query_trace_id}`)
+    tracePreview.value = JSON.stringify(trace, null, 2)
+    traceDialog.value?.showModal()
+  }
   const feedbackDialog = ref<HTMLDialogElement | null>(null)
   const reportTarget = ref<{ versionId: string, conversationId?: string } | null>(null)
   const reportReason = ref('')

@@ -99,6 +99,7 @@ export interface EvidenceAssessment {
 }
 
 export interface AskResponse {
+  query_trace_id?: string | null
   applied_filters?: Record<string, unknown> | null
   answer: string
   rag_enabled: boolean

@@ -8,6 +8,8 @@ COPY frontend/medivector-chat-app/ ./
 RUN pnpm run build
 
 FROM python:3.11-slim AS app
+ARG APP_GIT_SHA=unknown
+ENV APP_GIT_SHA=${APP_GIT_SHA}
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

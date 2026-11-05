@@ -24,7 +24,7 @@
           @click="run(() => inspect(draft.id))"
         ><strong>{{ draft.topic }}</strong><span>{{ statusLabels[draft.status] }} · r{{ draft.revision_number }}</span></button></div></section>
 
-      <section v-if="canReview" class="card"><h2>問題回報</h2><p v-if="reports.length === 0">目前沒有回報。</p><article v-for="report in reports" :key="report.id"><strong>{{ report.category }}</strong><p>{{ report.reason }}</p><small>來源版本：{{ report.version_id }} · 查詢紀錄：{{ report.conversation_id || '文件回報' }} · {{ report.actor }} · {{ report.created_at }}</small></article></section>
+      <section v-if="canReview" class="card"><h2>問題回報</h2><p v-if="reports.length === 0">目前沒有回報。</p><article v-for="report in reports" :key="report.id"><strong>{{ report.category }}</strong><p>{{ report.reason }}</p><small>來源版本：{{ report.version_id }} · 查詢紀錄：{{ report.query_trace_id || report.conversation_id || '文件回報' }} · {{ report.actor }} · {{ report.created_at }}</small></article></section>
     </template>
 
     <dialog ref="editor" @close="active = null"><template v-if="active"><header><div><h2>{{ active.topic }}</h2><p>{{ statusLabels[active.status] }} · r{{ active.revision_number }} · {{ scopeName(active) }}</p></div><button @click="editor?.close()">關閉</button></header><p v-if="notice" class="notice" role="status">{{ notice }}</p><p v-if="active.status !== 'published'" class="notice">此文稿目前未供正式使用，不可作為正式衛教交付。</p>
@@ -32,7 +32,7 @@
       <section><h3>核對來源</h3><details v-for="source in active.sources" :key="source.version_id"><summary>[來源{{ source.index }}] {{ source.title }} · {{ source.version_label }}</summary><p>文件 {{ source.document_id }} · 版本 {{ source.version_id }}</p><pre>{{ source.content || '請至核准文件資料庫查看原文。' }}</pre></details></section>
 
       <template v-if="canEdit"><label>修改／審核理由<input v-model.trim="reason" maxlength="2000" placeholder="記錄修改或審核依據，勿填個人健康資料"></label><div class="actions"><button v-if="active.status === 'draft'" :disabled="busy || !reason || content === active.content" @click="run(save)">儲存新修訂</button><button v-if="active.status === 'draft'" class="primary" :disabled="busy || !reason || content !== active.content" @click="run(() => transition('submit'))">送交審核</button><template v-if="canReview && active.status === 'in_review'"><button :disabled="busy || !reason" @click="run(() => transition('return'))">退回修改</button><button class="primary" :disabled="busy || !reason" @click="run(() => transition('approve'))">核准並發布</button></template><button v-if="canReview && active.status === 'published'" :disabled="busy || !reason" @click="run(() => transition('withdraw'))">撤回發布</button></div><p class="muted">核准前請逐段核對引用、適用範圍與文字。只檢查引用編號存在，無法證明內容正確。</p>
-        <details><summary>人工修改與事件紀錄</summary><article v-for="revision in active.revisions" :key="revision.id"><h4>r{{ revision.revision_number }} · {{ revision.actor }} · {{ revision.created_at }}</h4><p>{{ revision.reason }}</p><pre>{{ revision.diff || 'AI 初始待審稿' }}</pre></article><article v-for="event in active.events" :key="event.sequence"><p>{{ event.action }} · {{ event.actor }} · {{ event.created_at }}<br>{{ event.reason }}</p></article></details>
+        <details><summary>發布品質審核與設定快照</summary><pre>{{ releaseAudit }}</pre></details><details><summary>人工修改與事件紀錄</summary><article v-for="revision in active.revisions" :key="revision.id"><h4>r{{ revision.revision_number }} · {{ revision.actor }} · {{ revision.created_at }}</h4><p>{{ revision.reason }}</p><pre>{{ revision.diff || 'AI 初始待審稿' }}</pre></article><article v-for="event in active.events" :key="event.sequence"><p>{{ event.action }} · {{ event.actor }} · {{ event.created_at }}<br>{{ event.reason }}</p></article></details>
       </template>
     </template></dialog>
   </main>
@@ -49,7 +49,7 @@
   interface Revision { id: string, revision_number: number, actor: string, reason: string, diff: string, created_at: string }
   interface AuditEvent { sequence: number, action: string, actor: string, reason: string, created_at: string }
   interface Draft { id: string, topic: string, status: string, revision_number: number, branch_id: string, department_id: string, content: string, sources: Evidence[], revisions?: Revision[], events?: AuditEvent[] }
-  interface Report { id: string, version_id: string, conversation_id: string | null, actor: string, category: string, reason: string, created_at: string }
+  interface Report { query_trace_id?: string, id: string, version_id: string, conversation_id: string | null, actor: string, category: string, reason: string, created_at: string }
   const catalog = ref<Catalog | null>(null)
   const sources = ref<Source[]>([])
   const drafts = ref<Draft[]>([])
@@ -59,6 +59,7 @@
   const topic = ref('檢查前衛教')
   const selectedSources = ref<string[]>([])
   const active = ref<Draft | null>(null)
+  const releaseAudit = ref('')
   const editor = ref<HTMLDialogElement | null>(null)
   const content = ref('')
   const reason = ref('')
@@ -92,6 +93,7 @@
   }
   async function inspect (id: string) {
     active.value = await api<Draft>(`/api/education/drafts/${id}`)
+    releaseAudit.value = canEdit.value ? JSON.stringify((await api<{ reviews: unknown[] }>(`/api/education/drafts/${id}/release-reviews`)).reviews, null, 2) : ''
     content.value = active.value.content
     reason.value = ''
     if (!editor.value?.open) editor.value?.showModal()

@@ -76,7 +76,7 @@ def load_conversation_history(conversation_id: str) -> list[dict]:
     ])
 
 
-def save_messages(conversation_id: str, new_messages: list[dict]) -> None:
+def save_messages(conversation_id: str, new_messages: list[dict], *, on_saved=None):
     with db_connection() as conn:
         ensure_conversation(conn, conversation_id)
         with conn.cursor() as cur:
@@ -103,6 +103,7 @@ def save_messages(conversation_id: str, new_messages: list[dict]) -> None:
                 """,
                 (conversation_id, conversation_id, MEMORY_MESSAGES),
             )
+        return on_saved(conn) if on_saved else None
 
 
 def delete_conversation(conversation_id: str) -> None:

@@ -89,3 +89,15 @@ def attachment(version_id: UUID, chunk_id: UUID | None = None,
         "Content-Disposition": f'inline; filename="{version_id}.pdf"',
         "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "X-Source-SHA256": sha,
         "Content-Security-Policy": "sandbox"})
+
+
+@router.get("/query-traces/{trace_id}")
+def query_trace(trace_id: UUID):
+    from .quality_audit import get_trace
+    return get_trace(trace_id)
+
+
+@router.get('/query-traces')
+def query_traces(conversation_id: UUID):
+    from .quality_audit import list_traces
+    return {'traces': list_traces(conversation_id)}

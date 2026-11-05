@@ -1,4 +1,5 @@
 from typing import Any
+import time
 
 from .chat import chat_with_gpt
 from .config import MEMORY_MESSAGES
@@ -12,9 +13,12 @@ from .risk import assess_question_risk, emergency_diversion_answer
 
 
 def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
+    started = time.monotonic()
     context = context_for_request(payload.get("branch_id"), payload.get("department_id"))
     if context and not payload.get("rag_enabled", True):
         raise KnowledgeError("Institutional answers require approved retrieval evidence")
+    from .quality_audit import query_snapshot, record_query
+    snapshot = query_snapshot(context) if context else None
     api_key = require_openai_api_key()
     question = str(payload.get("question") or "").strip()
     if not question:
@@ -88,7 +92,7 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
         "risk_assessment": risk_payload(risk),
     }
 
-    save_messages(conversation_id, [
+    new_messages = [
         {"role": "user", "content": question},
         {
             "role": "assistant",
@@ -98,8 +102,12 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
             "retrieval_terms": response["retrieval_terms"],
             "risk_assessment": response["risk_assessment"],
         },
-    ])
-
+    ]
+    if context:
+        response["query_trace_id"] = save_messages(conversation_id, new_messages, on_saved=lambda conn: record_query(
+            context, conversation_id, question, response, snapshot, (time.monotonic() - started) * 1000, conn=conn))
+    else:
+        save_messages(conversation_id, new_messages)
     return response
 
 
