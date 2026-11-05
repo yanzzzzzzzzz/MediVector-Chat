@@ -597,3 +597,22 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 503)
         self.assertEqual(self.request('GET', '/api/conversations/' + conversation_id, user='reader').json()['messages'], [])
         self.assertEqual(self.request('GET', '/api/knowledge/query-traces?conversation_id=' + conversation_id, user='reader').json()['traces'], [])
+
+    def test_scope_comparison_uses_authorized_union_without_disabling_governance(self):
+        from evaluation.scope_comparison import compare
+        a = self.approve(self.create())
+        b = self.approve(self.create(scopes=[{'branch_id': 'b', 'department_id': 'general'}]))
+        scopes = [{'branch_id': 'a', 'department_id': 'general'}, {'branch_id': 'b', 'department_id': 'general'}]
+        shared = self.approve(self.create(scopes=scopes))
+        self.client.headers.update({'Authorization': 'Bearer ' + self.users['nurse']['token']})
+        report = compare(self.client, {'question': 'preparation', 'scopes': scopes, 'target': scopes[0], 'top_k': 5})
+        self.assertEqual({r['document_id'] for r in report['scoped_results']}, {a['document_id'], shared['document_id']})
+        self.assertEqual({r['document_id'] for r in report['authorized_union_results']}, {a['document_id'], b['document_id'], shared['document_id']})
+        self.assertEqual(len(report['authorized_union_results']), 3)
+        self.assertEqual(len(next(r for r in report['authorized_union_results'] if r['document_id'] == shared['document_id'])['authorized_scopes']), 2)
+        self.client.headers.update({'Authorization': 'Bearer ' + self.users['reader']['token']})
+        import httpx
+        with patch('medivector.retrieval.embed_texts') as embed:
+            with self.assertRaises(httpx.HTTPStatusError):
+                compare(self.client, {'question': 'preparation', 'scopes': scopes, 'target': scopes[0]})
+            embed.assert_not_called()

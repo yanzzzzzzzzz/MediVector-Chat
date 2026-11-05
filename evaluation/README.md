@@ -139,3 +139,24 @@ coverage/no-answer/P50/P95 and controlled export contracts. Remote repository cr
 no independent Lab CI or reviewed baseline is claimed until that handoff is complete. The Lab consumes
 this export contract without any OpenAI credential. At least five real failure analyses remain dependent
 on a valid reviewed run; do not fabricate failures to fill the queue.
+
+## Authorized branch comparison (#10)
+
+Use a nonpersonal question and a token explicitly granted both requested scopes. Example request JSON:
+
+```json
+{"question":"合成檢查前準備","scopes":[{"branch_id":"a","department_id":"general"},{"branch_id":"b","department_id":"general"}],"target":{"branch_id":"a","department_id":"general"},"top_k":5}
+```
+
+```sh
+EVALUATION_API_TOKEN='...' python -m evaluation.scope_comparison request.json new-scope-report.json
+```
+
+The diagnostic compares target-scope candidates with a deduplicated union of separately authorized scope
+queries. All organization/approval/effective-period/role/user ACL predicates remain active; it never adds
+a dangerous "disable scope ACL" API flag. Permissions for every manifest are checked before paying for
+query embeddings. Raw/filtered comparison is a different experiment; this diagnostic fixes raw mode,
+query expansion off, identical question/model and K. Manifests are checked before/after; changes abort.
+A shared version is counted once, with its authorized scope list and union rank retained. JSON/Markdown
+outputs are non-overwriting. Real PostgreSQL tests verify A versus A+B, shared-version dedup and refusal
+of a reader not granted B before embedding calls. This is a scope diagnostic, not a reviewed quality score.

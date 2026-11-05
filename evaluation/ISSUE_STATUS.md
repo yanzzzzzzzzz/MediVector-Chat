@@ -104,3 +104,11 @@ Added two real Luna responses against synthetic sources for pending human claim/
 fabricated reviewer or verdict. Deterministic citation validation now accepts both numeric and 索引 markers;
 nonexistent citations fail even if semantic review is pending, while pending support annotations cannot Pass.
 See `candidates/ANSWER_REVIEW.md`. Actual reviewed semantic-support examples remain necessary before closure.
+
+## #10 scope comparison increment
+
+Added a controlled authorized-scope union diagnostic to compare the same question with and without the
+target branch restriction, while never disabling organization/status/validity/ACL enforcement. Real DB
+tests cover shared-document dedup and scope denial before embedding; corpus/query drift aborts comparison.
+The source assistant engineering workflow is available; actual answer-support review (#5) and independently
+reviewed quality baseline (#8) remain explicitly pending rather than being inferred from these mechanics.
