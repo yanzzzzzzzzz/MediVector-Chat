@@ -1,7 +1,30 @@
-# GitHub issue implementation status — 2026-11-04
+# GitHub issue implementation status — 2026-11-05
 
-Changes are organized into feature commits; see the repository history. No deployment or GitHub
-issue closure is part of this change. Issue #8 remains preparation only.
+## Current state
+
+Closed after implementation/acceptance review and passing CI: **#1–#4, #6, #7, #11, #13–#19**.
+Implementation commits and test evidence are recorded on each GitHub issue. Latest engineering validation:
+88 backend tests (real PostgreSQL, no OpenAI Key), seven frontend tests, lint/TypeScript/build and CI.
+The local preview is running; its configured answer model is GPT-6 Luna.
+
+| Open issue | Remaining requirement |
+|---|---|
+| #5 | Actual human claim/citation-support annotation of prepared real responses; do not turn pending review into Pass |
+| #8 | Human review of 30 proposed cases, accessible independent Lab remote/push/CI, measured baseline and real failure analysis |
+| #9 | Product Epic depends on the remaining reviewed quality and professional Pilot evidence |
+| #10 | Source assistant engineering workflow/scope comparison is available; reviewed answer support and baseline still pending |
+| #12 | Rules, snapshots, audit and gates are available; reviewed baseline/answer-quality evidence still pending |
+| #20 | Actual 3–5 professional interviews and Pilot; protocol/report templates are prepared, no results fabricated |
+
+The independent .NET Lab is a separate checkout, not a platform embedded here. It passes Release build
+and synthetic metric/contract self-tests; its remote is not yet available. See human review materials in
+`candidates/` and the Pilot kit in `../docs/pilot/`.
+
+## Historical implementation log (2026-11-04 onward)
+
+The following entries record what each increment implemented and which limits applied at that time.
+Later increments supersede earlier pending-feature notes; use the current state above for open/closed status.
+Issue #8 remains preparation until its real human/remote/baseline requirements are satisfied.
 
 User confirmed that the ground-truth dataset and separate Evaluation Lab have not yet been
 established. Issue #8 remains pending dataset creation and human review; the existing template

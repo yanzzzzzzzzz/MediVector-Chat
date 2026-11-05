@@ -24,8 +24,8 @@ source revision. Each article has its own chunk UUID plus `document_version_id`.
 keep that provenance; new source content always creates a new version instead of modifying approved
 content. Source text, SHA256, license/use basis, URL, audience, effective period and branch/department
 pairs belong to the version. Chunk metadata records source offsets, encoding strategy and source SHA.
-The current institutional form accepts text. PDF attachment ingestion and full source viewer coverage
-remain part of #16; the shared offline PDF manifest mapping is retained.
+The institutional form accepts text or a version-bound PDF. PDF attachment ingestion, extraction diagnostics
+and full source-viewer coverage are implemented in #16; see the PDF provenance section below.
 
 `001_knowledge_governance.sql` is an additive, idempotent migration run during initialization in every
 account/organization schema. Old articles become stable `legacy-v1` Draft revisions with no scopes and
@@ -84,7 +84,7 @@ create a new revision for rollback content. Expired revisions cannot be newly ap
 Events include actor, source/target states, reason, version and timestamp. Database triggers reject
 UPDATE/DELETE of event rows and there are no mutation endpoints for the event history. This is a basic
 append-only application guard, not tamper-proof storage against a database administrator. Experiment
-snapshots and release quality gates remain #19 work.
+snapshots and release quality gates are implemented in #19; see `quality-audit.md`.
 
 ## API and workspace
 
@@ -113,9 +113,9 @@ scoped ANN optimizations must establish recall before replacing this path.
 Official chat cannot disable RAG. If no approved evidence survives, it returns a fixed inability-to-confirm
 response without calling the answer model. With evidence, a separate source-only prompt is used; the
 legacy symptom/advice template is not appended, and no clinical risk classification is claimed. This
-prompt restriction does not prove semantic faithfulness; #5/#18 evaluations and professional review
-remain necessary. The source-revision approval workflow is separate from #17's future generated-draft
-review/publication workflow.
+prompt restriction does not prove semantic faithfulness. Deterministic #18 rules are implemented, while
+#5 human answer-support review and #8 reviewed labels remain necessary. The source-revision approval
+workflow is separate from #17's implemented generated-draft review/publication workflow.
 
 Citation reads recheck current validity, state and grants. If a reference is withdrawn, superseded,
 expired or no longer accessible, it is denied and old conversation answers using it are redacted from
@@ -132,8 +132,9 @@ For institutional datasets, set `retrieval_context` to branch_id/department_id a
 the manifest's manifest_sha256. The export CLI verifies that authorized manifest before and after the
 run, replays expanded queries across modes and preserves the manifest in its report. It refuses changed
 or mismatched corpora. The manifest contains hashes and stable IDs, not an independent review of source
-correctness. Human-reviewed datasets, full #16 citation coverage, #17 generated drafts and #18/#19 gates
-are not claimed complete by this source-governance change.
+correctness. #16 PDF coverage, #17 generated drafts and #18/#19 rules/gates are implemented in their
+respective increments. Human-reviewed quality datasets and real professional Pilot remain incomplete;
+engineering checks do not establish clinical accuracy.
 
 ## PDF source provenance (#16)
 
