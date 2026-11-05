@@ -406,3 +406,114 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         foreign = self.create(scopes=[{'branch_id': 'b', 'department_id': 'general'}])
         self.assertEqual(self.request('GET', f"/api/knowledge/versions/{foreign['id']}/attachment", user='reader').status_code, 404)
         self.assertEqual(self.request('GET', path + '?chunk_id=' + str(uuid.uuid4()) + '&branch_id=a&department_id=general', user='reader').status_code, 404)
+
+    def generate_education(self, version, user='nurse', **changes):
+        with patch('medivector.education.require_openai_api_key', return_value='fake'), patch('medivector.education.openai_post', return_value={'choices': [{'message': {'content': '待人工審核草稿\n請核對預約地點並攜帶通知單。[來源1]'}}]}):
+            return self.request('POST', '/api/education/drafts', {'branch_id': 'a', 'department_id': 'general', 'topic': '合成檢查前衛教', 'version_ids': [version['id']], **changes}, user)
+
+    def education_action(self, draft, action, user='reviewer', **changes):
+        return self.request('POST', f"/api/education/drafts/{draft['id']}/transition", {'expected_revision': draft['revision_number'], 'action': action, 'reason': '合成流程測試，非臨床核准', **changes}, user)
+
+    def test_generated_education_edit_return_publish_withdraw_e2e(self):
+        version = self.approve(self.create())
+        response = self.generate_education(version)
+        self.assertEqual(response.status_code, 201, response.text)
+        draft = response.json()
+        self.assertEqual(draft['status'], 'draft')
+        self.assertEqual(draft['sources'][0]['version_id'], version['id'])
+        path = f"/api/education/drafts/{draft['id']}"
+        self.assertEqual(self.request('GET', path, user='reader').status_code, 404)
+        self.assertEqual(self.request('GET', '/api/education/drafts', user='reader').json()['drafts'], [])
+        edited = self.request('POST', path + '/revisions', {'expected_revision': 1, 'content': draft['content'] + '\n流程示範；請由專業人員核對。[來源1]', 'reason': '補上示範限制'}, 'nurse')
+        self.assertEqual(edited.status_code, 200, edited.text)
+        draft = edited.json()
+        self.assertEqual(draft['revision_number'], 2)
+        self.assertIn('+流程示範', draft['revisions'][1]['diff'])
+        self.assertEqual(draft['revisions'][0]['sources'], draft['revisions'][1]['sources'])
+        self.assertEqual(self.education_action(draft, 'approve', user='nurse').status_code, 403)
+        self.assertEqual(self.education_action(draft, 'approve').status_code, 409)
+        draft = self.education_action(draft, 'submit', user='nurse').json()
+        self.assertEqual(self.request('POST', path + '/revisions', {'expected_revision': 2, 'content': 'unsafe edit [來源1]', 'reason': 'test'}, 'nurse').status_code, 409)
+        draft = self.education_action(draft, 'return').json()
+        self.assertEqual(draft['status'], 'draft')
+        draft = self.education_action(draft, 'submit', user='nurse').json()
+        draft = self.education_action(draft, 'approve').json()
+        self.assertEqual(draft['status'], 'published')
+        public = self.request('GET', path, user='reader')
+        self.assertEqual(public.status_code, 200, public.text)
+        self.assertNotIn('revisions', public.json())
+        self.assertNotIn('content', public.json()['sources'][0])
+        self.assertEqual(self.education_action(draft, 'withdraw', user='nurse').status_code, 403)
+        archived = self.education_action(draft, 'withdraw').json()
+        self.assertEqual(archived['status'], 'archived')
+        self.assertEqual([e['action'] for e in archived['events']], ['generate', 'edit', 'submit', 'return', 'submit', 'approve', 'withdraw'])
+        self.assertEqual(self.request('GET', path, user='reader').status_code, 404)
+        self.assertEqual(self.request('GET', path, user='outsider').status_code, 404)
+        token = current_principal.set(Principal.from_config('admin', self.users['admin']))
+        try:
+            with self.assertRaises(Exception):
+                with db_connection() as conn, conn.cursor() as cur:
+                    cur.execute("UPDATE education_revisions SET content='tampered' WHERE draft_id=%s", (draft['id'],))
+        finally:
+            current_principal.reset(token)
+
+    def test_education_rejects_stale_edits_bad_citations_and_invalid_sources(self):
+        source = self.create()
+        self.assertEqual(self.generate_education(source).status_code, 409)
+        source = self.approve(source)
+        self.assertEqual(self.generate_education(source, user='reader').status_code, 403)
+        self.assertEqual(self.generate_education(source, user='outsider').status_code, 409)
+        self.assertEqual(self.generate_education(source, branch_id='b').status_code, 409)
+        draft = self.generate_education(source).json()
+        path = f"/api/education/drafts/{draft['id']}/revisions"
+        for content, expected in [('missing source', 1), ('wrong [來源2]', 1), ('valid [來源1]', 99)]:
+            response = self.request('POST', path, {'expected_revision': expected, 'content': content, 'reason': 'test'}, 'nurse')
+            self.assertEqual(response.status_code, 409, response.text)
+        self.action(source, 'withdraw')
+        self.assertEqual(self.education_action(draft, 'submit', user='nurse').status_code, 409)
+
+    def test_published_education_becomes_unavailable_when_source_withdrawn(self):
+        source = self.approve(self.create())
+        draft = self.generate_education(source).json()
+        draft = self.education_action(draft, 'submit', user='nurse').json()
+        draft = self.education_action(draft, 'approve').json()
+        self.action(source, 'withdraw')
+        self.assertEqual(self.request('GET', '/api/education/drafts', user='reader').json()['drafts'], [])
+        self.assertEqual(self.request('GET', f"/api/education/drafts/{draft['id']}", user='reader').status_code, 409)
+        self.assertEqual(self.request('GET', f"/api/education/drafts/{draft['id']}", user='reviewer').status_code, 200)
+
+    def test_generation_rechecks_sources_after_model_call_and_never_auto_publishes(self):
+        source = self.approve(self.create())
+        def withdraw_during_generation(*args, **kwargs):
+            self.assertEqual(self.action(source, 'withdraw').status_code, 200)
+            return {'choices': [{'message': {'content': '待審稿 [來源1]'}}]}
+        with patch('medivector.education.require_openai_api_key', return_value='fake'), patch('medivector.education.openai_post', side_effect=withdraw_during_generation):
+            response = self.request('POST', '/api/education/drafts', {'branch_id': 'a', 'department_id': 'general', 'topic': 'test', 'version_ids': [source['id']]}, 'nurse')
+        self.assertEqual(response.status_code, 409, response.text)
+        self.assertEqual(self.request('GET', '/api/education/drafts').json()['drafts'], [])
+
+    def test_feedback_links_only_owned_query_and_accessible_source(self):
+        from medivector.models import RetrievalQuery
+        source = self.approve(self.create())
+        trace = str(uuid.uuid4())
+        with patch('medivector.qa.require_openai_api_key', return_value='fake'), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery('preparation', [], False)), patch('medivector.qa.chat_with_gpt', return_value='Synthetic answer [1]'):
+            answer = self.request('POST', '/api/ask', {'conversation_id': trace, 'question': 'preparation', 'branch_id': 'a', 'department_id': 'general'}, 'reader')
+        self.assertEqual(answer.status_code, 200, answer.text)
+        payload = {'version_id': source['id'], 'conversation_id': trace, 'category': 'inappropriate_answer', 'reason': '合成回報，不含個人資料'}
+        self.assertEqual(self.request('POST', '/api/education/feedback', payload, 'reader').status_code, 201)
+        self.assertEqual(self.request('POST', '/api/education/feedback', payload, 'nurse').status_code, 404)
+        self.assertEqual(self.request('POST', '/api/education/feedback', payload, 'outsider').status_code, 404)
+        self.assertEqual(self.request('GET', '/api/education/feedback', user='reader').status_code, 403)
+        reports = self.request('GET', '/api/education/feedback', user='reviewer').json()['feedback']
+        self.assertEqual(len(reports), 1)
+        self.assertEqual(reports[0]['conversation_id'], trace)
+        self.action(source, 'withdraw')
+        self.assertEqual(self.request('POST', '/api/education/feedback', {**payload, 'category': 'outdated_source'}, 'reader').status_code, 201)
+
+    def test_generated_source_snapshots_do_not_bypass_named_user_acl(self):
+        source = self.approve(self.create(allowed_users=['nurse', 'reviewer']))
+        draft = self.generate_education(source).json()
+        # Admin's role alone does not override explicit source ACLs.
+        self.assertEqual(self.request('GET', f"/api/education/drafts/{draft['id']}", user='admin').status_code, 404)
+        self.assertEqual(self.request('GET', '/api/education/drafts', user='admin').json()['drafts'], [])
+        self.assertEqual(self.education_action(draft, 'submit', user='admin').status_code, 404)

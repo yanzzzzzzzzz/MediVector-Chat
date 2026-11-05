@@ -16,6 +16,7 @@
           @click="changeView('review')"
         ><i aria-hidden="true" class="mdi mdi-clipboard-check-outline" />審核佇列<span v-if="reviewCount" class="nav-count">{{ reviewCount }}</span></button>
 
+        <a class="source-link" href="/education">衛教草稿工作台</a>
         <button :aria-current="activeView === 'query' ? 'page' : undefined" :class="{ active: activeView === 'query' }" type="button" @click="changeView('query')"><i aria-hidden="true" class="mdi mdi-text-box-search-outline" />核准知識查詢</button>
 
         <button
@@ -125,7 +126,7 @@
 
                                                                        <template v-if="answer"><div class="answer-heading"><span class="status-pill approved"><span />查詢完成</span><small>{{ branchName(String(answer.applied_filters?.branch_id || '')) }}／{{ departmentName(String(answer.applied_filters?.department_id || '')) }}</small></div><div class="answer-content">{{ answer.answer }}</div>
 
-                                                                         <div v-if="answer.references.length > 0" class="answer-references"><h3>核對參考原文</h3>
+                                                                         <div v-if="answer.references.length > 0" class="answer-references"><h3>核對參考原文</h3><button v-if="answer.references[0]?.document_version_id" class="source-link" type="button" @click="startReport(answer.references[0].document_version_id, answerTrace)">回報此答案</button>
 
                                                                            <button
                                                                              v-for="reference in answer.references"
@@ -232,9 +233,11 @@
 
           <p v-if="sourcePreview.unparsedPages?.length">第 {{ sourcePreview.unparsedPages.join('、') }} 頁無可用文字或解析失敗，未用於檢索；請核對原件。</p></div>
 
-        <pre>{{ sourcePreview.content }}</pre><details class="trace-details"><summary>查看版本追溯資訊</summary><dl><dt>文件 ID</dt><dd>{{ sourcePreview.documentId }}</dd><dt>版本 ID</dt><dd>{{ sourcePreview.versionId }}</dd></dl></details></div>
+        <button class="source-link" type="button" @click="startReport(sourcePreview.versionId)">回報文件過期或內容問題</button><pre>{{ sourcePreview.content }}</pre><details class="trace-details"><summary>查看版本追溯資訊</summary><dl><dt>文件 ID</dt><dd>{{ sourcePreview.documentId }}</dd><dt>版本 ID</dt><dd>{{ sourcePreview.versionId }}</dd></dl></details></div>
 
       <footer class="source-footer"><i aria-hidden="true" class="mdi mdi-information-outline" />引用原文可供核對，不代表生成答案已通過事實驗證。</footer></template></dialog>
+
+    <dialog ref="feedbackDialog" class="review-dialog"><form @submit.prevent="run(sendReport)"><header class="dialog-heading"><h2>回報內容問題</h2><button type="button" @click="feedbackDialog?.close()">關閉</button></header><div class="review-body"><p>回報會連結來源版本與本次查詢（如有）。請勿輸入病歷或個人健康資料。</p><label class="field-label">問題類型<select v-model="reportCategory"><option value="inappropriate_answer">回答不適切</option><option value="outdated_source">文件過期</option><option value="other">其他內容問題</option></select></label><label class="field-label">問題說明<textarea v-model.trim="reportReason" maxlength="2000" required rows="4" /></label><p v-if="notice?.tone === 'error'" role="alert">{{ notice.text }}</p></div><footer class="dialog-footer"><button class="button primary" :disabled="busy || !reportReason" type="submit">送出回報</button></footer></form></dialog>
   </div>
 </template>
 
@@ -298,6 +301,23 @@
   const catalogName = ref('')
   const question = ref('')
   const answer = ref<AskResponse | null>(null)
+  const answerTrace = ref('')
+  const feedbackDialog = ref<HTMLDialogElement | null>(null)
+  const reportTarget = ref<{ versionId: string, conversationId?: string } | null>(null)
+  const reportReason = ref('')
+  const reportCategory = ref('inappropriate_answer')
+  function startReport (versionId: string, conversationId?: string) {
+    reportTarget.value = { versionId, conversationId }
+    reportReason.value = ''
+    reportCategory.value = conversationId ? 'inappropriate_answer' : 'outdated_source'
+    feedbackDialog.value?.showModal()
+  }
+  async function sendReport () {
+    if (!reportTarget.value) return
+    await api('/api/education/feedback', { method: 'POST', body: JSON.stringify({ version_id: reportTarget.value.versionId, conversation_id: reportTarget.value.conversationId || null, category: reportCategory.value, reason: reportReason.value }) })
+    feedbackDialog.value?.close()
+    notify('問題已回報，來源版本與查詢紀錄已連結。')
+  }
   const canEdit = computed(() => ['admin', 'reviewer', 'nurse'].includes(catalog.value?.role || ''))
   const canReview = computed(() => ['admin', 'reviewer'].includes(catalog.value?.role || ''))
   const labels: Record<string, string> = { draft: '草稿', in_review: '待審核', approved: '已發布', superseded: '已取代', archived: '已撤回' }
@@ -456,7 +476,9 @@
   async function ask () {
     answer.value = null
     notice.value = null
-    answer.value = await api<AskResponse>('/api/ask', { method: 'POST', body: JSON.stringify({ conversation_id: crypto.randomUUID(), question: question.value, branch_id: branchId.value, department_id: departmentId.value, rag_enabled: true }) })
+    const conversationId = crypto.randomUUID()
+    answer.value = await api<AskResponse>('/api/ask', { method: 'POST', body: JSON.stringify({ conversation_id: conversationId, question: question.value, branch_id: branchId.value, department_id: departmentId.value, rag_enabled: true }) })
+    answerTrace.value = conversationId
   }
   async function openCitation (reference: ReferenceItem) {
     clearPdf()

@@ -57,3 +57,12 @@ Added immutable version-bound PDF ingestion/original bytes, page extraction diag
 attachment reads and source links with cited page/offset/scope. Ten deterministic multi-page QA traces
 and permission/withdrawal/invalid-PDF regression cases exercise provenance. OCR is explicitly unsupported;
 all-image PDFs are rejected. See `docs/knowledge-governance.md` for endpoint and storage details.
+
+## Generated education workspace (#17)
+
+The separate `/education` workbench generates pending copy from selected approved sources, retains
+immutable evidence snapshots and human revision diffs, and requires explicit Reviewer/Admin publication.
+Nurse editing/submission, return, publish and withdrawal are covered end-to-end. Reader access is restricted
+to published copy whose sources remain valid/authorized. Source/query feedback is linked to exact version
+and owned conversation IDs. See `docs/education-workspace.md`; semantic and clinical review remain human
+responsibilities, not an automatic consequence of syntactically valid citations.

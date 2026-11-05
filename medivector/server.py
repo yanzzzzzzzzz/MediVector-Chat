@@ -21,6 +21,7 @@ from .db import init_db
 from .documents import add_documents, delete_document, infer_document_metadata, list_documents, update_document
 from .knowledge import KnowledgeError
 from .knowledge_routes import router as knowledge_router
+from .education_routes import router as education_router
 from .qa import ask_question
 from .retrieval_api import retrieval_search
 from .schemas import (
@@ -48,6 +49,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="MediVector API", lifespan=lifespan)
 app.add_middleware(APIProtection)
 app.include_router(knowledge_router)
+app.include_router(education_router)
 
 
 @app.exception_handler(KnowledgeError)
