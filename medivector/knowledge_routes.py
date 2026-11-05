@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter
 from . import knowledge
-from .knowledge_schemas import CatalogEntry, CreateVersion, TransitionRequest
+from .knowledge_schemas import CatalogEntry, CreateVersion, IndexRequest, TransitionRequest
 
 router = APIRouter(prefix="/api/knowledge", tags=["Institutional knowledge"])
 
@@ -54,3 +54,8 @@ def citation_chunk(chunk_id: UUID, branch_id: str, department_id: str):
 @router.get("/corpus-manifest")
 def corpus_manifest(branch_id: str, department_id: str):
     return knowledge.corpus_manifest(branch_id, department_id)
+
+
+@router.post("/versions/{version_id}/index")
+def index_version(version_id: UUID, payload: IndexRequest):
+    return knowledge.index_version(version_id, payload.reason)

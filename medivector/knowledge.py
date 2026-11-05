@@ -1,5 +1,6 @@
 """Institutional immutable source versions, review state machine and scoped reads."""
 import hashlib
+import os
 import uuid
 from datetime import datetime, timezone
 
@@ -74,6 +75,10 @@ def serialize_version(cur, row, *, include_content=True):
             row[key] = row[key].isoformat()
     cur.execute("SELECT branch_id, department_id FROM document_version_scopes WHERE version_id=%s ORDER BY branch_id, department_id", (row["id"],))
     row["scopes"] = [dict(scope) for scope in cur.fetchall()]
+    cur.execute("SELECT count(*) AS total, count(embedding) AS indexed FROM articles WHERE document_version_id=%s", (row["id"],))
+    counts = cur.fetchone()
+    row["index_status"] = "ready" if counts["total"] > 0 and counts["total"] == counts["indexed"] else "pending"
+    row["chunk_count"], row["indexed_chunk_count"] = counts["total"], counts["indexed"]
     if not include_content:
         row.pop("content", None)
     return row
@@ -87,6 +92,7 @@ def catalog():
         cur.execute("SELECT id, name FROM departments WHERE id=ANY(%s) ORDER BY id", (list(principal.department_ids),))
         departments = cur.fetchall()
     return {"organization_id": principal.organization_id, "principal": principal.name, "role": principal.role,
+            "ai_available": bool(os.getenv("OPENAI_API_KEY")),
             "branches": branches, "departments": departments}
 
 
@@ -126,7 +132,13 @@ def create_version(payload: CreateVersion):
                 raise KnowledgeError("Document not found or inaccessible", 404)
     manifest = chunk_manifest(payload.content, document_id=str(document_id), version=str(version_id), strategy=payload.chunk_strategy,
                               max_tokens=payload.max_tokens, overlap=payload.overlap_tokens)
-    vectors = embed_texts(require_openai_api_key(), [c["content"] for c in manifest["chunks"]])
+    # Source governance is available without an AI credential. NULL means not indexed,
+    # never a placeholder embedding. Configured upstream failures still fail explicitly.
+    try:
+        api_key = require_openai_api_key()
+    except RuntimeError:
+        api_key = None
+    vectors = embed_texts(api_key, [c["content"] for c in manifest["chunks"]]) if api_key else [None] * len(manifest["chunks"])
     if len(vectors) != len(manifest["chunks"]):
         raise KnowledgeError("Embedding response count does not match chunks")
     with db_connection() as conn, conn.cursor(row_factory=dict_row) as cur:
@@ -286,6 +298,8 @@ def corpus_manifest(branch_id, department_id):
                             array_agg(a.id::text ORDER BY a.chunk_index,a.id) AS chunk_ids
                          FROM document_versions v JOIN knowledge_documents d ON d.id=v.document_id
                          JOIN articles a ON a.document_version_id=v.id WHERE {where}
+                         AND a.embedding IS NOT NULL
+                         AND NOT EXISTS (SELECT 1 FROM articles pending WHERE pending.document_version_id=v.id AND pending.embedding IS NULL)
                          GROUP BY v.id ORDER BY v.document_id,v.version_number""", params)
         versions = []
         for row in cur.fetchall():
@@ -298,3 +312,30 @@ def corpus_manifest(branch_id, department_id):
               "versions": versions}
     return {**frozen, "query_at": context.query_at.isoformat(),
             "manifest_sha256": hashlib.sha256(json.dumps(frozen, sort_keys=True, separators=(",", ":")).encode()).hexdigest()}
+
+
+def index_version(version_id, reason: str):
+    """Fill only an entirely unindexed source revision; never overwrite an existing index."""
+    principal = organization_principal({"admin", "reviewer", "nurse"})
+    from .knowledge_schemas import Scope
+    with db_connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        row = visible_version(cur, version_id, principal)
+        cur.execute("SELECT id FROM knowledge_documents WHERE id=%s FOR UPDATE", (row["document_id"],))
+        row = visible_version(cur, version_id, principal, lock=True)
+        if row["status"] in {"archived", "superseded"}:
+            raise KnowledgeError("Withdrawn or superseded sources cannot be indexed", 409)
+        cur.execute("SELECT branch_id,department_id FROM document_version_scopes WHERE version_id=%s", (version_id,))
+        check_scopes(principal, [Scope(**scope) for scope in cur.fetchall()])
+        cur.execute("SELECT id,content,embedding IS NOT NULL AS indexed FROM articles WHERE document_version_id=%s ORDER BY chunk_index,id FOR UPDATE", (version_id,))
+        chunks = cur.fetchall()
+        if not chunks or any(chunk["indexed"] for chunk in chunks):
+            raise KnowledgeError("Only entirely unindexed versions can be indexed; existing embeddings are preserved", 409)
+        # The document lock serializes retries with both indexing and review transitions.
+        vectors = embed_texts(require_openai_api_key(), [chunk["content"] for chunk in chunks])
+        if len(vectors) != len(chunks):
+            raise KnowledgeError("Embedding response count does not match chunks")
+        for chunk, vector in zip(chunks, vectors):
+            cur.execute("UPDATE articles SET embedding=%s WHERE id=%s AND embedding IS NULL", (vector, chunk["id"]))
+        cur.execute("INSERT INTO knowledge_events(document_id,version_id,actor,action,from_status,to_status,reason) VALUES (%s,%s,%s,'index',%s,%s,%s)",
+                    (row["document_id"], version_id, principal.name, row["status"], row["status"], reason))
+        return serialize_version(cur, row)

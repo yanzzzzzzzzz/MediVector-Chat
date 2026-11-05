@@ -259,6 +259,68 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         self.assertNotEqual(first["manifest_sha256"], changed["manifest_sha256"])
         self.assertEqual([v["version_id"] for v in changed["versions"]], [replacement["id"]])
 
+    def create_without_key(self, **changes):
+        with patch("medivector.knowledge.require_openai_api_key", side_effect=RuntimeError("missing key")), patch("medivector.knowledge.embed_texts") as embed:
+            version = self.create(**changes)
+            embed.assert_not_called()
+        self.assertEqual(version["index_status"], "pending")
+        self.assertEqual(version["indexed_chunk_count"], 0)
+        return version
+
+    def test_no_key_preserves_source_workflow_without_fake_vectors(self):
+        version = self.create_without_key()
+        approved = self.approve(version)
+        self.assertEqual(approved["status"], "approved")
+        self.assertEqual(approved["index_status"], "pending")
+        self.assertEqual(self.search().json()["results"], [])
+        manifest = self.request("GET", "/api/knowledge/corpus-manifest?branch_id=a&department_id=general", user="reader").json()
+        self.assertEqual(manifest["versions"], [])
+        token = current_principal.set(Principal.from_config("admin", self.users["admin"]))
+        try:
+            with db_connection() as conn, conn.cursor() as cur:
+                cur.execute("SELECT count(*),count(embedding) FROM articles WHERE document_version_id=%s", (version["id"],))
+                total, indexed = cur.fetchone()
+                self.assertGreater(total, 0)
+                self.assertEqual(indexed, 0)
+        finally:
+            current_principal.reset(token)
+
+    def test_pending_source_can_be_indexed_once_and_becomes_searchable(self):
+        version = self.approve(self.create_without_key())
+        result = self.request("POST", f"/api/knowledge/versions/{version['id']}/index", {"reason": "Test deferred indexing"}, "nurse")
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertEqual(result.json()["index_status"], "ready")
+        self.assertEqual(result.json()["id"], version["id"])
+        self.assertEqual(result.json()["checksum"], version["checksum"])
+        self.assertEqual([r["document_version_id"] for r in self.search().json()["results"]], [version["id"]])
+        with patch("medivector.knowledge.embed_texts") as embed:
+            repeat = self.request("POST", f"/api/knowledge/versions/{version['id']}/index", {"reason": "Attempted overwrite"})
+            self.assertEqual(repeat.status_code, 409)
+            embed.assert_not_called()
+        events = self.request("GET", f"/api/knowledge/documents/{version['document_id']}/history").json()["events"]
+        self.assertEqual([e["actor"] for e in events if e["action"] == "index"], ["nurse"])
+
+    def test_indexing_enforces_role_and_org_and_withdrawal(self):
+        version = self.approve(self.create_without_key())
+        path = f"/api/knowledge/versions/{version['id']}/index"
+        with patch("medivector.knowledge.embed_texts") as embed:
+            self.assertEqual(self.request("POST", path, {"reason": "unauthorized"}, "reader").status_code, 403)
+            self.assertEqual(self.request("POST", path, {"reason": "wrong organization"}, "outsider").status_code, 404)
+            self.assertEqual(self.action(version, "withdraw").status_code, 200)
+            self.assertEqual(self.request("POST", path, {"reason": "withdrawn source"}).status_code, 409)
+            embed.assert_not_called()
+
+    def test_failed_indexing_rolls_back_without_changing_source(self):
+        version = self.approve(self.create_without_key())
+        with patch("medivector.knowledge.embed_texts", return_value=[]):
+            response = self.request("POST", f"/api/knowledge/versions/{version['id']}/index", {"reason": "Bad embedding count"})
+        self.assertEqual(response.status_code, 400)
+        saved = self.request("GET", f"/api/knowledge/versions/{version['id']}").json()
+        self.assertEqual(saved["index_status"], "pending")
+        self.assertEqual(saved["checksum"], version["checksum"])
+        self.assertEqual(saved["status"], "approved")
+        self.assertEqual(self.search().json()["results"], [])
+
     def test_no_approved_evidence_does_not_call_answer_model(self):
         self.create()
         with patch("medivector.qa.require_openai_api_key", return_value="fake"), patch("medivector.qa.get_retrieval_query") as rewrite, patch("medivector.qa.chat_with_gpt") as generate, patch("medivector.qa.assess_question_risk") as risk:

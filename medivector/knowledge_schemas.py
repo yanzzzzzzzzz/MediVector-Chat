@@ -64,3 +64,7 @@ class CreateVersion(StrictRequest):
 class TransitionRequest(StrictRequest):
     action: Literal["submit", "approve", "return", "withdraw"]
     reason: str = Field(min_length=1, max_length=2000)
+
+
+class IndexRequest(StrictRequest):
+    reason: str = Field(min_length=1, max_length=2000)

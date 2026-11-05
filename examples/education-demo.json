@@ -1,0 +1,36 @@
+{
+  "notice": "合成的本機操作示範；未經院所醫療專業審查，不得視為正式衛教、診斷或個人化建議。",
+  "source_checked_on": "2026-11-05",
+  "documents": [
+    {
+      "key": "hand-hygiene",
+      "title": "【示範】手部清潔與洗手步驟",
+      "version_label": "示範 v1.0",
+      "source": "合成示範摘要｜參考 CDC 公開資訊",
+      "source_url": "https://www.cdc.gov/clean-hands/about/index.html",
+      "license": "自行撰寫之流程示範摘要；保留參考來源連結，不代表引用機構授權或院所正式核准。",
+      "audience": "一般民眾（流程示範）",
+      "content": "合成的本機操作示範；未經院所醫療專業審查，不得視為正式衛教、診斷或個人化建議。\n\n一般衛教摘要\n以清潔流動水與肥皂洗手，搓洗手心、手背、指縫與指甲下方至少 20 秒，再沖淨並擦乾。\n\n留意手部清潔的時機\n備餐、用餐前後，以及如廁、擤鼻涕、咳嗽或打噴嚏後，留意手部清潔。\n\n示範用途\n用來展示草稿、送審、核准與版本追溯；實際使用前仍需由院方專業人員審查。"
+    },
+    {
+      "key": "blood-pressure-record",
+      "title": "【示範】居家血壓紀錄與回診準備",
+      "version_label": "示範 v1.0",
+      "source": "合成示範摘要｜參考美國心臟協會 AHA",
+      "source_url": "https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings/monitoring-your-blood-pressure-at-home",
+      "license": "自行撰寫之流程示範摘要；保留參考來源連結，不代表引用機構授權或院所正式核准。",
+      "audience": "一般成人（流程示範）",
+      "content": "合成的本機操作示範；未經院所醫療專業審查，不得視為正式衛教、診斷或個人化建議。\n\n紀錄目的\n依醫療人員安排記錄居家量測結果，供回診討論；居家監測不能取代看診，也不應自行停藥。\n\n量測與紀錄摘要\n可請醫療人員確認上臂式血壓計與壓脈帶尺寸。量測前安靜休息至少 5 分鐘，量測時不說話，手臂妥善支撐。記錄日期、時間及讀值，量測頻率依專業人員建議。\n\n示範用途\n不提供診斷門檻、調藥或個人化處置，僅用於展示待審文件與原文核對。"
+    },
+    {
+      "key": "clinic-preparation",
+      "title": "【示範】門診前的用藥清單與提問準備",
+      "version_label": "示範 v1.0",
+      "source": "合成示範摘要｜參考美國 VA 公開資訊",
+      "source_url": "https://www.va.gov/resources/what-should-i-bring-to-my-health-care-appointments/",
+      "license": "自行撰寫之流程示範摘要；保留參考來源連結，不代表引用機構授權或院所正式核准。",
+      "audience": "一般成人（流程示範）",
+      "content": "合成的本機操作示範；未經院所醫療專業審查，不得視為正式衛教、診斷或個人化建議。\n\n可先整理的資訊\n列出想討論的問題，整理目前使用的處方藥、非處方藥、保健品與草藥清單。記下近期用藥變更、過敏或曾發生的不良反應，於看診時提供專業人員確認。\n\n核對預約通知\n不同就診或檢查可能有額外準備，請依院方通知確認。本文不自行訂定禁食、停藥或檢查前處置。\n\n示範用途\n用來練習新增草稿與文件修訂，不作為任何院所的正式規範。"
+    }
+  ]
+}

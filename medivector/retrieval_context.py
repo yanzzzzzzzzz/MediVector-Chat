@@ -15,7 +15,7 @@ class RetrievalContext:
         return {"organization_id": self.principal.organization_id,
                 "branch_id": self.branch_id, "department_id": self.department_id,
                 "role": self.principal.role, "query_at": self.query_at.isoformat(),
-                "status": "approved", "validity": "effective_from <= query_at < effective_until",
+                "status": "approved", "index_status": "ready", "validity": "effective_from <= query_at < effective_until",
                 "acl": "server principal role and named-user grants", "strategy": "exact_over_authorized_subset"}
 
 

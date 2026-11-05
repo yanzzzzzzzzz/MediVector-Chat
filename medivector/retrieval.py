@@ -159,7 +159,8 @@ def retrieve_candidates(
                                    'branch_id',%s::text,'department_id',%s::text,'source_url',v.source_url) AS chunk_metadata
                         FROM articles a JOIN document_versions v ON v.id=a.document_version_id
                         JOIN knowledge_documents d ON d.id=v.document_id
-                        WHERE {where}
+                        WHERE {where} AND a.embedding IS NOT NULL
+                          AND NOT EXISTS (SELECT 1 FROM articles pending WHERE pending.document_version_id=v.id AND pending.embedding IS NULL)
                     )
                     SELECT id,document_id,source_id,title,source,publisher,published_date,version,
                            audience,topic,credibility,content,
@@ -173,6 +174,7 @@ def retrieve_candidates(
                            publisher, published_date, version, audience, topic, credibility,
                            content, embedding OPERATOR(public.<=>) %s::public.vector AS distance, chunk_metadata
                     FROM articles
+                    WHERE embedding IS NOT NULL
                     ORDER BY distance
                     LIMIT %s
                     """,
