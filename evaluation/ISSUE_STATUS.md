@@ -90,3 +90,10 @@ review worksheet. Python and the independent .NET Lab reject pending-human data;
 blank. The separate .NET 10 checkout passes its Release build and synthetic metric/contract self-tests,
 but remote repository creation/push is pending. No human-reviewed baseline, clinical claim or five-failure
 analysis is fabricated. These external/human completion requirements keep #8 open.
+
+## #20 interview/Pilot preparation (still open)
+
+Prepared a 3–5-participant interview guide, synthetic task protocol, timing/source/citation/revision/error
+measurement definitions and an empty anonymized report template in `docs/pilot/`. No participants, consent,
+interviews, measurements, adoption findings or validated product hypotheses are invented. Real professional
+participation and completed reports are required before #20 can be closed.

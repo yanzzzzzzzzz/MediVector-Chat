@@ -1,0 +1,20 @@
+{
+  "study_id": "DRAFT-assign-before-pilot",
+  "status": "not_started",
+  "notice": "空白研究範本；沒有受訪者、實測結果或已驗證產品假設。",
+  "data_scope": "synthetic_or_authorized_nonpersonal_only",
+  "participants": [],
+  "interview_records": [],
+  "task_measurements": [],
+  "measurement_fields": ["participant_alias", "role", "task_id", "task_order", "baseline_seconds", "tool_seconds", "completed", "source_version_correct", "citation_support_reviewer", "revision_count", "error_types", "nonpersonal_reproduction_steps"],
+  "hypotheses": [
+    {"id": "H01", "claim": "現行文件與版本查找是工作痛點", "status": "unverified", "evidence": []},
+    {"id": "H02", "claim": "工具可縮短查找及核對時間", "status": "unverified", "evidence": []},
+    {"id": "H03", "claim": "附引用的草稿可降低重複撰寫與修訂成本", "status": "unverified", "evidence": []},
+    {"id": "H04", "claim": "院所有足夠的導入意願與部署條件", "status": "unverified", "evidence": []}
+  ],
+  "prioritized_needs": [],
+  "adoption_and_deployment_findings": [],
+  "limitations": ["尚未招募或訪談 3–5 位專業人員", "尚未執行 Pilot", "不能從自動化測試推論實際工作效益或臨床安全"],
+  "decision": "pending_real_participant_evidence"
+}
