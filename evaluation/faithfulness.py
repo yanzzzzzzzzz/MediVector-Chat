@@ -9,7 +9,7 @@ from pathlib import Path
 
 def evaluate(case):
     references = {int(ref["index"]) for ref in case["references"]}
-    cited = {int(number) for number in re.findall(r"\[(\d+)\]", case["answer"])}
+    cited = {int(number) for number in re.findall(r"\[(?:索引\s*)?(\d+)\]", case["answer"])}
     claims = case.get("claims", [])
     missing = [c["text"] for c in claims if c.get("requires_evidence", True) and not c.get("citations")]
     unsupported, unreviewed = [], []
@@ -20,13 +20,16 @@ def evaluate(case):
                 unsupported.append({"claim": claim["text"], "citation": citation})
             elif verdict is not True:
                 unreviewed.append({"claim": claim["text"], "citation": citation})
+    pending = case.get("review_status") == "pending_human"
+    status = ("fail" if cited - references or (not pending and (missing or unsupported)) else
+              "unreviewed" if pending or unreviewed or not claims else "pass")
     return {"id": case["id"], "invalid_citations": sorted(cited - references),
             "missing_citations": missing, "unsupported_citations": unsupported,
             "unreviewed_citations": unreviewed,
-            "generation_faithfulness": "unreviewed" if unreviewed or not claims else (
-                "fail" if cited - references or missing or unsupported else "pass"),
+            "generation_faithfulness": status,
+            "review_status": case.get("review_status", "annotation_provenance_not_supplied"),
             "retrieval_quality": case.get("retrieval_metrics"),
-            "method": "Citation existence is automatic; claim coverage and support require human annotations."}
+            "method": "Citation existence is automatic; claim coverage and support use supplied annotations, whose authenticity is not established. Pending human review cannot pass; no clinical validation is claimed."}
 
 
 def main():

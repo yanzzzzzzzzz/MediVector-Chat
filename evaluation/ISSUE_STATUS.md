@@ -97,3 +97,10 @@ Prepared a 3–5-participant interview guide, synthetic task protocol, timing/so
 measurement definitions and an empty anonymized report template in `docs/pilot/`. No participants, consent,
 interviews, measurements, adoption findings or validated product hypotheses are invented. Real professional
 participation and completed reports are required before #20 can be closed.
+
+## #5 answer-support review handoff (still open)
+
+Added two real Luna responses against synthetic sources for pending human claim/support review, with no
+fabricated reviewer or verdict. Deterministic citation validation now accepts both numeric and 索引 markers;
+nonexistent citations fail even if semantic review is pending, while pending support annotations cannot Pass.
+See `candidates/ANSWER_REVIEW.md`. Actual reviewed semantic-support examples remain necessary before closure.
