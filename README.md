@@ -309,7 +309,7 @@ DELETE /api/conversations/{conversation_id}
 | --- | --- | --- |
 | `OPENAI_API_KEY` | 無 | 必填，用於 embeddings 與 GPT |
 | `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | embedding 模型 |
-| `OPENAI_CHAT_MODEL` | `gpt-4.1-mini` | 回答用模型 |
+| `OPENAI_CHAT_MODEL` | `gpt-6-luna` | 回答用模型 |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | OpenAI API base URL |
 | `TOP_K` | `5` | 最多回傳幾筆參考資料 |
 | `REFERENCE_CANDIDATE_LIMIT` | `20` | vector search 第一階段先取幾筆候選 |

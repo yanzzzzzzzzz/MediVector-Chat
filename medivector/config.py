@@ -10,7 +10,7 @@ load_dotenv(ROOT_DIR / ".env")
 FRONTEND_DIST_DIR = ROOT_DIR / "frontend" / "medivector-chat-app" / "dist"
 EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
 EMBEDDING_DIM = 1536  # text-embedding-3-small default
-CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-4.1-mini")
+CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-6-luna")
 RISK_MODEL = "gpt-4o-mini-2024-07-18"
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
 TOP_K = int(os.getenv("TOP_K", "5"))
