@@ -1,0 +1,63 @@
+{
+  "report_kind": "synthetic_preview_entry_validation",
+  "verified_baseline": false,
+  "release_gate_eligible": false,
+  "checks": [
+    {
+      "check": "workspace_mode",
+      "status_code": 200,
+      "body": {
+        "workspace": "institutional"
+      },
+      "passed": true
+    },
+    {
+      "check": "invalid_conversation_id",
+      "method": "POST",
+      "status_code": 400,
+      "passed": true
+    },
+    {
+      "check": "invalid_conversation_id",
+      "method": "GET",
+      "status_code": 400,
+      "passed": true
+    },
+    {
+      "check": "invalid_conversation_id",
+      "method": "DELETE",
+      "status_code": 400,
+      "passed": true
+    },
+    {
+      "check": "prototype_title_and_language",
+      "passed": true
+    }
+  ],
+  "api_checks_build": "807192f",
+  "browser_checks": {
+    "institutional_history_heading": true,
+    "legacy_composer_absent": true,
+    "history_restore": true,
+    "emphasis_rendered_without_asterisks": true,
+    "history_citation_button_opens_source": true,
+    "new_query_opens_form_directly": true,
+    "new_query_url": "http://127.0.0.1:8000/knowledge?view=query",
+    "prototype_title": true,
+    "browser_checks_build": "3e12d5b"
+  },
+  "tests": {
+    "backend_passed": 126,
+    "database_integration_included": true,
+    "frontend_passed": 10,
+    "lint_passed": true,
+    "typescript_and_build_passed": true
+  },
+  "limitations": "Engineering input/routing/rendering validation on local synthetic preview; not a reviewed clinical baseline or professional Pilot.",
+  "runtime": {
+    "git_sha": "3e12d5b4c73ed011b3ba95499de2b7341a8d9153",
+    "source_support_enabled": true,
+    "legacy_document_gets_in_current_container_logs": 0,
+    "workspace_mode_gets_in_current_container_logs": 1
+  }
+}

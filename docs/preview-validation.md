@@ -1,6 +1,6 @@
 # 本機原型預覽驗證 — 2026-11-06
 
-## 目前狀態
+## 首輪啟用狀態
 
 本機 `medivector-preview` 的 app 已重建為程式版本 `cb5b37dfb10a267ab4c9a8dbdd74c2dd5c5b9af4`，
 `SOURCE_SUPPORT_CHECK_ENABLED=true`。頁面為 http://127.0.0.1:8000/knowledge。
@@ -60,9 +60,9 @@ SOURCE_SUPPORT_CHECK_ENABLED=false docker compose -p medivector-preview \
 
 ## 操作注意
 
-院所帳號請在 `/knowledge` 發起新查詢。舊 `/` Demo 可還原既有對話，但其新增資料／一般聊天流程
-不具完整院所範圍設定；進入時可能顯示不適用 legacy documents endpoint 的提示。這是後續應整理的介面入口。
-目前問答區使用純文字呈現，模型偶爾產生的 Markdown 粗體標記可能原樣顯示，尚待介面整理。
+首輪操作曾發現院所帳號進入舊 `/` Demo 時載入不適用的 legacy API，以及粗體標記原樣顯示。
+後續已修正入口與格式呈現，`/` 對院所帳號作為歷史閱讀頁，新問題改到 `/knowledge?view=query`。
+詳見 [最新入口修正與驗證](entry-polish-validation.md)。
 
 初次驗證腳本誤用帶前綴的非 UUID 對話 ID，伺服器回 500；改用 UI 同樣採用的 UUID 後四項通過。
-此發現顯示 API 還可補上對話 ID 的輸入驗證，避免不合法值進入資料庫；本輪沒有修改既有 API 合約。
+後續已補上 UUID 輸入驗證，不合法值回 400；首輪記錄保留於此，最新行為見入口修正文件。

@@ -206,3 +206,11 @@ currently available; the review and Pilot materials remain prepared, not falsely
 來源 manifest 前後未變。Chrome 另核對回答、拒答、引用原文、追溯視窗、歷史還原，以及原始 PDF 第三頁內容。
 新增可重用的 `docker-compose.source-support.yml` 與 [預覽驗證／回復說明](../docs/preview-validation.md)。
 這不取代 #5/#8/#20 的人工驗證。已記錄 legacy 入口與非 UUID 輸入處理等後續整理項目。
+
+
+### 2026-11-06 入口、UUID 與文字呈現修正
+
+`807192f` 修正院所歷史頁誤用 legacy API、對話 ID 無效值回 500，以及回答粗體／引用呈現；
+`3e12d5b` 讓「新查詢」直接開啟查詢表單。新增授權工作區模式端點，院所歷史頁不提供無範圍聊天輸入。
+完整後端 126 項（含 DB 整合）、前端 10 項測試、lint／型別／build 通過，並已重建本機預覽。
+詳見 [入口驗證](../docs/entry-polish-validation.md)。未變更來源或關閉人工待辦。
