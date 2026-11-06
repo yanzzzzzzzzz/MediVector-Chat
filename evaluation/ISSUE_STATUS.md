@@ -146,3 +146,7 @@ committed .NET source/self-tests/workflow (`26926f6`, `115c4ed`).
 [Independent Lab CI passed](https://github.com/yanzzzzzzzzz/rag-evaluation-lab/actions/runs/42144963691). Human review of the candidate dataset,
 real baseline runs and actual failure analyses are still pending. No professional participants are
 currently available; the review and Pilot materials remain prepared, not falsely marked as validated.
+
+### 2026-11-06 合成資料實測
+
+已完成 120 次檢索比較及 5 題回答觀察，新增診斷程式與保護測試（後端 93 tests 通過、CI 通過）。詳見 [工程分析](reports/synthetic-analysis-2026-11-06.md)。全部候選標註仍為 pending_human，不能匯入正式 baseline 或 release gate；#5、#8 仍保留人工驗收待辦。

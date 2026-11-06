@@ -1,0 +1,441 @@
+{
+  "report_kind": "unreviewed_synthetic_answer_observations",
+  "created_at": "2026-11-06T02:22:27.404540+00:00",
+  "verified_baseline": false,
+  "human_review_complete": false,
+  "corpus_version": "6b9bfdfedd2667bde21bc7accf551b1f25e9858f22c7617566884e705333dc8c",
+  "notice": "合成資料工程觀察；實際模型回答尚未經真人語意或臨床審查，不計為已驗證失敗案例或 baseline。",
+  "cases": [
+    {
+      "case_id": "candidate-016",
+      "question": "PDF 合成範例要攜帶什麼文件？",
+      "proposed_answerable": true,
+      "review_status": "pending_human",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "claims": [],
+      "response": {
+        "query_trace_id": "f0648428-b488-43cb-b24a-4090a0bfbfcc",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T02:22:13.353714+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "目前沒有符合此院區、科別且已核准有效的參考資料，無法確認院所規範。請向院方專業人員確認。",
+        "rag_enabled": true,
+        "references": [],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "沒有找到可用參考資料。",
+          "reference_count": 0,
+          "best_distance": null
+        },
+        "retrieval_terms": [
+          "PDF 合成範例 PDF synthesis example",
+          "文件 documents",
+          "必要文件 required documents",
+          "合成文件 synthesis documents",
+          "範例示範 example demonstration",
+          "電子文件 electronic documents",
+          "格式格式化 formatting"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "server_snapshot": {
+        "git_sha": "c0c952aade13044eb95c1b0fbed97f4fb7cea922",
+        "chat_model": "gpt-6-luna",
+        "generation_parameters": {
+          "model": "gpt-6-luna",
+          "temperature": 0,
+          "reasoning_effort": "none"
+        },
+        "prompt_versions": {
+          "chat.py": "12da2a326b2ed51b00b5b7ee921ab073db733fac4b9dee71af34d0bed0ab17c4",
+          "education.py": "e0f5b769686c4a5d1fbc314b4803472e30e97b6b24e4c454d0b794205f488470",
+          "retrieval.py": "aaa4b72519a08b6f07aca23ec3846bcd04e17654360541b92d6da1045752c4a1"
+        }
+      }
+    },
+    {
+      "case_id": "candidate-018",
+      "question": "PDF 第一頁的準備事項是什麼？",
+      "proposed_answerable": true,
+      "review_status": "pending_human",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "claims": [],
+      "response": {
+        "query_trace_id": "75d6195b-5dd2-46f8-99f1-ffaac7e96016",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T02:22:15.704217+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "目前沒有符合此院區、科別且已核准有效的參考資料，無法確認院所規範。請向院方專業人員確認。",
+        "rag_enabled": true,
+        "references": [],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "沒有找到可用參考資料。",
+          "reference_count": 0,
+          "best_distance": null
+        },
+        "retrieval_terms": [
+          "PDF",
+          "第一頁",
+          "準備事項",
+          "preparation items",
+          "first page",
+          "PDF document"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "server_snapshot": {
+        "git_sha": "c0c952aade13044eb95c1b0fbed97f4fb7cea922",
+        "chat_model": "gpt-6-luna",
+        "generation_parameters": {
+          "model": "gpt-6-luna",
+          "temperature": 0,
+          "reasoning_effort": "none"
+        },
+        "prompt_versions": {
+          "chat.py": "12da2a326b2ed51b00b5b7ee921ab073db733fac4b9dee71af34d0bed0ab17c4",
+          "education.py": "e0f5b769686c4a5d1fbc314b4803472e30e97b6b24e4c454d0b794205f488470",
+          "retrieval.py": "aaa4b72519a08b6f07aca23ec3846bcd04e17654360541b92d6da1045752c4a1"
+        }
+      }
+    },
+    {
+      "case_id": "candidate-024",
+      "question": "本院大腸鏡檢查前何時停用藥物？",
+      "proposed_answerable": false,
+      "review_status": "pending_human",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "claims": [],
+      "response": {
+        "query_trace_id": "dac62ded-d498-4fcb-8af1-b984c9e19fab",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T02:22:16.892203+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "提供的核准原文沒有大腸鏡檢查前停用藥物的資訊，無法確認停藥時間；請向院方確認。",
+        "rag_enabled": true,
+        "references": [
+          {
+            "document_version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+            "chunk_metadata": {
+              "end": 191,
+              "pages": [],
+              "start": 0,
+              "status": "approved",
+              "chunk_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b:abcd691e-7fa5-4057-a696-9797efc87465:token:1",
+              "branch_id": "main",
+              "source_url": "https://www.cdc.gov/clean-hands/about/index.html",
+              "version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+              "approved_at": "2026-11-05T07:55:11.859816+00:00",
+              "chunk_index": 1,
+              "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+              "token_count": 266,
+              "department_id": "general",
+              "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+              "version_label": "示範 v1.1",
+              "organization_id": "local-preview-hospital"
+            },
+            "index": 1,
+            "uuid": "dba96957-0aed-44bf-802d-97db8a1ecf1e",
+            "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+            "source_id": 0,
+            "title": "【示範】手部清潔與洗手步驟",
+            "source": "合成示範摘要｜參考 CDC 公開資訊",
+            "publisher": "",
+            "published_date": "",
+            "version": "示範 v1.1",
+            "audience": "",
+            "topic": "",
+            "credibility": "",
+            "content": "【本機操作示範】未經院所醫療專業審查，不得作為正式衛教或個人化建議。\n\n一般衛教摘要\n以流動清水和肥皂清潔雙手，搓洗手背、指縫與指甲周圍至少 20 秒，再沖淨並擦乾。\n\n留意手部清潔的時機\n\n版本示範註記：本修訂新增操作說明，衛教摘要未變更。\n準備食物及用餐前後、如廁後、擤鼻涕或咳嗽打噴嚏後。\n\n示範用途\n展示建立草稿、送審、核准與來源追溯流程；實際使用前仍須由院所專業人員審查。",
+            "distance": 0.5870176532544754,
+            "distance_text": "0.5870"
+          }
+        ],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "參考資料不足，只有 1 筆。",
+          "reference_count": 1,
+          "best_distance": 0.5870176532544754
+        },
+        "retrieval_terms": [
+          "大腸鏡檢查 colonoscopy",
+          "停用藥物 stop medication",
+          "檢查前 pre-examination",
+          "藥物使用 medication use",
+          "醫療指導 medical guidance",
+          "腸道準備 bowel preparation",
+          "藥物副作用 medication side effects"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "server_snapshot": {
+        "git_sha": "c0c952aade13044eb95c1b0fbed97f4fb7cea922",
+        "chat_model": "gpt-6-luna",
+        "generation_parameters": {
+          "model": "gpt-6-luna",
+          "temperature": 0,
+          "reasoning_effort": "none"
+        },
+        "prompt_versions": {
+          "chat.py": "12da2a326b2ed51b00b5b7ee921ab073db733fac4b9dee71af34d0bed0ab17c4",
+          "education.py": "e0f5b769686c4a5d1fbc314b4803472e30e97b6b24e4c454d0b794205f488470",
+          "retrieval.py": "aaa4b72519a08b6f07aca23ec3846bcd04e17654360541b92d6da1045752c4a1"
+        }
+      }
+    },
+    {
+      "case_id": "candidate-028",
+      "question": "其他院區的檢查前準備流程為何？",
+      "proposed_answerable": false,
+      "review_status": "pending_human",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "claims": [],
+      "response": {
+        "query_trace_id": "3d27ef36-e7c6-4f9a-95f9-0f71835fa0bd",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T02:22:20.421265+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "提供的核准原文沒有說明其他院區的檢查前準備流程，無法確認；請向院方確認。原文內容是手部清潔衛教，並非檢查前準備說明。[1]",
+        "rag_enabled": true,
+        "references": [
+          {
+            "document_version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+            "chunk_metadata": {
+              "end": 191,
+              "pages": [],
+              "start": 0,
+              "status": "approved",
+              "chunk_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b:abcd691e-7fa5-4057-a696-9797efc87465:token:1",
+              "branch_id": "main",
+              "source_url": "https://www.cdc.gov/clean-hands/about/index.html",
+              "version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+              "approved_at": "2026-11-05T07:55:11.859816+00:00",
+              "chunk_index": 1,
+              "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+              "token_count": 266,
+              "department_id": "general",
+              "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+              "version_label": "示範 v1.1",
+              "organization_id": "local-preview-hospital"
+            },
+            "index": 1,
+            "uuid": "dba96957-0aed-44bf-802d-97db8a1ecf1e",
+            "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+            "source_id": 0,
+            "title": "【示範】手部清潔與洗手步驟",
+            "source": "合成示範摘要｜參考 CDC 公開資訊",
+            "publisher": "",
+            "published_date": "",
+            "version": "示範 v1.1",
+            "audience": "",
+            "topic": "",
+            "credibility": "",
+            "content": "【本機操作示範】未經院所醫療專業審查，不得作為正式衛教或個人化建議。\n\n一般衛教摘要\n以流動清水和肥皂清潔雙手，搓洗手背、指縫與指甲周圍至少 20 秒，再沖淨並擦乾。\n\n留意手部清潔的時機\n\n版本示範註記：本修訂新增操作說明，衛教摘要未變更。\n準備食物及用餐前後、如廁後、擤鼻涕或咳嗽打噴嚏後。\n\n示範用途\n展示建立草稿、送審、核准與來源追溯流程；實際使用前仍須由院所專業人員審查。",
+            "distance": 0.5546184379072892,
+            "distance_text": "0.5546"
+          }
+        ],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "參考資料不足，只有 1 筆。",
+          "reference_count": 1,
+          "best_distance": 0.5546184379072892
+        },
+        "retrieval_terms": [
+          "檢查前準備流程",
+          "preparation process for examination",
+          "其他院區",
+          "other medical facilities",
+          "檢查",
+          "examination",
+          "流程",
+          "process"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "server_snapshot": {
+        "git_sha": "c0c952aade13044eb95c1b0fbed97f4fb7cea922",
+        "chat_model": "gpt-6-luna",
+        "generation_parameters": {
+          "model": "gpt-6-luna",
+          "temperature": 0,
+          "reasoning_effort": "none"
+        },
+        "prompt_versions": {
+          "chat.py": "12da2a326b2ed51b00b5b7ee921ab073db733fac4b9dee71af34d0bed0ab17c4",
+          "education.py": "e0f5b769686c4a5d1fbc314b4803472e30e97b6b24e4c454d0b794205f488470",
+          "retrieval.py": "aaa4b72519a08b6f07aca23ec3846bcd04e17654360541b92d6da1045752c4a1"
+        }
+      }
+    },
+    {
+      "case_id": "candidate-030",
+      "question": "本院規定沒有肥皂時應使用幾％酒精？",
+      "proposed_answerable": false,
+      "review_status": "pending_human",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "claims": [],
+      "response": {
+        "query_trace_id": "dd157873-a320-4e4c-b3e3-34200459692e",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T02:22:24.244225+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "原文未提及沒有肥皂時應使用幾％酒精，無法確認；請向院方確認。原文僅說明以流動清水和肥皂清潔雙手。[1]",
+        "rag_enabled": true,
+        "references": [
+          {
+            "document_version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+            "chunk_metadata": {
+              "end": 191,
+              "pages": [],
+              "start": 0,
+              "status": "approved",
+              "chunk_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b:abcd691e-7fa5-4057-a696-9797efc87465:token:1",
+              "branch_id": "main",
+              "source_url": "https://www.cdc.gov/clean-hands/about/index.html",
+              "version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+              "approved_at": "2026-11-05T07:55:11.859816+00:00",
+              "chunk_index": 1,
+              "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+              "token_count": 266,
+              "department_id": "general",
+              "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+              "version_label": "示範 v1.1",
+              "organization_id": "local-preview-hospital"
+            },
+            "index": 1,
+            "uuid": "dba96957-0aed-44bf-802d-97db8a1ecf1e",
+            "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+            "source_id": 0,
+            "title": "【示範】手部清潔與洗手步驟",
+            "source": "合成示範摘要｜參考 CDC 公開資訊",
+            "publisher": "",
+            "published_date": "",
+            "version": "示範 v1.1",
+            "audience": "",
+            "topic": "",
+            "credibility": "",
+            "content": "【本機操作示範】未經院所醫療專業審查，不得作為正式衛教或個人化建議。\n\n一般衛教摘要\n以流動清水和肥皂清潔雙手，搓洗手背、指縫與指甲周圍至少 20 秒，再沖淨並擦乾。\n\n留意手部清潔的時機\n\n版本示範註記：本修訂新增操作說明，衛教摘要未變更。\n準備食物及用餐前後、如廁後、擤鼻涕或咳嗽打噴嚏後。\n\n示範用途\n展示建立草稿、送審、核准與來源追溯流程；實際使用前仍須由院所專業人員審查。",
+            "distance": 0.5358054354567744,
+            "distance_text": "0.5358"
+          }
+        ],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "參考資料不足，只有 1 筆。",
+          "reference_count": 1,
+          "best_distance": 0.5358054354567744
+        },
+        "retrieval_terms": [
+          "酒精 concentration alcohol",
+          "消毒 disinfectant",
+          "手部衛生 hand hygiene",
+          "肥皂 soap",
+          "醫療規範 medical guidelines",
+          "抗菌 antibacterial",
+          "清潔清洗 cleaning"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "server_snapshot": {
+        "git_sha": "c0c952aade13044eb95c1b0fbed97f4fb7cea922",
+        "chat_model": "gpt-6-luna",
+        "generation_parameters": {
+          "model": "gpt-6-luna",
+          "temperature": 0,
+          "reasoning_effort": "none"
+        },
+        "prompt_versions": {
+          "chat.py": "12da2a326b2ed51b00b5b7ee921ab073db733fac4b9dee71af34d0bed0ab17c4",
+          "education.py": "e0f5b769686c4a5d1fbc314b4803472e30e97b6b24e4c454d0b794205f488470",
+          "retrieval.py": "aaa4b72519a08b6f07aca23ec3846bcd04e17654360541b92d6da1045752c4a1"
+        }
+      }
+    }
+  ]
+}
