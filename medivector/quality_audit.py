@@ -35,7 +35,10 @@ def query_snapshot(context):
         catalog = source_catalog(cur, context.principal, context.branch_id, context.department_id, context.query_at)
     # Snapshot only the fully indexed corpus that can enter formal retrieval.
     catalog = {key: value for key, value in catalog.items() if value['indexed']}
-    return build_snapshot(catalog, chat_model=config.CHAT_MODEL, generation=chat_parameters(0))
+    from .source_support import PROMPT, SCHEMA
+    return build_snapshot(catalog, chat_model=config.CHAT_MODEL, generation={
+        **chat_parameters(0), 'source_support_check_enabled': config.SOURCE_SUPPORT_CHECK_ENABLED,
+        'source_support_prompt_sha256': digest({'prompt': PROMPT, 'schema': SCHEMA})})
 
 
 def record_query(context, conversation_id, question, response, snapshot, elapsed_ms, *, conn=None):
@@ -43,7 +46,7 @@ def record_query(context, conversation_id, question, response, snapshot, elapsed
     after = query_snapshot(context)
     if after['corpus_sha256'] != snapshot['corpus_sha256']:
         snapshot = {**snapshot, 'corpus_changed_during_query': True, 'corpus_after': after['corpus']}
-    snapshot = {**snapshot, 'answer_model_invoked': bool(response['references']), 'elapsed_excludes_audit_persistence': True}
+    snapshot = {**snapshot, 'answer_model_invoked': snapshot.get('answer_model_invoked', bool(response['references'])), 'elapsed_excludes_audit_persistence': True}
     refs = [{key: ref.get(key) for key in ('index', 'uuid', 'document_id', 'document_version_id', 'distance')}
             for ref in response['references']]
     # No raw question/answer, retrieval rewrite or source text is copied into the audit trace.

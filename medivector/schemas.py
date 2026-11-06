@@ -100,6 +100,17 @@ class RiskAssessmentSchema(BaseModel):
     action: str
 
 
+class SourceSupportAssessmentSchema(BaseModel):
+    status: Literal["sufficient", "partial", "insufficient", "uncertain"]
+    estimated_answerable: bool
+    model: str | None = None
+    human_reviewed: Literal[False] = False
+    semantic_support_verified: Literal[False] = False
+    reason: str | None = None
+    elapsed_ms: float | None = None
+    usage: dict[str, int] | None = None
+
+
 class AskRequest(BaseModel):
     branch_id: str | None = None
     department_id: str | None = None
@@ -109,6 +120,7 @@ class AskRequest(BaseModel):
 
 
 class AskResponse(BaseModel):
+    source_support_assessment: SourceSupportAssessmentSchema | None = None
     query_trace_id: str | None = None
     applied_filters: dict[str, Any] | None = None
     answer: str
@@ -131,6 +143,7 @@ class ConversationsResponse(BaseModel):
 
 
 class MessageItemSchema(BaseModel):
+    source_support_assessment: SourceSupportAssessmentSchema | None = None
     role: str
     content: str
     references: list[ReferenceItemSchema] = Field(default_factory=list)

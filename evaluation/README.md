@@ -230,3 +230,28 @@ The last command makes no network calls; it replays saved raw distances at four 
 thresholds and two margins. Inputs are bound to the candidate packet hash. Use fresh output paths.
 Threshold exploration on the same proposed labels is not a validated deployment choice.
 See [expanded analysis](reports/prototype-challenge-analysis-2026-11-06.md).
+
+
+## Model-estimated source sufficiency
+
+Replay the frozen representation run through a separate source sufficiency estimator:
+
+```sh
+python -m evaluation.source_support_diagnostic \
+  evaluation/reports/prototype-challenge-2026-11-06.json \
+  evaluation/candidates/prototype-challenge-v1.json fresh-support-run.json \
+  --variant title --workers 2 --acknowledge-synthetic-data
+```
+
+The packet hash, questions and source text/IDs are checked before paid calls. Labels never enter the
+model request. Per-requirement supporting quotes must match supplied excerpts exactly. This checks
+provenance, not semantic entailment or complete decomposition. Unknown/partial/missing support and
+request failures do not become acceptance. Reports retain proposed-label confusion counts, failure
+counts, timings, token usage, exact quotes and source/prompt hashes, while staying ineligible for the
+release gate and reviewed baseline commands. Use only authorized nonpersonal synthetic inputs and
+fresh output paths. The model is the configured answer model; no answer generation occurs here.
+
+A separate opt-in runtime flag (`SOURCE_SUPPORT_CHECK_ENABLED`, default false) enables the same
+estimator before institutional answer generation. Persisted chat/audit data contain summaries only;
+raw model requirements/quotes are confined to the authorized offline diagnostic report.
+See [measured source-support analysis](reports/source-support-analysis-2026-11-06.md).

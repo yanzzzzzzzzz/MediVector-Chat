@@ -119,6 +119,7 @@ def message_metadata(message: dict) -> dict:
         for key in (
             "references",
             "evidence_assessment",
+            "source_support_assessment",
             "retrieval_terms",
             "risk_assessment",
         )

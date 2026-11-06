@@ -335,6 +335,28 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         response = self.request("POST", "/api/ask", {"question": "test", "rag_enabled": False, "branch_id": "a", "department_id": "general"}, "reader")
         self.assertEqual(response.status_code, 400)
 
+    def test_source_support_gate_refusal_is_persisted_and_audited_without_source_quote_copies(self):
+        from medivector.models import RetrievalQuery
+        self.approve(self.create())
+        conversation = str(uuid.uuid4())
+        estimate = {'status': 'insufficient', 'estimated_answerable': False, 'human_reviewed': False,
+                    'semantic_support_verified': False, 'supporting_chunk_ids': [],
+                    'requirements': [{'requirement': 'SYNTHETIC_PRIVATE_CHECK_TEXT'}]}
+        with patch('medivector.qa.SOURCE_SUPPORT_CHECK_ENABLED', True), patch('medivector.config.SOURCE_SUPPORT_CHECK_ENABLED', True), patch('medivector.qa.assess_source_support', return_value=estimate) as check, patch('medivector.qa.require_openai_api_key', return_value='fake'), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery('preparation', [], False)), patch('medivector.qa.chat_with_gpt') as generate:
+            response = self.request('POST', '/api/ask', {'conversation_id': conversation, 'question': 'preparation cost?', 'branch_id': 'a', 'department_id': 'general'}, 'reader')
+        self.assertEqual(response.status_code, 200, response.text)
+        generate.assert_not_called()
+        check.assert_called_once()
+        body = response.json()
+        self.assertTrue(body['references'])
+        self.assertFalse(body['source_support_assessment']['estimated_answerable'])
+        audit = self.request('GET', '/api/knowledge/query-traces/' + body['query_trace_id'], user='reader').json()
+        self.assertFalse(audit['snapshot']['answer_model_invoked'])
+        self.assertTrue(audit['snapshot']['generation_parameters']['source_support_check_enabled'])
+        history = self.request('GET', '/api/conversations/' + conversation, user='reader').json()
+        self.assertEqual(history['messages'][-1]['source_support_assessment']['status'], 'insufficient')
+        self.assertNotIn('SYNTHETIC_PRIVATE_CHECK_TEXT', json.dumps([body, audit, history]))
+
     def upload_pdf(self, data, user='nurse', **changes):
         payload = self.payload(**changes)
         payload.pop('content', None)
