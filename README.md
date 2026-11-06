@@ -544,3 +544,5 @@ DEMO_AUTO_CONNECT_USER='' docker compose -p medivector-preview \
 舊訊息沒有逐則連結時，顯示整段對話的追溯清單。來源開啟時重新核對權限與版本，撤回來源的歷史回覆仍會遮蔽。
 
 「新查詢」可回到空白查詢表單，歷史頁也可對特定答案回報問題。`/` 舊版閱讀頁仍保留。
+
+使用方式與實測紀錄見 [工作台查詢紀錄](docs/query-history.md)。

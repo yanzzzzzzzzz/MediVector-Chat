@@ -222,3 +222,9 @@ currently available; the review and Pilot materials remain prepared, not falsely
 未將 Token 寫入前端，預設驗證仍保留，機構／範圍／角色檢查仍適用。已啟用於只綁定 localhost 的預覽，
 全新分頁與不帶 Token 的文件／合成問答實測通過。後端 130、前端 13 項測試及 lint／型別／build 通過。
 恢復方式與實測見 [預覽說明](../docs/preview-validation.md)。
+
+
+### 2026-11-07 工作台查詢紀錄
+
+`86345b8` 新增工作台內歷史搜尋、原範圍與時間、逐則追溯及答案回報入口。新回答的追溯連結以同一筆交易保存並核對擁有者；舊訊息保留對話追溯清單。來源開啟仍重新核對權限／版本，撤回遮蔽持續適用。
+後端 132、前端 17 項測試與 lint／型別／build 通過，本機 API 與 Chrome 已驗證，示範自動連線維持啟用。詳見 [使用與驗證](../docs/query-history.md)。合成工程驗證不關閉 #5／#8／#20。
