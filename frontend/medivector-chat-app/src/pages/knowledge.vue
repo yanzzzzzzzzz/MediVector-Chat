@@ -20,6 +20,14 @@
         <button :aria-current="activeView === 'query' ? 'page' : undefined" :class="{ active: activeView === 'query' }" type="button" @click="changeView('query')"><i aria-hidden="true" class="mdi mdi-text-box-search-outline" />核准知識查詢</button>
 
         <button
+          :aria-current="activeView === 'history' ? 'page' : undefined"
+          :class="{ active: activeView === 'history' }"
+          :disabled="busy"
+          type="button"
+          @click="changeView('history')"
+        ><i aria-hidden="true" class="mdi mdi-history" />查詢紀錄</button>
+
+        <button
           v-if="catalog?.role === 'admin'"
           :aria-current="activeView === 'settings' ? 'page' : undefined"
           class="settings-nav"
@@ -31,7 +39,6 @@
 
       <div class="sidebar-bottom">
         <div class="trust-note"><i aria-hidden="true" class="mdi mdi-shield-check-outline" /><strong>讓知識值得信賴</strong><p>只有流程中核准且有效的文件，<br>才會用於文件查詢。</p></div>
-        <RouterLink class="demo-link" to="/"><i aria-hidden="true" class="mdi mdi-arrow-top-right" />查閱對話紀錄</RouterLink>
         <button class="account" :disabled="demoAutoConnect" type="button" @click="openApiAccess"><span class="avatar">{{ catalog?.principal.slice(0, 1).toUpperCase() || 'M' }}</span><span><strong>{{ catalog?.principal || '尚未連線' }}</strong><small>{{ roleLabels[catalog?.role || ''] || '設定存取憑證' }}</small></span><i v-if="!demoAutoConnect" aria-hidden="true" class="mdi mdi-cog-outline" /></button>
       </div>
     </aside>
@@ -42,7 +49,15 @@
       <header class="page-header">
         <div><div class="eyebrow">KNOWLEDGE WORKSPACE</div><h1>{{ pageTitles[activeView] }}</h1><p>{{ pageDescriptions[activeView] }}</p></div>
 
-        <div class="header-actions"><button class="button secondary" :disabled="busy" type="button" @click="run(refresh)"><i aria-hidden="true" :class="['mdi mdi-refresh', { spinning: busy }]" /><span>重新整理</span></button>
+        <div class="header-actions"><button
+                                      v-if="activeView === 'history'"
+                                      class="button primary"
+                                      :disabled="busy"
+                                      type="button"
+                                      @click="startFreshQuery"
+                                    ><i aria-hidden="true" class="mdi mdi-plus" />新查詢</button>
+
+          <button class="button secondary" :disabled="busy" type="button" @click="run(refresh)"><i aria-hidden="true" :class="['mdi mdi-refresh', { spinning: busy }]" /><span>重新整理</span></button>
 
           <button
             v-if="canEdit && ['documents', 'review'].includes(activeView)"
@@ -57,7 +72,7 @@
 
       <template v-if="catalog">
         <div v-if="!catalog.ai_available" class="setup-notice"><i aria-hidden="true" class="mdi mdi-information-outline" /><span>目前可管理、送審與核准文件。AI 索引與問答尚未啟用，待建立索引的版本不會用於知識查詢。</span></div>
-        <div v-if="activeView !== 'settings'" class="scope-filter"><span><i aria-hidden="true" class="mdi mdi-map-marker-outline" />適用範圍</span><label><span class="sr-only">選擇院區</span><select v-model="branchId" :disabled="busy"><option value="">全部院區</option><option v-for="branch in catalog.branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option></select></label><span class="scope-divider" /><label><span class="sr-only">選擇科別</span><select v-model="departmentId" :disabled="busy"><option value="">全部科別</option><option v-for="department in catalog.departments" :key="department.id" :value="department.id">{{ department.name }}</option></select></label><span class="scope-hint">依帳號權限顯示可用內容</span></div>
+        <div v-if="!['settings', 'history'].includes(activeView)" class="scope-filter"><span><i aria-hidden="true" class="mdi mdi-map-marker-outline" />適用範圍</span><label><span class="sr-only">選擇院區</span><select v-model="branchId" :disabled="busy"><option value="">全部院區</option><option v-for="branch in catalog.branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option></select></label><span class="scope-divider" /><label><span class="sr-only">選擇科別</span><select v-model="departmentId" :disabled="busy"><option value="">全部科別</option><option v-for="department in catalog.departments" :key="department.id" :value="department.id">{{ department.name }}</option></select></label><span class="scope-hint">依帳號權限顯示可用內容</span></div>
 
         <template v-if="activeView === 'documents' || activeView === 'review'">
           <div class="metrics">
@@ -126,7 +141,9 @@
 
                                                                        <template v-if="answer"><div class="answer-heading"><span class="status-pill approved"><span />查詢完成</span><small>{{ branchName(String(answer.applied_filters?.branch_id || '')) }}／{{ departmentName(String(answer.applied_filters?.department_id || '')) }}</small></div><div class="answer-content"><AnswerText :references="answer.references" :text="answer.answer" @open-reference="reference => run(() => openCitation(reference))" /></div>
 
-                                                                         <div v-if="answer.references.length > 0" class="answer-references"><button v-if="answer.query_trace_id" class="source-link" type="button" @click="run(inspectTrace)">查看模型與查詢追溯</button><h3>核對參考原文</h3><button v-if="answer.references[0]?.document_version_id" class="source-link" type="button" @click="startReport(answer.references[0].document_version_id, answerTrace)">回報此答案</button>
+                                                                         <button v-if="answer.query_trace_id" class="source-link" type="button" @click="run(inspectTrace)">查看模型與查詢追溯</button>
+
+                                                                         <div v-if="answer.references.length > 0" class="answer-references"><h3>核對參考原文</h3><button v-if="answer.references[0]?.document_version_id" class="source-link" type="button" @click="startReport(answer.references[0].document_version_id, answerTrace)">回報此答案</button>
 
                                                                            <button
                                                                              v-for="reference in answer.references"
@@ -139,6 +156,17 @@
                                                                            <p>引用與檢索證據不代表答案已通過事實驗證，請核對原文。</p></div></template></section>
 
           <aside class="query-context"><span class="section-icon small"><i aria-hidden="true" class="mdi mdi-map-marker-outline" /></span><h3>本次查詢範圍</h3><dl><dt>院區</dt><dd>{{ branchName(branchId) || '請先選擇院區' }}</dd><dt>科別</dt><dd>{{ departmentName(departmentId) || '請先選擇科別' }}</dd><dt>已建索引的核准版本</dt><dd>{{ searchableCount }} 份</dd></dl><div class="context-note"><i aria-hidden="true" class="mdi mdi-information-outline" />沒有合適的核准資料時，系統會說明無法確認院所規範。</div></aside></div>
+
+        <KnowledgeHistory
+          v-else-if="activeView === 'history'"
+          ref="historyPanel"
+          :branches="catalog.branches"
+          :departments="catalog.departments"
+          @new-query="startFreshQuery"
+          @open-reference="reference => run(() => openCitation(reference))"
+          @open-trace="traceId => run(() => openTrace(traceId))"
+          @report-answer="target => startReport(target.versionId, target.conversationId)"
+        />
 
         <section v-else class="settings-panel"><div class="panel-heading"><div><h2>院區與科別設定</h2><p>為帳號已授權的代碼設定名稱，方便文件選擇適用範圍。</p></div><span class="settings-icon"><i aria-hidden="true" class="mdi mdi-domain" /></span></div><div class="settings-grid"><form @submit.prevent="run(saveCatalog)"><h3>登錄名稱</h3><label class="field-label">類別<select v-model="catalogKind"><option value="branches">院區</option><option value="departments">科別</option></select></label><label class="field-label">已授權代碼<input v-model.trim="catalogId" placeholder="輸入帳號已獲授權的代碼" required></label><label class="field-label">顯示名稱<input v-model.trim="catalogName" placeholder="例如：主院區、一般衛教" required></label><button class="button primary" :disabled="busy" type="submit">儲存設定<i aria-hidden="true" class="mdi mdi-check" /></button></form><div class="registered-scopes"><h3>已登錄範圍</h3><p>院區</p><div v-for="branch in catalog.branches" :key="branch.id"><i aria-hidden="true" class="mdi mdi-hospital-building" /><strong>{{ branch.name }}</strong><code>{{ branch.id }}</code></div><small v-if="catalog.branches.length === 0">尚未登錄院區</small><p>科別</p><div v-for="department in catalog.departments" :key="department.id"><i aria-hidden="true" class="mdi mdi-stethoscope" /><strong>{{ department.name }}</strong><code>{{ department.id }}</code></div><small v-if="catalog.departments.length === 0">尚未登錄科別</small></div></div></section>
       </template>
@@ -245,8 +273,9 @@
 <script setup lang="ts">
   import type { AskResponse, ReferenceItem } from '@/types'
   import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
-  import { useRoute } from 'vue-router'
+  import { useRoute, useRouter } from 'vue-router'
   import AnswerText from '@/components/AnswerText.vue'
+  import KnowledgeHistory from '@/components/KnowledgeHistory.vue'
   import { api, apiBlob, isDemoAutoConnect } from '@/composables/useApi'
 
   interface Entry { id: string, name: string }
@@ -255,7 +284,7 @@
   interface Attachment { filename: string, sha256: string }
   interface Version { attachment?: Attachment | null, pages?: PageMapping[], index_status?: 'ready' | 'pending', id: string, document_id: string, version_label: string, status: string, title: string, source: string, source_url: string, license: string, content?: string, effective_from: string, effective_until: string | null, approved_by: string | null, approved_at: string | null, scopes: { branch_id: string, department_id: string }[] }
   interface SourcePreview { title: string, version: string, status: string, source: string, sourceUrl?: string, content: string, documentId: string, versionId: string, location?: string, attachment?: Attachment | null, attachmentPath?: string, page?: number, scope?: string, unparsedPages?: number[] }
-  type View = 'documents' | 'review' | 'query' | 'settings'
+  type View = 'documents' | 'review' | 'query' | 'history' | 'settings'
   type Filter = 'all' | 'draft' | 'in_review' | 'approved' | 'history'
   type Action = 'submit' | 'approve' | 'return' | 'withdraw'
 
@@ -269,7 +298,9 @@
   const loadedOnce = ref(false)
   const notice = ref<{ text: string, tone: 'success' | 'error' } | null>(null)
   const route = useRoute()
-  const activeView = ref<View>(route.query.view === 'query' ? 'query' : 'documents')
+  const router = useRouter()
+  const historyPanel = ref<InstanceType<typeof KnowledgeHistory> | null>(null)
+  const activeView = ref<View>(route.query.view === 'query' ? 'query' : (route.query.view === 'history' ? 'history' : 'documents'))
   const statusFilter = ref<Filter>('all')
   const search = ref('')
   const editorDialog = ref<HTMLDialogElement | null>(null)
@@ -311,7 +342,10 @@
   const tracePreview = ref('')
   async function inspectTrace () {
     if (!answer.value?.query_trace_id) return
-    const trace = await api(`/api/knowledge/query-traces/${answer.value.query_trace_id}`)
+    await openTrace(answer.value.query_trace_id)
+  }
+  async function openTrace (traceId: string) {
+    const trace = await api(`/api/knowledge/query-traces/${encodeURIComponent(traceId)}`)
     tracePreview.value = JSON.stringify(trace, null, 2)
     traceDialog.value?.showModal()
   }
@@ -335,8 +369,8 @@
   const canReview = computed(() => ['admin', 'reviewer'].includes(catalog.value?.role || ''))
   const labels: Record<string, string> = { draft: '草稿', in_review: '待審核', approved: '已發布', superseded: '已取代', archived: '已撤回' }
   const roleLabels: Record<string, string> = { admin: '機構管理員', reviewer: '文件審核者', nurse: '文件編輯者', user: '知識查詢者' }
-  const pageTitles: Record<View, string> = { documents: '文件資料庫', review: '審核佇列', query: '核准知識查詢', settings: '院區與科別' }
-  const pageDescriptions: Record<View, string> = { documents: '管理院所的衛教知識，讓每份內容都有出處、每次修訂都可追溯。', review: '從來源、內容到適用範圍，為即將發布的文件做好把關。', query: '以院所核准的來源回答問題，並回到原文核對每一份依據。', settings: '維護工作空間的適用範圍，讓文件與查詢找到正確的院區。' }
+  const pageTitles: Record<View, string> = { documents: '文件資料庫', review: '審核佇列', query: '核准知識查詢', history: '查詢紀錄', settings: '院區與科別' }
+  const pageDescriptions: Record<View, string> = { documents: '管理院所的衛教知識，讓每份內容都有出處、每次修訂都可追溯。', review: '從來源、內容到適用範圍，為即將發布的文件做好把關。', query: '以院所核准的來源回答問題，並回到原文核對每一份依據。', history: '找回先前的問題與回覆，重新核對引用來源和查詢追溯。', settings: '維護工作空間的適用範圍，讓文件與查詢找到正確的院區。' }
   const actionLabels: Record<Action, string> = { submit: '送交審核', approve: '核准發布', return: '退回草稿', withdraw: '撤回文件' }
   const actionDescriptions: Record<Action, string> = { submit: '提交後將交由具權限的審核者核對。核准前，這份文件不會用於正式查詢。', approve: '請確認原文、授權與適用範圍。發布後，同一文件的舊核准版本將保留於歷史紀錄，不再用於新查詢。', return: '退回後可建立修訂並重新送審。請記錄需要調整的內容，方便編輯者接續處理。', withdraw: '撤回後，這個版本不再供正式查詢引用。歷史版本與審核紀錄仍會保留。' }
   const scopedVersions = computed(() => versions.value.filter(version => version.scopes.some(scope => (!branchId.value || scope.branch_id === branchId.value) && (!departmentId.value || scope.department_id === departmentId.value))))
@@ -380,9 +414,16 @@
   }
   function changeView (view: View) {
     activeView.value = view
+    void router.replace({ query: { ...route.query, view: ['query', 'history'].includes(view) ? view : undefined } })
     statusFilter.value = view === 'review' ? 'in_review' : 'all'
     search.value = ''
     notice.value = null
+  }
+  function startFreshQuery () {
+    question.value = ''
+    answer.value = null
+    answerTrace.value = ''
+    changeView('query')
   }
   function clearFilters () {
     search.value = ''
@@ -414,6 +455,10 @@
     }
   }
   async function refresh () {
+    if (activeView.value === 'history') {
+      if (await historyPanel.value?.refresh()) notify('查詢紀錄已更新。')
+      return
+    }
     await load()
     notify('文件清單已更新。')
   }

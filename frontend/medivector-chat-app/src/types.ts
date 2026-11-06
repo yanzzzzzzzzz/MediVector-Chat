@@ -99,6 +99,7 @@ export interface EvidenceAssessment {
 }
 
 export interface AskResponse {
+  source_support_assessment?: SourceSupportAssessment | null
   query_trace_id?: string | null
   applied_filters?: Record<string, unknown> | null
   answer: string
@@ -133,10 +134,28 @@ export interface ConversationItem {
 }
 
 export interface ConversationMessageItem {
+  query_trace_id?: string | null
+  applied_filters?: Record<string, unknown> | null
+  created_at?: string | null
+  source_support_assessment?: SourceSupportAssessment | null
   role: string
   content: string
   references?: ReferenceItem[]
   evidence_assessment?: EvidenceAssessment | null
   retrieval_terms?: string[]
   risk_assessment?: RiskAssessment | null
+}
+
+export interface SourceSupportAssessment {
+  status: 'sufficient' | 'partial' | 'insufficient' | 'uncertain'
+  estimated_answerable: boolean
+  human_reviewed: false
+  semantic_support_verified: false
+}
+
+export interface QueryTraceSummary {
+  id: string
+  created_at: string
+  elapsed_ms: number
+  answer_sha256: string
 }

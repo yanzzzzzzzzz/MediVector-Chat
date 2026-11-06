@@ -136,6 +136,7 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
             "evidence_assessment": response["evidence_assessment"],
             "retrieval_terms": response["retrieval_terms"],
             "risk_assessment": response["risk_assessment"],
+            "applied_filters": response["applied_filters"],
         },
     ]
     if source_support is not None:

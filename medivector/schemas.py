@@ -152,6 +152,9 @@ class ConversationsResponse(BaseModel):
 
 
 class MessageItemSchema(BaseModel):
+    query_trace_id: str | None = None
+    applied_filters: dict[str, Any] | None = None
+    created_at: str | None = None
     source_support_assessment: SourceSupportAssessmentSchema | None = None
     role: str
     content: str

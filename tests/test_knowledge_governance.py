@@ -368,6 +368,51 @@ class KnowledgeGovernanceTests(unittest.TestCase):
             self.assertEqual(response.status_code, 403, response.text)
             self.assertEqual(self.client.get('/api/documents').status_code, 403)
 
+    def test_saved_answers_link_exact_traces_and_scope_without_cross_owner_or_withdrawn_source_leaks(self):
+        from medivector.models import RetrievalQuery
+        source = self.approve(self.create())
+        conversation = str(uuid.uuid4())
+        results = []
+        with patch('medivector.qa.require_openai_api_key', return_value='fake'), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery('preparation', [], False)):
+            for index in range(2):
+                with patch('medivector.qa.chat_with_gpt', return_value=f'Synthetic saved answer {index} [1]'):
+                    response = self.request('POST', '/api/ask', {'conversation_id': conversation,
+                        'question': f'Synthetic question {index}', 'branch_id': 'a', 'department_id': 'general'}, 'reader')
+                self.assertEqual(response.status_code, 200, response.text)
+                results.append(response.json())
+        messages = self.request('GET', '/api/conversations/' + conversation, user='reader').json()['messages']
+        answers = [message for message in messages if message['role'] == 'assistant']
+        self.assertEqual([message['query_trace_id'] for message in answers], [r['query_trace_id'] for r in results])
+        for message in answers:
+            self.assertEqual(message['applied_filters']['branch_id'], 'a')
+            self.assertEqual(message['applied_filters']['department_id'], 'general')
+            self.assertIsNotNone(datetime.fromisoformat(message['created_at']).tzinfo)
+        self.assertEqual(self.request('GET', '/api/conversations/' + conversation, user='nurse').json()['messages'], [])
+        self.assertEqual(self.request('GET', '/api/knowledge/query-traces?conversation_id=' + conversation, user='nurse').json()['traces'], [])
+        self.assertEqual(self.action(source, 'withdraw').status_code, 200)
+        redacted = self.request('GET', '/api/conversations/' + conversation, user='reader').json()['messages']
+        for message in redacted:
+            if message['role'] == 'assistant':
+                self.assertEqual(message['references'], [])
+                self.assertIsNone(message['query_trace_id'])
+                self.assertNotIn('Synthetic saved answer', message['content'])
+
+    def test_mismatched_trace_rolls_back_new_history_instead_of_linking_another_conversation(self):
+        from medivector.models import RetrievalQuery
+        self.approve(self.create())
+        first_id, second_id = str(uuid.uuid4()), str(uuid.uuid4())
+        with patch('medivector.qa.require_openai_api_key', return_value='fake'), patch('medivector.qa.get_retrieval_query', return_value=RetrievalQuery('preparation', [], False)), patch('medivector.qa.chat_with_gpt', return_value='Synthetic answer [1]'):
+            first = self.request('POST', '/api/ask', {'conversation_id': first_id, 'question': 'first',
+                'branch_id': 'a', 'department_id': 'general'}, 'reader')
+            self.assertEqual(first.status_code, 200, first.text)
+            with patch('medivector.quality_audit.record_query', return_value=first.json()['query_trace_id']):
+                second = self.request('POST', '/api/ask', {'conversation_id': second_id, 'question': 'second',
+                    'branch_id': 'a', 'department_id': 'general'}, 'reader')
+        self.assertEqual(second.status_code, 400, second.text)
+        self.assertEqual(self.request('GET', '/api/conversations/' + second_id, user='reader').json()['messages'], [])
+        first_history = self.request('GET', '/api/conversations/' + first_id, user='reader').json()['messages']
+        self.assertEqual(first_history[-1]['query_trace_id'], first.json()['query_trace_id'])
+
     def upload_pdf(self, data, user='nurse', **changes):
         payload = self.payload(**changes)
         payload.pop('content', None)
