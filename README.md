@@ -509,3 +509,29 @@ ACL 與有效期間的核准版本；沒有來源時直接回覆無法確認院�
 
 `POST /api/ask` 的 `conversation_id` 若省略，會建立新的 UUID；若要延續同一對話，請傳入先前使用的
 UUID。問答、讀取及刪除對話皆會在 API 入口驗證 ID，不合法值回 400，不進入資料庫。
+
+
+## 本機免輸入憑證測試
+
+額外套用 `docker-compose.demo.yml`，可讓本機預覽自動使用既有 `local-admin` 示範工作空間，
+不顯示手動連線設定、不將 Token 放進前端。此模式只供綁定 `127.0.0.1` 的本機測試；
+一般啟動不套用該檔時仍需原有驗證。帳號的機構、院區、科別與文件權限仍有效。
+
+對目前已存在的預覽，可從專案根目錄執行：
+
+```sh
+APP_GIT_SHA="$(git rev-parse HEAD)" docker compose -p medivector-preview \
+  -f docker-compose.yml -f /tmp/medivector-preview-compose.yml \
+  -f docker-compose.source-support.yml -f docker-compose.demo.yml \
+  up -d --build --no-deps app
+```
+
+恢復手動連線時，移除 `docker-compose.demo.yml`，並明確指定空的 `DEMO_AUTO_CONNECT_USER` 後重建 app：
+
+```sh
+DEMO_AUTO_CONNECT_USER='' docker compose -p medivector-preview \
+  -f docker-compose.yml -f /tmp/medivector-preview-compose.yml \
+  -f docker-compose.source-support.yml up -d --no-deps app
+```
+
+重載頁面後會恢復原有憑證設定介面。`.env` 與既有憑證不會被修改或刪除。

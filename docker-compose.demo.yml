@@ -1,0 +1,6 @@
+# Local testing only: anonymous requests use this explicitly named demo workspace.
+# Keep ports bound to 127.0.0.1. Omit this overlay to restore Token authentication.
+services:
+  app:
+    environment:
+      DEMO_AUTO_CONNECT_USER: local-admin

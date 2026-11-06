@@ -12,6 +12,7 @@ import { registerPlugins } from '@/plugins'
 
 // Components
 import App from './App.vue'
+import { initializeConnection } from './composables/useApi'
 
 // Styles
 import 'unfonts.css'
@@ -22,4 +23,4 @@ const app = createApp(App)
 
 registerPlugins(app)
 
-app.mount('#app')
+initializeConnection().finally(() => app.mount('#app'))

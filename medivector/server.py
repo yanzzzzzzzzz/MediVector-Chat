@@ -81,7 +81,10 @@ async def exception_handler(_request: Request, exc: Exception) -> JSONResponse:
 @app.get("/api/session")
 def session_mode() -> dict[str, str]:
     principal = current_principal.get()
-    return {"workspace": "institutional" if principal and principal.organization_id else "legacy"}
+    result = {"workspace": "institutional" if principal and principal.organization_id else "legacy"}
+    if principal and principal.organization_id and principal.name == os.getenv("DEMO_AUTO_CONNECT_USER", ""):
+        result["connection_mode"] = "demo_auto"
+    return result
 
 
 @app.get("/api/documents", response_model=DocumentsResponse)

@@ -6,13 +6,13 @@
 
         <div class="utility-actions">
           <RouterLink to="/knowledge">院所文件與審核</RouterLink>
-          <button type="button" @click="openApiAccess"><i aria-hidden="true" class="mdi mdi-key-outline" />連線設定</button>
+          <button v-if="!demoAutoConnect" type="button" @click="openApiAccess"><i aria-hidden="true" class="mdi mdi-key-outline" />連線設定</button>
         </div>
       </header>
 
       <router-view />
 
-      <dialog ref="accessDialog" aria-labelledby="access-title" class="access-dialog">
+      <dialog v-if="!demoAutoConnect" ref="accessDialog" aria-labelledby="access-title" class="access-dialog">
         <form @submit.prevent="applyToken">
           <div class="access-heading">
             <span class="access-symbol"><i aria-hidden="true" class="mdi mdi-key-outline" /></span>
@@ -42,12 +42,14 @@
 <script lang="ts" setup>
   import { provide, ref } from 'vue'
   import { useRoute } from 'vue-router'
+  import { isDemoAutoConnect } from '@/composables/useApi'
 
   const route = useRoute()
+  const demoAutoConnect = isDemoAutoConnect()
   const accessDialog = ref<HTMLDialogElement | null>(null)
   const token = ref(sessionStorage.getItem('apiToken') || '')
   function openApiAccess () {
-    accessDialog.value?.showModal()
+    if (!demoAutoConnect) accessDialog.value?.showModal()
   }
   provide('openApiAccess', openApiAccess)
   function applyToken () {

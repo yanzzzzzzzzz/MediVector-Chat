@@ -357,6 +357,17 @@ class KnowledgeGovernanceTests(unittest.TestCase):
         self.assertEqual(history['messages'][-1]['source_support_assessment']['status'], 'insufficient')
         self.assertNotIn('SYNTHETIC_PRIVATE_CHECK_TEXT', json.dumps([body, audit, history]))
 
+    def test_demo_auto_connection_preserves_reader_scope_and_mutation_denial(self):
+        source = self.approve(self.create())
+        with patch.dict(os.environ, {'DEMO_AUTO_CONNECT_USER': 'reader'}):
+            versions = self.client.get('/api/knowledge/versions')
+            self.assertEqual(versions.status_code, 200, versions.text)
+            self.assertIn(source['id'], [v['id'] for v in versions.json()['versions']])
+            response = self.client.post('/api/knowledge/versions/' + source['id'] + '/transition',
+                                        json={'action': 'withdraw', 'reason': 'synthetic unauthorized reader action'})
+            self.assertEqual(response.status_code, 403, response.text)
+            self.assertEqual(self.client.get('/api/documents').status_code, 403)
+
     def upload_pdf(self, data, user='nurse', **changes):
         payload = self.payload(**changes)
         payload.pop('content', None)

@@ -34,6 +34,15 @@ class Principal:
 current_principal: ContextVar[Principal | None] = ContextVar("principal", default=None)
 
 
+def demo_principal(users):
+    """Explicit local-preview identity; never choose an account implicitly."""
+    name = os.getenv("DEMO_AUTO_CONNECT_USER", "")
+    user = users.get(name)
+    if not user or not user.get("organization_id"):
+        return None
+    return Principal.from_config(name, user)
+
+
 def configured_users() -> dict:
     users = json.loads(os.getenv("API_USERS", "{}"))
     if not isinstance(users, dict):
@@ -80,6 +89,8 @@ class APIProtection:
             for name, user in users.items():
                 if hmac.compare_digest(supplied, ("Bearer " + user["token"]).encode("ascii")):
                     principal = Principal.from_config(name, user)
+            if principal is None and not supplied:
+                principal = demo_principal(users)
             if principal is None:
                 return await JSONResponse({"error": "API authorization required"}, status_code=401)(scope, receive, send)
             if principal.organization_id and scope["path"].startswith("/api/documents"):

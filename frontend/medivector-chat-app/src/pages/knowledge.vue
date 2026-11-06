@@ -1,7 +1,7 @@
 <template>
   <div class="knowledge-app">
     <aside aria-label="工作區導覽" class="sidebar">
-      <RouterLink class="brand" to="/knowledge"><span class="brand-mark"><i aria-hidden="true" class="mdi mdi-plus" /></span><span>MediVector<small>醫療文件知識管理原型</small></span></RouterLink>
+      <RouterLink class="brand" to="/knowledge"><span class="brand-mark"><i aria-hidden="true" class="mdi mdi-plus" /></span><span>MediVector<small>醫療文件管理原型</small></span></RouterLink>
       <div class="organization"><span class="organization-icon"><i aria-hidden="true" class="mdi mdi-domain" /></span><div><strong>院所工作空間</strong><small :title="catalog?.organization_id">{{ catalog?.organization_id || '等待連線' }}</small></div><i aria-hidden="true" class="mdi mdi-lock-outline" /></div>
       <p class="nav-caption">工作空間</p>
 
@@ -32,12 +32,12 @@
       <div class="sidebar-bottom">
         <div class="trust-note"><i aria-hidden="true" class="mdi mdi-shield-check-outline" /><strong>讓知識值得信賴</strong><p>只有流程中核准且有效的文件，<br>才會用於文件查詢。</p></div>
         <RouterLink class="demo-link" to="/"><i aria-hidden="true" class="mdi mdi-arrow-top-right" />查閱對話紀錄</RouterLink>
-        <button class="account" type="button" @click="openApiAccess"><span class="avatar">{{ catalog?.principal.slice(0, 1).toUpperCase() || 'M' }}</span><span><strong>{{ catalog?.principal || '尚未連線' }}</strong><small>{{ roleLabels[catalog?.role || ''] || '設定存取憑證' }}</small></span><i aria-hidden="true" class="mdi mdi-cog-outline" /></button>
+        <button class="account" :disabled="demoAutoConnect" type="button" @click="openApiAccess"><span class="avatar">{{ catalog?.principal.slice(0, 1).toUpperCase() || 'M' }}</span><span><strong>{{ catalog?.principal || '尚未連線' }}</strong><small>{{ roleLabels[catalog?.role || ''] || '設定存取憑證' }}</small></span><i v-if="!demoAutoConnect" aria-hidden="true" class="mdi mdi-cog-outline" /></button>
       </div>
     </aside>
 
     <main class="main-content">
-      <div class="topbar"><div>工作台<i aria-hidden="true" class="mdi mdi-chevron-right" /><span>{{ pageTitles[activeView] }}</span></div><button class="connection" type="button" @click="openApiAccess"><span :class="['connection-dot', { online: catalog }]" />{{ catalog ? '工作空間已連線' : '連線設定' }}<i aria-hidden="true" class="mdi mdi-chevron-down" /></button></div>
+      <div class="topbar"><div>工作台<i aria-hidden="true" class="mdi mdi-chevron-right" /><span>{{ pageTitles[activeView] }}</span></div><span v-if="demoAutoConnect" class="connection"><span class="connection-dot online" />本機示範工作空間</span><button v-else class="connection" type="button" @click="openApiAccess"><span :class="['connection-dot', { online: catalog }]" />{{ catalog ? '工作空間已連線' : '連線設定' }}<i aria-hidden="true" class="mdi mdi-chevron-down" /></button></div>
 
       <header class="page-header">
         <div><div class="eyebrow">KNOWLEDGE WORKSPACE</div><h1>{{ pageTitles[activeView] }}</h1><p>{{ pageDescriptions[activeView] }}</p></div>
@@ -247,7 +247,7 @@
   import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
   import { useRoute } from 'vue-router'
   import AnswerText from '@/components/AnswerText.vue'
-  import { api, apiBlob } from '@/composables/useApi'
+  import { api, apiBlob, isDemoAutoConnect } from '@/composables/useApi'
 
   interface Entry { id: string, name: string }
   interface Catalog { ai_available?: boolean, organization_id: string, principal: string, role: string, branches: Entry[], departments: Entry[] }
@@ -259,6 +259,7 @@
   type Filter = 'all' | 'draft' | 'in_review' | 'approved' | 'history'
   type Action = 'submit' | 'approve' | 'return' | 'withdraw'
 
+  const demoAutoConnect = isDemoAutoConnect()
   const openApiAccess = inject<() => void>('openApiAccess', () => {})
   const catalog = ref<Catalog | null>(null)
   const versions = ref<Version[]>([])
