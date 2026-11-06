@@ -5,16 +5,7 @@
       <span>思考中</span>
     </template>
 
-    <template v-else-if="message.role === 'assistant' && message.references.length > 0">
-      <template v-for="(part, index) in answerParts(message)" :key="index">
-        <button v-if="part.ref" class="citation" type="button" @click="$emit('open-reference', part.ref)">
-          [{{ part.ref.index }}]
-        </button>
-
-        <template v-else>{{ part.text }}</template>
-      </template>
-    </template>
-
+    <AnswerText v-else-if="message.role === 'assistant'" :references="message.references" :text="message.text" @open-reference="$emit('open-reference', $event)" />
     <template v-else>{{ message.text }}</template>
 
     <div v-if="message.role === 'assistant' && message.evidenceAssessment" class="evidence-wrap">
@@ -60,7 +51,8 @@
 </template>
 
 <script setup lang="ts">
-  import type { AnswerPart, ChatMessage, ReferenceItem } from '@/types'
+  import type { ChatMessage, ReferenceItem } from '@/types'
+  import AnswerText from '@/components/AnswerText.vue'
 
   defineProps<{
     message: ChatMessage
@@ -70,27 +62,6 @@
     'open-reference': [reference: ReferenceItem]
   }>()
 
-  function answerParts (message: ChatMessage): AnswerPart[] {
-    const referencesByIndex = new Map(message.references.map(ref => [String(ref.index), ref]))
-    const parts: AnswerPart[] = []
-    const pattern = /\[(\d+)\]/g
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-
-    while ((match = pattern.exec(message.text)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push({ text: message.text.slice(lastIndex, match.index) })
-      }
-      const refItem = referencesByIndex.get(match[1])
-      parts.push(refItem ? { ref: refItem } : { text: match[0] })
-      lastIndex = pattern.lastIndex
-    }
-
-    if (lastIndex < message.text.length) {
-      parts.push({ text: message.text.slice(lastIndex) })
-    }
-    return parts
-  }
 </script>
 
 <style scoped>

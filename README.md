@@ -285,7 +285,7 @@ POST /api/ask
 Content-Type: application/json
 
 {
-  "conversation_id": "browser-session-id",
+  "conversation_id": "48a99d8e-94b6-4cf4-91d1-bd0dbf0a8363",
   "question": "年輕人健身要注意什麼？",
   "rag_enabled": true
 }
@@ -500,3 +500,12 @@ ACL 與有效期間的核准版本；沒有來源時直接回覆無法確認院�
 來源判斷已補測複合問題、例外、否定、衝突與指令干擾，並修正把資訊缺漏誤判為足夠的案例。
 判斷時可用文件標題辨識情境，支持引文仍限正文。
 [邊界失敗、修正與回歸結果](evaluation/reports/source-support-boundary-analysis-2026-11-06.md)。
+
+
+## 院所查詢紀錄與對話 ID
+
+院所帳號在 `/` 閱讀既有查詢紀錄，新查詢與文件管理導向 `/knowledge`，不再呼叫舊版文件 API。
+`GET /api/session` 僅回傳目前帳號的工作區模式，沿用既有 API 授權，不回傳憑證。
+
+`POST /api/ask` 的 `conversation_id` 若省略，會建立新的 UUID；若要延續同一對話，請傳入先前使用的
+UUID。問答、讀取及刪除對話皆會在 API 入口驗證 ID，不合法值回 400，不進入資料庫。

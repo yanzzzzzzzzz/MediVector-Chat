@@ -15,7 +15,7 @@
           width="14"
           xmlns="http://www.w3.org/2000/svg"
         ><line x1="12" x2="12" y1="5" y2="19" /><line x1="5" x2="19" y1="12" y2="12" /></svg>
-        新對話
+        {{ institutional ? '新查詢' : '新對話' }}
       </button>
     </div>
 
@@ -71,7 +71,7 @@
           width="15"
           xmlns="http://www.w3.org/2000/svg"
         ><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
-        衛教資料庫
+        {{ institutional ? '文件工作台' : '衛教資料庫' }}
       </button>
     </div>
   </aside>
@@ -81,6 +81,7 @@
   import type { ConversationItem } from '@/types'
 
   defineProps<{
+    institutional?: boolean
     conversations: ConversationItem[]
     conversationId: string
     deletingConvoId: string | null

@@ -108,7 +108,8 @@ class PureLogicTests(unittest.TestCase):
         request = AskRequest(question="頭痛怎麼辦")
 
         self.assertEqual(app.title, "MediVector API")
-        self.assertEqual(request.conversation_id, "default")
+        from uuid import UUID
+        self.assertEqual(str(UUID(request.conversation_id)), request.conversation_id)
         self.assertTrue(request.rag_enabled)
 
     def test_message_metadata_keeps_reference_payload_for_history_restore(self) -> None:

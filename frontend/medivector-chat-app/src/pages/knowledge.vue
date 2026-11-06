@@ -1,7 +1,7 @@
 <template>
   <div class="knowledge-app">
     <aside aria-label="工作區導覽" class="sidebar">
-      <RouterLink class="brand" to="/knowledge"><span class="brand-mark"><i aria-hidden="true" class="mdi mdi-plus" /></span><span>MediVector<small>院所知識管理平台</small></span></RouterLink>
+      <RouterLink class="brand" to="/knowledge"><span class="brand-mark"><i aria-hidden="true" class="mdi mdi-plus" /></span><span>MediVector<small>醫療文件知識管理原型</small></span></RouterLink>
       <div class="organization"><span class="organization-icon"><i aria-hidden="true" class="mdi mdi-domain" /></span><div><strong>院所工作空間</strong><small :title="catalog?.organization_id">{{ catalog?.organization_id || '等待連線' }}</small></div><i aria-hidden="true" class="mdi mdi-lock-outline" /></div>
       <p class="nav-caption">工作空間</p>
 
@@ -30,8 +30,8 @@
       </nav>
 
       <div class="sidebar-bottom">
-        <div class="trust-note"><i aria-hidden="true" class="mdi mdi-shield-check-outline" /><strong>讓知識值得信賴</strong><p>只有經核准且有效的文件，<br>才會用於正式衛教查詢。</p></div>
-        <RouterLink class="demo-link" to="/"><i aria-hidden="true" class="mdi mdi-arrow-top-right" />開啟 Demo 對話</RouterLink>
+        <div class="trust-note"><i aria-hidden="true" class="mdi mdi-shield-check-outline" /><strong>讓知識值得信賴</strong><p>只有流程中核准且有效的文件，<br>才會用於文件查詢。</p></div>
+        <RouterLink class="demo-link" to="/"><i aria-hidden="true" class="mdi mdi-arrow-top-right" />查閱對話紀錄</RouterLink>
         <button class="account" type="button" @click="openApiAccess"><span class="avatar">{{ catalog?.principal.slice(0, 1).toUpperCase() || 'M' }}</span><span><strong>{{ catalog?.principal || '尚未連線' }}</strong><small>{{ roleLabels[catalog?.role || ''] || '設定存取憑證' }}</small></span><i aria-hidden="true" class="mdi mdi-cog-outline" /></button>
       </div>
     </aside>
@@ -110,7 +110,7 @@
           <section class="workflow-guide"><div class="guide-title"><span><i aria-hidden="true" class="mdi mdi-shield-check-outline" /></span><div><h3>每份知識，都有一道品質把關</h3><p>來源核准後才會用於正式查詢，歷史版本則完整保留。</p></div></div><div class="workflow-steps"><span><b>1</b>建立草稿</span><i aria-hidden="true" class="mdi mdi-chevron-right" /><span><b>2</b>送交審核</span><i aria-hidden="true" class="mdi mdi-chevron-right" /><span><b>3</b>核准發布</span></div></section>
         </template>
 
-        <div v-else-if="activeView === 'query'" class="query-layout"><section class="query-card"><div class="section-icon"><i aria-hidden="true" class="mdi mdi-text-box-search-outline" /></div><h2>從核准的知識中，找到答案</h2><p class="muted">選定院區與科別，輸入想確認的衛教問題。</p>
+        <div v-else-if="activeView === 'query'" class="query-layout"><section class="query-card"><div class="section-icon"><i aria-hidden="true" class="mdi mdi-text-box-search-outline" /></div><h2>從核准的知識中，找到答案</h2><p class="muted">選定院區與科別，輸入想核對的文件問題。</p>
 
                                                                        <form @submit.prevent="run(ask)"><label class="field-label" for="knowledge-question">你想查詢什麼？</label>
 
@@ -124,7 +124,7 @@
 
                                                                          <div class="query-submit"><small><i aria-hidden="true" class="mdi mdi-shield-check-outline" />只使用已核准且有效的資料</small><button class="button primary" :disabled="busy || !branchId || !departmentId" type="submit"><i aria-hidden="true" class="mdi mdi-magnify" />{{ busy ? '正在查詢…' : '查詢核准知識' }}</button></div></form>
 
-                                                                       <template v-if="answer"><div class="answer-heading"><span class="status-pill approved"><span />查詢完成</span><small>{{ branchName(String(answer.applied_filters?.branch_id || '')) }}／{{ departmentName(String(answer.applied_filters?.department_id || '')) }}</small></div><div class="answer-content">{{ answer.answer }}</div>
+                                                                       <template v-if="answer"><div class="answer-heading"><span class="status-pill approved"><span />查詢完成</span><small>{{ branchName(String(answer.applied_filters?.branch_id || '')) }}／{{ departmentName(String(answer.applied_filters?.department_id || '')) }}</small></div><div class="answer-content"><AnswerText :references="answer.references" :text="answer.answer" @open-reference="reference => run(() => openCitation(reference))" /></div>
 
                                                                          <div v-if="answer.references.length > 0" class="answer-references"><button v-if="answer.query_trace_id" class="source-link" type="button" @click="run(inspectTrace)">查看模型與查詢追溯</button><h3>核對參考原文</h3><button v-if="answer.references[0]?.document_version_id" class="source-link" type="button" @click="startReport(answer.references[0].document_version_id, answerTrace)">回報此答案</button>
 
@@ -144,7 +144,7 @@
       </template>
 
       <section v-else class="connect-state"><span class="section-icon"><i aria-hidden="true" :class="['mdi', busy ? 'mdi-loading spinning' : 'mdi-domain']" /></span><h2>{{ busy ? '正在載入院所工作空間' : '連線你的院所工作空間' }}</h2><p>{{ busy ? '正在確認權限與可用文件，請稍候。' : '設定存取憑證後，即可管理授權範圍內的文件與審核工作。' }}</p><button v-if="!busy" class="button primary" type="button" @click="openApiAccess">設定連線<i aria-hidden="true" class="mdi mdi-arrow-right" /></button></section>
-      <footer class="workspace-footer"><span>MediVector<span class="footer-dot">·</span>讓每一份衛教，都有可靠依據</span><span>僅使用經授權的非個人資料</span></footer>
+      <footer class="workspace-footer"><span>MediVector<span class="footer-dot">·</span>醫療文件知識管理原型</span><span>僅使用經授權的非個人資料</span></footer>
     </main>
 
     <dialog ref="editorDialog" aria-labelledby="editor-title" class="editor-dialog">
@@ -245,6 +245,7 @@
 <script setup lang="ts">
   import type { AskResponse, ReferenceItem } from '@/types'
   import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
+  import AnswerText from '@/components/AnswerText.vue'
   import { api, apiBlob } from '@/composables/useApi'
 
   interface Entry { id: string, name: string }

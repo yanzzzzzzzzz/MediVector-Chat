@@ -7,6 +7,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, UploadFile
@@ -77,6 +78,12 @@ async def exception_handler(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse({"error": str(exc)}, status_code=500)
 
 
+@app.get("/api/session")
+def session_mode() -> dict[str, str]:
+    principal = current_principal.get()
+    return {"workspace": "institutional" if principal and principal.organization_id else "legacy"}
+
+
 @app.get("/api/documents", response_model=DocumentsResponse)
 def get_documents(q: str = "", date_from: str = "", date_to: str = "") -> dict[str, Any]:
     return {"documents": list_documents(q=q, date_from=date_from, date_to=date_to)}
@@ -142,13 +149,13 @@ def get_conversations() -> dict[str, Any]:
 
 
 @app.get("/api/conversations/{conversation_id}", response_model=ConversationMessagesResponse)
-def get_conversation_messages(conversation_id: str) -> dict[str, Any]:
-    return {"messages": load_conversation_history(conversation_id)}
+def get_conversation_messages(conversation_id: UUID) -> dict[str, Any]:
+    return {"messages": load_conversation_history(str(conversation_id))}
 
 
 @app.delete("/api/conversations/{conversation_id}", response_model=DeleteConversationResponse)
-def delete_conversation_route(conversation_id: str) -> dict[str, bool]:
-    delete_conversation(conversation_id)
+def delete_conversation_route(conversation_id: UUID) -> dict[str, bool]:
+    delete_conversation(str(conversation_id))
     return {"deleted": True}
 
 

@@ -1,4 +1,5 @@
 from typing import Any, Literal
+from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -114,9 +115,17 @@ class SourceSupportAssessmentSchema(BaseModel):
 class AskRequest(BaseModel):
     branch_id: str | None = None
     department_id: str | None = None
-    conversation_id: str = "default"
+    conversation_id: str = Field(default_factory=lambda: str(uuid4()))
     question: str
     rag_enabled: bool = True
+
+    @field_validator("conversation_id")
+    @classmethod
+    def valid_conversation_id(cls, value: str) -> str:
+        try:
+            return str(UUID(value))
+        except ValueError:
+            raise ValueError("conversation_id 必須是有效的 UUID。") from None
 
 
 class AskResponse(BaseModel):

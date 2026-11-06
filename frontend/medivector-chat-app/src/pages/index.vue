@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <header class="app-header">
-      <h1>Vector DB 中文問答</h1>
+      <h1>{{ institutional ? '院所查詢紀錄' : '醫療文件問答原型' }}</h1>
       <div class="status">{{ status }}</div>
     </header>
 
@@ -10,7 +10,8 @@
         :conversation-id="conversationId"
         :conversations="conversations"
         :deleting-convo-id="deletingConvoId"
-        @create-new="createNewConversation"
+        :institutional="institutional"
+        @create-new="startConversation"
         @delete-conversation="deleteConversation"
         @open-docs="openDocsDialog"
         @switch-conversation="switchConversation"
@@ -36,7 +37,12 @@
           />
         </div>
 
-        <form class="ask-form" @submit.prevent="askQuestion">
+        <div v-if="institutional" class="history-notice">
+          <p>這裡可查閱已儲存的院所對話。新問題請選定院區與科別後查詢。</p>
+          <RouterLink to="/knowledge">前往核准知識查詢</RouterLink>
+        </div>
+
+        <form v-else-if="sessionReady" class="ask-form" @submit.prevent="askQuestion">
           <label class="rag-control">
             <span>使用 RAG 搜尋向量資料庫</span>
             <input v-model="ragEnabled" type="checkbox">
@@ -389,13 +395,18 @@
 <script setup lang="ts">
   import type { DocumentGroup, ReferenceItem } from '@/types'
   import { nextTick, onMounted, ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import ConversationSidebar from '@/components/ConversationSidebar.vue'
   import MessageBubble from '@/components/MessageBubble.vue'
   import ReferenceDialog from '@/components/ReferenceDialog.vue'
+  import { api } from '@/composables/useApi'
   import { useChat } from '@/composables/useChat'
   import { useDocuments } from '@/composables/useDocuments'
 
   const status = ref('準備中')
+  const institutional = ref(false)
+  const sessionReady = ref(false)
+  const router = useRouter()
   const chatLogEl = ref<HTMLDivElement | null>(null)
   const docDialogEl = ref<HTMLDialogElement | null>(null)
   const docsDialogEl = ref<HTMLDialogElement | null>(null)
@@ -461,7 +472,18 @@
     startNewDocument,
   } = useDocuments(setStatus, fileInputEl)
 
+  function startConversation () {
+    if (!sessionReady.value) return
+    if (institutional.value) router.push('/knowledge')
+    else createNewConversation()
+  }
+
   function openDocsDialog () {
+    if (!sessionReady.value) return
+    if (institutional.value) {
+      router.push('/knowledge')
+      return
+    }
     loadDocs()
     docsDialogEl.value?.showModal()
   }
@@ -522,17 +544,24 @@
     if (deleted) deleteConvoDialogEl.value?.close()
   }
 
-  onMounted(() => {
-    loadDocs().catch(error => {
-      const message = error instanceof Error ? error.message : String(error)
-      setStatus(message)
-    })
-    loadConversations()
-    loadConversationHistory()
+  onMounted(async () => {
+    try {
+      const session = await api<{ workspace: 'institutional' | 'legacy' }>('/api/session')
+      institutional.value = session.workspace === 'institutional'
+      sessionReady.value = true
+      if (institutional.value) setStatus('院所查詢紀錄；新問題請前往核准知識查詢')
+      else loadDocs().catch(error => setStatus(error instanceof Error ? error.message : String(error)))
+      await Promise.all([loadConversations(), loadConversationHistory()])
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : String(error))
+    }
   })
 </script>
 
 <style scoped>
+  .history-notice { padding: 18px; border-top: 1px solid #d9dee5; color: #51606d; }
+  .history-notice a { display: inline-block; margin-top: 10px; color: #0b5f59; }
+
   .page {
     min-height: 100vh;
     background: #f6f7f8;
