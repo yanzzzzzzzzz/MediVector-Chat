@@ -1,0 +1,45 @@
+{
+  "report_kind": "local_demo_auto_connection_smoke",
+  "created_at": "2026-11-06T15:34:05.779343+00:00",
+  "authorization_header_sent": false,
+  "verified_baseline": false,
+  "session": {
+    "workspace": "institutional",
+    "connection_mode": "demo_auto"
+  },
+  "workspace": {
+    "principal": "local-admin",
+    "organization_id": "local-preview-hospital"
+  },
+  "visible_versions": 5,
+  "answer": "文件提到以流動清水和肥皂搓洗手背、指縫與指甲周圍至少 20 秒。[1]",
+  "source_support_assessment": {
+    "status": "sufficient",
+    "estimated_answerable": true,
+    "model": "gpt-6-luna",
+    "human_reviewed": false,
+    "semantic_support_verified": false,
+    "reason": null,
+    "elapsed_ms": 2593.87,
+    "usage": {
+      "prompt_tokens": 924,
+      "completion_tokens": 113,
+      "total_tokens": 1037
+    }
+  },
+  "references": 1,
+  "browser_checks": {
+    "fresh_native_tab_opened_without_entering_token": true,
+    "workspace_loaded": true,
+    "manual_connection_control_hidden": true,
+    "demo_workspace_label_visible": true,
+    "query_form_ready": true
+  },
+  "tests": {
+    "backend_passed": 130,
+    "real_pgvector_included": true,
+    "frontend_passed": 13,
+    "lint_and_typescript_build_passed": true
+  },
+  "code_commit": "daf3868"
+}

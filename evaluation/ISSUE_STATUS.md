@@ -214,3 +214,11 @@ currently available; the review and Pilot materials remain prepared, not falsely
 `3e12d5b` 讓「新查詢」直接開啟查詢表單。新增授權工作區模式端點，院所歷史頁不提供無範圍聊天輸入。
 完整後端 126 項（含 DB 整合）、前端 10 項測試、lint／型別／build 通過，並已重建本機預覽。
 詳見 [入口驗證](../docs/entry-polish-validation.md)。未變更來源或關閉人工待辦。
+
+
+### 2026-11-06 暫時免設定連線
+
+依使用者測試需求，`daf3868` 新增明確指定示範帳號的本機自動連線覆寫，隱藏手動連線控制；
+未將 Token 寫入前端，預設驗證仍保留，機構／範圍／角色檢查仍適用。已啟用於只綁定 localhost 的預覽，
+全新分頁與不帶 Token 的文件／合成問答實測通過。後端 130、前端 13 項測試及 lint／型別／build 通過。
+恢復方式與實測見 [預覽說明](../docs/preview-validation.md)。

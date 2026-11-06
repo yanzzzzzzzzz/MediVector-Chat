@@ -66,3 +66,15 @@ SOURCE_SUPPORT_CHECK_ENABLED=false docker compose -p medivector-preview \
 
 初次驗證腳本誤用帶前綴的非 UUID 對話 ID，伺服器回 500；改用 UI 同樣採用的 UUID 後四項通過。
 後續已補上 UUID 輸入驗證，不合法值回 400；首輪記錄保留於此，最新行為見入口修正文件。
+
+
+## 暫時免設定連線（使用者測試模式）
+
+依使用者要求，本機預覽已額外套用 `docker-compose.demo.yml`，自動使用既有 `local-admin`
+示範工作空間，隱藏連線設定與憑證輸入。開全新分頁即可測試，不需帶 Token；所有測試頁面共用此示範帳號。
+正式預設仍要求授權，`.env` 及原有憑證未修改。移除 demo 覆寫檔、清空 `DEMO_AUTO_CONNECT_USER`
+再重建 app／重載頁面，就會恢復手動連線。完整指令見 [README](../README.md)。
+
+已實測無 Authorization header 可載入文件與完成一個合成問答；新 Chrome 分頁直接顯示本機示範工作空間與查詢表單。
+後端 130 項（含真實 pgvector）、前端 13 項測試及 lint／型別／build 通過。
+[免連線設定實測記錄](../evaluation/reports/demo-auto-connection-2026-11-06.json)。
