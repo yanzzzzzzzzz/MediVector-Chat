@@ -245,6 +245,7 @@
 <script setup lang="ts">
   import type { AskResponse, ReferenceItem } from '@/types'
   import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
+  import { useRoute } from 'vue-router'
   import AnswerText from '@/components/AnswerText.vue'
   import { api, apiBlob } from '@/composables/useApi'
 
@@ -266,7 +267,8 @@
   const busy = ref(false)
   const loadedOnce = ref(false)
   const notice = ref<{ text: string, tone: 'success' | 'error' } | null>(null)
-  const activeView = ref<View>('documents')
+  const route = useRoute()
+  const activeView = ref<View>(route.query.view === 'query' ? 'query' : 'documents')
   const statusFilter = ref<Filter>('all')
   const search = ref('')
   const editorDialog = ref<HTMLDialogElement | null>(null)

@@ -39,7 +39,7 @@
 
         <div v-if="institutional" class="history-notice">
           <p>這裡可查閱已儲存的院所對話。新問題請選定院區與科別後查詢。</p>
-          <RouterLink to="/knowledge">前往核准知識查詢</RouterLink>
+          <RouterLink to="/knowledge?view=query">前往核准知識查詢</RouterLink>
         </div>
 
         <form v-else-if="sessionReady" class="ask-form" @submit.prevent="askQuestion">
@@ -474,7 +474,7 @@
 
   function startConversation () {
     if (!sessionReady.value) return
-    if (institutional.value) router.push('/knowledge')
+    if (institutional.value) router.push('/knowledge?view=query')
     else createNewConversation()
   }
 
