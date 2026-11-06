@@ -1,4 +1,4 @@
-# GitHub issue implementation status — 2026-11-06
+# GitHub issue implementation status — 2026-11-07
 
 ## Scope decision — 2026-11-06
 
@@ -15,7 +15,8 @@
 
 Closed after implementation/acceptance review and passing CI: **#1–#4, #6, #7, #11, #13–#19**.
 Implementation commits and test evidence are recorded on each GitHub issue. Latest engineering validation:
-88 backend tests (real PostgreSQL, no OpenAI Key), seven frontend tests, lint/TypeScript/build and CI.
+141 backend tests (real PostgreSQL, no OpenAI calls); the latest frontend increment passed 17 tests, lint/TypeScript/build.
+The latest local commits have not yet been pushed, so remote CI for those commits is not claimed.
 The local preview is running; its configured answer model is GPT-6 Luna.
 
 | Open issue | Remaining requirement |

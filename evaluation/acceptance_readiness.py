@@ -51,7 +51,7 @@ def inspect(dataset, answers, pilot):
             '20': {'reported_status': pilot.get('status'), 'record_counts': pilot_counts,
                    'real_participation_verified': False},
             '9': {'depends_on': [5, 8, 20]}, '10': {'depends_on': [5, 8]},
-            '12': {'depends_on': [5, 8]},
+            '12': {'depends_on': [5, 8, 20]},
         },
         'remaining_acceptance': blockers,
         'limitations': 'Offline structural checks only. Supplied reviewer identity, actual participation, source authorization and semantic decisions are not authenticated. No clinical validation or automatic issue closure.',
