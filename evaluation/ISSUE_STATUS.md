@@ -197,3 +197,12 @@ currently available; the review and Pilot materials remain prepared, not falsely
 最終 44＋18＋4 題與候選標註一致；原始失敗與中途退步均保留，未將程式候選標註當人工真值。
 完整 123 項後端測試在一次性 pgvector 容器通過。預覽開關仍關閉，下一步為本機端到端操作驗證。
 詳見 [邊界修正分析](reports/source-support-boundary-analysis-2026-11-06.md)。#5/#8/#20 保持未完成。
+
+
+### 2026-11-06 本機預覽啟用與實際驗證
+
+本機預覽已以 `cb5b37d` 重建，透過額外 Compose 覆寫啟用來源檢查；專案預設仍為 false，
+未修改 `.env` 或來源資料。四個實際 API 情境確認回答／拒答、引用版本、歷史摘要與稽核模型呼叫旗標，
+來源 manifest 前後未變。Chrome 另核對回答、拒答、引用原文、追溯視窗、歷史還原，以及原始 PDF 第三頁內容。
+新增可重用的 `docker-compose.source-support.yml` 與 [預覽驗證／回復說明](../docs/preview-validation.md)。
+這不取代 #5/#8/#20 的人工驗證。已記錄 legacy 入口與非 UUID 輸入處理等後續整理項目。

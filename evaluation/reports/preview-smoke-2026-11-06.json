@@ -1,0 +1,484 @@
+{
+  "report_kind": "synthetic_local_preview_smoke",
+  "created_at": "2026-11-06T13:52:41.932894+00:00",
+  "verified_baseline": false,
+  "release_gate_eligible": false,
+  "cases": [
+    {
+      "label": "supported",
+      "question": "示範洗手文件提到至少搓洗多久？",
+      "proposed_expected_acceptance": true,
+      "conversation_id": "88cf2b20-f171-4125-b719-a06d43778d84",
+      "response": {
+        "source_support_assessment": {
+          "status": "sufficient",
+          "estimated_answerable": true,
+          "model": "gpt-6-luna",
+          "human_reviewed": false,
+          "semantic_support_verified": false,
+          "reason": null,
+          "elapsed_ms": 2252.73,
+          "usage": {
+            "prompt_tokens": 924,
+            "completion_tokens": 113,
+            "total_tokens": 1037
+          }
+        },
+        "query_trace_id": "245a0bbd-f84c-4088-a037-a7ec5dffc404",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T13:52:41.979730+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "文件提到搓洗手背、指縫與指甲周圍至少 20 秒。[1]",
+        "rag_enabled": true,
+        "references": [
+          {
+            "document_version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+            "chunk_metadata": {
+              "end": 191,
+              "pages": [],
+              "start": 0,
+              "status": "approved",
+              "chunk_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b:abcd691e-7fa5-4057-a696-9797efc87465:token:1",
+              "branch_id": "main",
+              "source_url": "https://www.cdc.gov/clean-hands/about/index.html",
+              "version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+              "approved_at": "2026-11-05T07:55:11.859816+00:00",
+              "chunk_index": 1,
+              "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+              "token_count": 266,
+              "department_id": "general",
+              "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+              "version_label": "示範 v1.1",
+              "organization_id": "local-preview-hospital"
+            },
+            "index": 1,
+            "uuid": "dba96957-0aed-44bf-802d-97db8a1ecf1e",
+            "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+            "source_id": 0,
+            "title": "【示範】手部清潔與洗手步驟",
+            "source": "合成示範摘要｜參考 CDC 公開資訊",
+            "publisher": "",
+            "published_date": "",
+            "version": "示範 v1.1",
+            "audience": "",
+            "topic": "",
+            "credibility": "",
+            "content": "【本機操作示範】未經院所醫療專業審查，不得作為正式衛教或個人化建議。\n\n一般衛教摘要\n以流動清水和肥皂清潔雙手，搓洗手背、指縫與指甲周圍至少 20 秒，再沖淨並擦乾。\n\n留意手部清潔的時機\n\n版本示範註記：本修訂新增操作說明，衛教摘要未變更。\n準備食物及用餐前後、如廁後、擤鼻涕或咳嗽打噴嚏後。\n\n示範用途\n展示建立草稿、送審、核准與來源追溯流程；實際使用前仍須由院所專業人員審查。",
+            "distance": 0.456044390311354,
+            "distance_text": "0.4560"
+          }
+        ],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "參考資料不足，只有 1 筆。",
+          "reference_count": 1,
+          "best_distance": 0.456044390311354
+        },
+        "retrieval_terms": [
+          "洗手時間 hand washing duration",
+          "洗手方法 hand washing technique",
+          "手部衛生 hand hygiene",
+          "洗手重要性 importance of hand washing",
+          "洗手步驟 hand washing steps",
+          "細菌去除 bacteria removal",
+          "感染控制 infection control"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "history_summary_matches": true,
+      "answer_model_invoked": true,
+      "source_support_enabled": true,
+      "build": "cb5b37dfb10a267ab4c9a8dbdd74c2dd5c5b9af4",
+      "elapsed_ms": 7835.6,
+      "expectations_match": true,
+      "citation_version_matches": true
+    },
+    {
+      "label": "insufficient",
+      "question": "本院大腸鏡檢查前何時停用藥物？",
+      "proposed_expected_acceptance": false,
+      "conversation_id": "ec25aed2-e476-4edd-8cf0-e798d56e45a4",
+      "response": {
+        "source_support_assessment": {
+          "status": "insufficient",
+          "estimated_answerable": false,
+          "model": "gpt-6-luna",
+          "human_reviewed": false,
+          "semantic_support_verified": false,
+          "reason": null,
+          "elapsed_ms": 1276.24,
+          "usage": {
+            "prompt_tokens": 929,
+            "completion_tokens": 44,
+            "total_tokens": 973
+          }
+        },
+        "query_trace_id": "e9485998-3893-445e-8a6a-fb6a9bc9fc5f",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T13:52:49.823140+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "目前找到的核准文件未提供足以確認此問題的資訊，無法確認院所規範。請向文件負責人確認。",
+        "rag_enabled": true,
+        "references": [
+          {
+            "document_version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+            "chunk_metadata": {
+              "end": 191,
+              "pages": [],
+              "start": 0,
+              "status": "approved",
+              "chunk_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b:abcd691e-7fa5-4057-a696-9797efc87465:token:1",
+              "branch_id": "main",
+              "source_url": "https://www.cdc.gov/clean-hands/about/index.html",
+              "version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+              "approved_at": "2026-11-05T07:55:11.859816+00:00",
+              "chunk_index": 1,
+              "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+              "token_count": 266,
+              "department_id": "general",
+              "source_sha256": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+              "version_label": "示範 v1.1",
+              "organization_id": "local-preview-hospital"
+            },
+            "index": 1,
+            "uuid": "dba96957-0aed-44bf-802d-97db8a1ecf1e",
+            "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+            "source_id": 0,
+            "title": "【示範】手部清潔與洗手步驟",
+            "source": "合成示範摘要｜參考 CDC 公開資訊",
+            "publisher": "",
+            "published_date": "",
+            "version": "示範 v1.1",
+            "audience": "",
+            "topic": "",
+            "credibility": "",
+            "content": "【本機操作示範】未經院所醫療專業審查，不得作為正式衛教或個人化建議。\n\n一般衛教摘要\n以流動清水和肥皂清潔雙手，搓洗手背、指縫與指甲周圍至少 20 秒，再沖淨並擦乾。\n\n留意手部清潔的時機\n\n版本示範註記：本修訂新增操作說明，衛教摘要未變更。\n準備食物及用餐前後、如廁後、擤鼻涕或咳嗽打噴嚏後。\n\n示範用途\n展示建立草稿、送審、核准與來源追溯流程；實際使用前仍須由院所專業人員審查。",
+            "distance": 0.5759199837172171,
+            "distance_text": "0.5759"
+          }
+        ],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "來源可回答性估計未通過；現有原文不足或無法確認。",
+          "reference_count": 1,
+          "best_distance": 0.5759199837172171
+        },
+        "retrieval_terms": [
+          "大腸鏡檢查 colonoscopy",
+          "停用藥物 stop medication",
+          "檢查前 preparation before examination",
+          "藥物使用 medication use",
+          "檢查準備 examination preparation",
+          "藥物停用 medication cessation",
+          "醫療指導 medical guidance"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "history_summary_matches": true,
+      "answer_model_invoked": false,
+      "source_support_enabled": true,
+      "build": "cb5b37dfb10a267ab4c9a8dbdd74c2dd5c5b9af4",
+      "elapsed_ms": 4649.7,
+      "expectations_match": true,
+      "citation_version_matches": true
+    },
+    {
+      "label": "empty",
+      "question": "量子糾纏通訊協議的封包格式是什麼？",
+      "proposed_expected_acceptance": false,
+      "conversation_id": "c8b4c35c-63d6-43f2-9fcf-e6847ac7465b",
+      "response": {
+        "source_support_assessment": {
+          "status": "insufficient",
+          "estimated_answerable": false,
+          "model": "gpt-6-luna",
+          "human_reviewed": false,
+          "semantic_support_verified": false,
+          "reason": "no_sources",
+          "elapsed_ms": 0.0,
+          "usage": null
+        },
+        "query_trace_id": "53c74e06-7d08-452d-ae4b-2fcfce5b9874",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T13:52:54.486926+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "目前沒有符合此院區、科別且已核准有效的參考資料，無法確認院所規範。請向院方專業人員確認。",
+        "rag_enabled": true,
+        "references": [],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "來源可回答性估計未通過；現有原文不足或無法確認。",
+          "reference_count": 0,
+          "best_distance": null
+        },
+        "retrieval_terms": [
+          "量子糾纏通信協議 quantum entanglement communication protocol",
+          "封包格式 packet format",
+          "量子通信 quantum communication",
+          "量子糾纏 quantum entanglement",
+          "數據傳輸 data transmission",
+          "協議格式 protocol format",
+          "量子密碼學 quantum cryptography",
+          "信息安全 information security"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "history_summary_matches": true,
+      "answer_model_invoked": false,
+      "source_support_enabled": true,
+      "build": "cb5b37dfb10a267ab4c9a8dbdd74c2dd5c5b9af4",
+      "elapsed_ms": 3364.1,
+      "expectations_match": true
+    },
+    {
+      "label": "pdf",
+      "question": "What should I bring according to the synthetic PDF: bring the appointment notice?",
+      "proposed_expected_acceptance": true,
+      "conversation_id": "44cacb91-8656-4c5b-9503-0f39e35673e8",
+      "response": {
+        "source_support_assessment": {
+          "status": "sufficient",
+          "estimated_answerable": true,
+          "model": "gpt-6-luna",
+          "human_reviewed": false,
+          "semantic_support_verified": false,
+          "reason": null,
+          "elapsed_ms": 2594.23,
+          "usage": {
+            "prompt_tokens": 755,
+            "completion_tokens": 126,
+            "total_tokens": 881
+          }
+        },
+        "query_trace_id": "d268f7e3-d2dc-4828-8f45-2b2ce8034e6d",
+        "applied_filters": {
+          "organization_id": "local-preview-hospital",
+          "branch_id": "main",
+          "department_id": "general",
+          "role": "admin",
+          "query_at": "2026-11-06T13:52:57.850767+00:00",
+          "status": "approved",
+          "index_status": "ready",
+          "validity": "effective_from <= query_at < effective_until",
+          "acl": "server principal role and named-user grants",
+          "strategy": "exact_over_authorized_subset"
+        },
+        "answer": "是，原文寫明要攜帶預約通知。[1]",
+        "rag_enabled": true,
+        "references": [
+          {
+            "document_version_id": "d91afc94-9f82-449a-82dd-87cba2872233",
+            "chunk_metadata": {
+              "end": 177,
+              "pages": [
+                1,
+                3
+              ],
+              "start": 0,
+              "status": "approved",
+              "chunk_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869:d91afc94-9f82-449a-82dd-87cba2872233:token:1",
+              "branch_id": "main",
+              "source_url": "",
+              "version_id": "d91afc94-9f82-449a-82dd-87cba2872233",
+              "approved_at": "2026-11-05T14:58:46.089989+00:00",
+              "chunk_index": 1,
+              "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+              "token_count": 31,
+              "department_id": "general",
+              "source_sha256": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+              "version_label": "PDF 示範 v1",
+              "organization_id": "local-preview-hospital"
+            },
+            "index": 1,
+            "uuid": "5db022be-d7ef-4c38-9f14-64363b608f36",
+            "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+            "source_id": 0,
+            "title": "【示範】PDF 頁碼與原件核對",
+            "source": "自行建立的合成流程範例",
+            "publisher": "",
+            "published_date": "",
+            "version": "PDF 示範 v1",
+            "audience": "",
+            "topic": "",
+            "credibility": "",
+            "content": "Synthetic source - workflow demonstration only.\nPage one: verify appointment location.\n\nSynthetic source - workflow demonstration only.\nPage three: bring the appointment notice.",
+            "distance": 0.6030807416797767,
+            "distance_text": "0.6031"
+          }
+        ],
+        "evidence_assessment": {
+          "sufficient": false,
+          "reason": "參考資料不足，只有 1 筆。",
+          "reference_count": 1,
+          "best_distance": 0.6030807416797767
+        },
+        "retrieval_terms": [
+          "appointment 預約",
+          "appointment notice 預約通知",
+          "bring 帶來",
+          "documents 文件",
+          "requirements 要求",
+          "checklist 清單",
+          "medical appointment 醫療預約"
+        ],
+        "memory_messages": 2,
+        "risk_assessment": {
+          "level": "green",
+          "label": "未做臨床分診",
+          "reason": "僅供院所核准衛教資訊查詢。",
+          "diverted": false,
+          "action": "不提供診斷或個人化診療。"
+        }
+      },
+      "history_summary_matches": true,
+      "answer_model_invoked": true,
+      "source_support_enabled": true,
+      "build": "cb5b37dfb10a267ab4c9a8dbdd74c2dd5c5b9af4",
+      "elapsed_ms": 7270.6,
+      "expectations_match": true,
+      "citation_version_matches": true
+    }
+  ],
+  "corpus_manifest_before": {
+    "format_version": 1,
+    "organization_id": "local-preview-hospital",
+    "branch_id": "main",
+    "department_id": "general",
+    "embedding_model": "text-embedding-3-small",
+    "versions": [
+      {
+        "version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+        "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+        "version_label": "示範 v1.1",
+        "version_number": 2,
+        "checksum": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+        "status": "approved",
+        "effective_from": "2026-11-05T07:54:00+00:00",
+        "effective_until": null,
+        "chunk_ids": [
+          "dba96957-0aed-44bf-802d-97db8a1ecf1e"
+        ]
+      },
+      {
+        "version_id": "d91afc94-9f82-449a-82dd-87cba2872233",
+        "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+        "version_label": "PDF 示範 v1",
+        "version_number": 1,
+        "checksum": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+        "status": "approved",
+        "effective_from": "2026-11-04T14:51:06.342409+00:00",
+        "effective_until": null,
+        "chunk_ids": [
+          "5db022be-d7ef-4c38-9f14-64363b608f36"
+        ]
+      }
+    ],
+    "query_at": "2026-11-06T13:52:41.960828+00:00",
+    "manifest_sha256": "6b9bfdfedd2667bde21bc7accf551b1f25e9858f22c7617566884e705333dc8c"
+  },
+  "corpus_manifest_after": {
+    "format_version": 1,
+    "organization_id": "local-preview-hospital",
+    "branch_id": "main",
+    "department_id": "general",
+    "embedding_model": "text-embedding-3-small",
+    "versions": [
+      {
+        "version_id": "abcd691e-7fa5-4057-a696-9797efc87465",
+        "document_id": "568a84f7-6fe8-4436-8a8e-2967011f7a0b",
+        "version_label": "示範 v1.1",
+        "version_number": 2,
+        "checksum": "996f53b306af727071ba9f66fcf148eb65d6272c215e5cd01acdff61faf63a6a",
+        "status": "approved",
+        "effective_from": "2026-11-05T07:54:00+00:00",
+        "effective_until": null,
+        "chunk_ids": [
+          "dba96957-0aed-44bf-802d-97db8a1ecf1e"
+        ]
+      },
+      {
+        "version_id": "d91afc94-9f82-449a-82dd-87cba2872233",
+        "document_id": "dc0a24b6-73fc-41cc-a32e-0b69fd09f869",
+        "version_label": "PDF 示範 v1",
+        "version_number": 1,
+        "checksum": "e0499b986c324f727c2212506a2c20df6337881b181ca06c13a59fe82ab88e6f",
+        "status": "approved",
+        "effective_from": "2026-11-04T14:51:06.342409+00:00",
+        "effective_until": null,
+        "chunk_ids": [
+          "5db022be-d7ef-4c38-9f14-64363b608f36"
+        ]
+      }
+    ],
+    "query_at": "2026-11-06T13:53:05.128600+00:00",
+    "manifest_sha256": "6b9bfdfedd2667bde21bc7accf551b1f25e9858f22c7617566884e705333dc8c"
+  },
+  "corpus_unchanged": true,
+  "browser_verification": {
+    "method": "Chrome native UI through computer-use tools",
+    "supported_answer_seen": true,
+    "insufficient_refusal_seen": true,
+    "text_citation_opened": true,
+    "text_citation_version": "示範 v1.1",
+    "trace_dialog_opened": true,
+    "saved_refusal_history_restored": true,
+    "pdf_citation_opened": true,
+    "pdf_citation_pages": [
+      1,
+      3
+    ],
+    "original_pdf_loaded": true,
+    "pdf_viewer_total_pages": 3,
+    "pdf_page_three_text_verified": "Page three: bring the appointment notice.",
+    "preview_left_open": "http://127.0.0.1:8000/knowledge"
+  },
+  "limitations": "Four synthetic HTTP smoke cases plus manual browser interactions; not a reviewed baseline, clinical validation or professional Pilot. Existing body-only index and thresholds unchanged."
+}

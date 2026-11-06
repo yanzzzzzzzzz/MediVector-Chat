@@ -1,0 +1,5 @@
+# Optional local preview overlay; omit this file to restore the default (disabled).
+services:
+  app:
+    environment:
+      SOURCE_SUPPORT_CHECK_ENABLED: "true"
