@@ -60,6 +60,14 @@ jobs:
         run: python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
       - name: Unit and real PostgreSQL integration tests
         run: python -m unittest discover -s tests -v
+      - name: Report human acceptance prerequisites (not a release gate)
+        run: |
+          set +e
+          python -m evaluation.acceptance_readiness "$RUNNER_TEMP/acceptance-readiness.json"
+          readiness_status=$?
+          set -e
+          test "$readiness_status" -eq 2
+          cat "$RUNNER_TEMP/acceptance-readiness.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Synthetic rule reports and release gate regression
         run: |
           python -m evaluation.medical_rules evaluation/medical_rules_cases.json "$RUNNER_TEMP/medical-rules.json"

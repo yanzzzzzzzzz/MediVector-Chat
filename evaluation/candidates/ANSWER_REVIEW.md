@@ -20,3 +20,12 @@
 執行 `python -m evaluation.faithfulness evaluation/candidates/answer-support-v1.json <新報告路徑>`。
 待審資料不能得到 Pass；不存在的引用仍直接 Fail。現有 `faithfulness_cases.json` 是合成邏輯測試，
 不是專業人員已審查的醫療案例。實際語意標註完成前 #5 保持開啟。
+
+## 標註完整性檢查
+
+`claims` 必須按回答順序逐字涵蓋全部回答文字（只忽略空白與 `[1]`／`[索引 1]` 引用記號）。
+限制說明或拒答也要保留在陳述中，並由審查者決定 `requires_evidence`，不要漏掉不便判斷的句子。
+漏標、改寫或順序錯誤會保留 `unreviewed`；標註的引用必須實際存在於回答及當次 references，否則 Fail。
+`review_status=reviewed` 還必須具備非空 reviewer 與帶時區時間；這只是欄位檢查，不是審查身分驗證。
+
+可先執行 [一鍵準備檢查](../README.md#人工驗收準備檢查)，盤點 #5／#8／#20 的剩餘條件。

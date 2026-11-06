@@ -228,3 +228,12 @@ currently available; the review and Pilot materials remain prepared, not falsely
 
 `86345b8` 新增工作台內歷史搜尋、原範圍與時間、逐則追溯及答案回報入口。新回答的追溯連結以同一筆交易保存並核對擁有者；舊訊息保留對話追溯清單。來源開啟仍重新核對權限／版本，撤回遮蔽持續適用。
 後端 132、前端 17 項測試與 lint／型別／build 通過，本機 API 與 Chrome 已驗證，示範自動連線維持啟用。詳見 [使用與驗證](../docs/query-history.md)。合成工程驗證不關閉 #5／#8／#20。
+
+
+### 2026-11-07 逐項 GitHub 驗收與標註完整性補強
+
+已重新讀取 GitHub 六個 open issue（#5／#8／#9／#10／#12／#20）及其討論，沒有新增未記錄的工程需求。
+#5 評分器新增全部回答的逐字陳述涵蓋檢查、標註引用與回答／references 一致性，以及 reviewed 狀態的 reviewer／時區欄位驗證；漏標不能 Pass，引用矛盾 Fail。
+新增離線單指令 `evaluation.acceptance_readiness` 與 CI summary，輸出輸入 hash、人工欄位盤點及每項剩餘驗收，不把欄位或紀錄數當成真人工作證明。
+完整 141 項後端測試（含一次性 PostgreSQL／pgvector）通過。本輪未改前端或線上問答流程，未改示範自動連線。
+實測仍為 30 題待審、2 份待審回答、0 位 Pilot 參與者；人工驗收及依賴 Epic 均保持開啟。見 [準備檢查報告](reports/acceptance-readiness-2026-11-07.md)。

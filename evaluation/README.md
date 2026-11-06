@@ -278,3 +278,27 @@ For the paired probes, use `source-support-scope-input-v1.json` and
 and labels the comparator accordingly. Author-proposed rationales and labels are never sent to the model.
 Source titles can provide document context, but all supporting quotes must still occur in body text.
 See [the failure, regression and final comparison](reports/source-support-boundary-analysis-2026-11-06.md).
+
+## 人工驗收準備檢查
+
+```sh
+python -m evaluation.acceptance_readiness /tmp/acceptance-readiness.json
+```
+
+離線讀取目前 30 題候選、2 份回答與 Pilot 範本，輸出 JSON＋Markdown 與輸入 SHA-256。
+不連線、不呼叫模型、不變更標註，不會覆寫既有報告。可用 `--dataset`、`--answers`、`--pilot` 指定實際整理後的檔案。
+
+結束碼 **2** 表示仍需外部驗收，屬預期結果；讀檔或輸入錯誤仍會失敗。本工具永遠不自動關閉 issue 或簽發真人完成證明。
+`input_ready_for_baseline` 只表示輸入通過欄位檢查，必須另外執行 retrieval exporter 與獨立 Lab；不代表 baseline 已完成。
+`input_ready_for_acceptance` 只表示回答標註檢查通過，審查者身分與判斷仍需獨立核對。
+Pilot 僅盤點紀錄數，不從 `completed` 字串或參與者數推論真人訪談已完成。
+CI 會將此盤點放入 summary，與發布閘門分開呈現。
+
+正式完成順序：
+
+1. #5：實際審查者逐字切分回答、核對引用支持性及理由，執行 `evaluation.faithfulness`，另確認審查來源。
+2. #8：人工核對至少 30 題並凍結來源／索引／模型；執行本專案 `evaluation.retrieval_baseline` 及獨立 `rag-evaluation-lab`，依實際結果分析失敗，不預造五例。
+3. #20：安排 3–5 位專業參與者，完成匿名訪談與 Pilot 配對量測、需求優先順序、導入限制及假設結論。
+4. #9／#10／#12：依上述證據驗收，保留原範圍，未完成的依賴不提前關閉。
+
+2026-11-07 現況見 [準備檢查報告](reports/acceptance-readiness-2026-11-07.md)。

@@ -1,0 +1,92 @@
+{
+  "report_kind": "acceptance_prerequisite_inventory",
+  "created_at": "2026-11-06T16:21:40.502780+00:00",
+  "status": "external_acceptance_required",
+  "release_gate_eligible": false,
+  "issues": {
+    "5": {
+      "input_ready_for_acceptance": false,
+      "answers": 2,
+      "supplied_review_provenance_valid": 0,
+      "results": [
+        {
+          "id": "answer-candidate-001",
+          "invalid_citations": [],
+          "missing_citations": [],
+          "unsupported_citations": [],
+          "unreviewed_citations": [],
+          "annotation_coverage_complete": false,
+          "annotation_errors": [],
+          "human_review_provenance_valid": false,
+          "generation_faithfulness": "unreviewed",
+          "review_status": "pending_human",
+          "retrieval_quality": null,
+          "method": "Citation existence is automatic; claim coverage and support use supplied annotations, whose authenticity is not established. Pending human review cannot pass; no clinical validation is claimed."
+        },
+        {
+          "id": "answer-candidate-002",
+          "invalid_citations": [],
+          "missing_citations": [],
+          "unsupported_citations": [],
+          "unreviewed_citations": [],
+          "annotation_coverage_complete": false,
+          "annotation_errors": [],
+          "human_review_provenance_valid": false,
+          "generation_faithfulness": "unreviewed",
+          "review_status": "pending_human",
+          "retrieval_quality": null,
+          "method": "Citation existence is automatic; claim coverage and support use supplied annotations, whose authenticity is not established. Pending human review cannot pass; no clinical validation is claimed."
+        }
+      ]
+    },
+    "8": {
+      "input_ready_for_baseline": false,
+      "cases": 30,
+      "supplied_review_provenance_valid": 0,
+      "validation_error": "Candidate labels still require human review; do not publish a baseline",
+      "baseline_execution_verified": false
+    },
+    "20": {
+      "reported_status": "not_started",
+      "record_counts": {
+        "participants": 0,
+        "interview_records": 0,
+        "task_measurements": 0,
+        "prioritized_needs": 0,
+        "adoption_and_deployment_findings": 0
+      },
+      "real_participation_verified": false
+    },
+    "9": {
+      "depends_on": [
+        5,
+        8,
+        20
+      ]
+    },
+    "10": {
+      "depends_on": [
+        5,
+        8
+      ]
+    },
+    "12": {
+      "depends_on": [
+        5,
+        8
+      ]
+    }
+  },
+  "remaining_acceptance": [
+    "#5: complete real claim-by-claim review, full answer coverage and citation-support decisions",
+    "#8: review at least 30 cases with reviewer/time and freeze corpus/index/model versions",
+    "#8: execute the reviewed baseline in the independent Lab and analyse actual failures; do not invent five failures",
+    "#20: verify 3–5 real professional interviews and Pilot records, paired measurements, needs and deployment findings"
+  ],
+  "limitations": "Offline structural checks only. Supplied reviewer identity, actual participation, source authorization and semantic decisions are not authenticated. No clinical validation or automatic issue closure.",
+  "input_sha256": {
+    "dataset": "2e0c9373c90239b7570cb4dc4275c3443a15a5fb724082a73aea7dffd2408b38",
+    "answers": "3deb0c5f08d9ee6eef35578945ef6a756f057720d2113d9581379dd11cca432a",
+    "pilot": "3cafa7016931f15d486ccf6fa778cb21bf3ff126dd59a625af3b47284d1f9803"
+  }
+}
