@@ -163,3 +163,25 @@ query expansion off, identical question/model and K. Manifests are checked befor
 A shared version is counted once, with its authorized scope list and union rank retained. JSON/Markdown
 outputs are non-overwriting. Real PostgreSQL tests verify A versus A+B, shared-version dedup and refusal
 of a reader not granted B before embedding calls. This is a scope diagnostic, not a reviewed quality score.
+
+## Unreviewed synthetic engineering diagnostic
+
+Before human review is available, use the separately labelled diagnostic command:
+
+```sh
+EVALUATION_API_TOKEN='...' python -m evaluation.synthetic_diagnostic \
+  evaluation/candidates/local-preview-v1.json new-diagnostic.json \
+  --acknowledge-synthetic-data
+```
+
+This accepts only pending-human candidate packets, never fills review provenance, checks the authorized
+corpus before/after and shares the exact raw/filtered query-replay protocol with the reviewed exporter.
+It compares expansion off/on and K=3/5/10 against **proposed** labels, measures API latency and creates
+JSON/Markdown observations for human review. It does not generate answers or score their faithfulness.
+
+The diagnostic has a different report schema (`groups`, `candidate_packet`, `verified_baseline: false`),
+so it cannot be passed to the independent Lab's reviewed-baseline command or the release gate. The
+reviewed `retrieval_baseline` command still rejects pending-human inputs. Never relabel a diagnostic as
+a verified baseline. A two-chunk corpus cannot meaningfully distinguish K=3/5/10, and sequential latency
+with reused rewrites is not a fair causal comparison of raw versus filtered speed. Do not change live
+thresholds based solely on these small, unreviewed examples.

@@ -70,6 +70,62 @@ def medical_rules_for_run(path, corpus_version):
     return evaluate_suite(dataset)
 
 
+def collect_runs(client, dataset, progress=None):
+    """Shared request protocol; callers separately enforce baseline or diagnostic eligibility."""
+    retrieval_context = dataset.get("retrieval_context", {})
+    if not isinstance(retrieval_context, dict) or (retrieval_context and set(retrieval_context) != {"branch_id", "department_id"}):
+        raise ValueError("Only branch_id and department_id may be requested; organization and ACL come from authentication")
+    experiments = []
+    queries = {}
+    def verify_manifest():
+        if retrieval_context:
+            manifest_response = client.get("/api/knowledge/corpus-manifest", params=retrieval_context)
+            manifest_response.raise_for_status()
+            manifest = manifest_response.json()
+            if manifest["manifest_sha256"] != dataset["corpus_version"]:
+                raise ValueError("Authorized corpus manifest changed or does not match the frozen dataset")
+            return manifest
+        return None
+    corpus_manifest = verify_manifest()
+    for expansion in (False, True):
+        for mode in ("raw", "filtered"):
+            # One request per case at max K: do not rewrite independently for K=3/5/10.
+            runs = []
+            for case in dataset["cases"]:
+                replay = queries.get((expansion, case["id"]))
+                payload = {"question": case["query"], "top_k": 10, "candidate_limit": 20,
+                           "mode": mode, "query_expansion": expansion, **retrieval_context}
+                if replay:
+                    payload.update(question=replay["standalone_query"], retrieval_terms=replay["terms"], query_expansion=False)
+                response = client.post("/api/retrieval/search", json=payload)
+                response.raise_for_status()
+                result = response.json()
+                if replay and (result["standalone_query"] != replay["standalone_query"] or result["terms"] != replay["terms"]):
+                    raise ValueError("Standalone query or terms changed during raw/filtered replay")
+                queries[(expansion, case["id"])] = result
+                if result["settings"]["embedding_model"] != dataset["embedding_model"]:
+                    raise ValueError("API embedding model differs from dataset freeze")
+                runs.append({"case_id": case["id"], "retrieval": result,
+                             "metrics": {str(k): metrics(case, result["results"], k) for k in (3, 5, 10)}})
+                if progress:
+                    progress(mode, expansion, len(runs), len(dataset["cases"]))
+            summary = {}
+            for k in (3, 5, 10):
+                values = [r["metrics"][str(k)] for r in runs]
+                answerable = [v for v in values if v["answerable"]]
+                negatives = [v for v in values if not v["answerable"]]
+                summary[str(k)] = {name: statistics.mean(v[name] for v in answerable) if answerable else None for name in ("recall", "mrr", "hit")}
+                summary[str(k)]["unanswerable_return_rate"] = statistics.mean(v["returned_any"] for v in negatives) if negatives else None
+                evidence = [v["evidence_recall"] for v in answerable if v["evidence_recall"] is not None]
+                summary[str(k)]["evidence_recall"] = statistics.mean(evidence) if evidence else None
+            latencies = sorted(r["retrieval"]["elapsed_ms"] for r in runs)
+            experiments.append({"mode": mode, "query_expansion": expansion, "summary": summary,
+                                "p50_ms": statistics.median(latencies),
+                                "p95_ms": latencies[math.ceil(len(latencies) * .95) - 1], "runs": runs})
+    verify_manifest()
+    return corpus_manifest, experiments
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("dataset", type=Path)
@@ -83,54 +139,8 @@ def main():
     if args.output.exists() or args.output.with_suffix(".md").exists():
         raise FileExistsError("Use a fresh report path")
     headers = {"Authorization": "Bearer " + os.environ["EVALUATION_API_TOKEN"]} if os.getenv("EVALUATION_API_TOKEN") else {}
-    retrieval_context = dataset.get("retrieval_context", {})
-    if not isinstance(retrieval_context, dict) or (retrieval_context and set(retrieval_context) != {"branch_id", "department_id"}):
-        raise ValueError("Only branch_id and department_id may be requested; organization and ACL come from authentication")
-    experiments = []
-    queries = {}
     with httpx.Client(base_url=args.base_url, headers=headers, timeout=180) as client:
-        def verify_manifest():
-            if retrieval_context:
-                manifest_response = client.get("/api/knowledge/corpus-manifest", params=retrieval_context)
-                manifest_response.raise_for_status()
-                manifest = manifest_response.json()
-                if manifest["manifest_sha256"] != dataset["corpus_version"]:
-                    raise ValueError("Authorized corpus manifest changed or does not match the frozen dataset")
-                return manifest
-            return None
-        corpus_manifest = verify_manifest()
-        for expansion in (False, True):
-            for mode in ("raw", "filtered"):
-                # One request per case at max K: do not rewrite independently for K=3/5/10.
-                runs = []
-                for case in dataset["cases"]:
-                    replay = queries.get((expansion, case["id"]))
-                    payload = {"question": case["query"], "top_k": 10, "candidate_limit": 20,
-                               "mode": mode, "query_expansion": expansion, **retrieval_context}
-                    if replay:
-                        payload.update(question=replay["standalone_query"], retrieval_terms=replay["terms"], query_expansion=False)
-                    response = client.post("/api/retrieval/search", json=payload)
-                    response.raise_for_status()
-                    result = response.json()
-                    queries[(expansion, case["id"])] = result
-                    if result["settings"]["embedding_model"] != dataset["embedding_model"]:
-                        raise ValueError("API embedding model differs from dataset freeze")
-                    runs.append({"case_id": case["id"], "retrieval": result,
-                                 "metrics": {str(k): metrics(case, result["results"], k) for k in (3, 5, 10)}})
-                summary = {}
-                for k in (3, 5, 10):
-                    values = [r["metrics"][str(k)] for r in runs]
-                    answerable = [v for v in values if v["answerable"]]
-                    negatives = [v for v in values if not v["answerable"]]
-                    summary[str(k)] = {name: statistics.mean(v[name] for v in answerable) if answerable else None for name in ("recall", "mrr", "hit")}
-                    summary[str(k)]["unanswerable_return_rate"] = statistics.mean(v["returned_any"] for v in negatives) if negatives else None
-                    evidence = [v["evidence_recall"] for v in answerable if v["evidence_recall"] is not None]
-                    summary[str(k)]["evidence_recall"] = statistics.mean(evidence) if evidence else None
-                latencies = sorted(r["retrieval"]["elapsed_ms"] for r in runs)
-                experiments.append({"mode": mode, "query_expansion": expansion, "summary": summary,
-                                    "p50_ms": statistics.median(latencies),
-                                    "p95_ms": latencies[math.ceil(len(latencies) * .95) - 1], "runs": runs})
-        verify_manifest()
+        corpus_manifest, experiments = collect_runs(client, dataset)
     report = {"dataset": dataset, "corpus_manifest": corpus_manifest, "experiments": experiments, "generation_faithfulness": "Not measured by retrieval evaluation",
               "limitations": "Human labels are supplied, not verified by this script. Freeze DB externally; synthetic data is not clinical validation. K is the first K chunk results; documents are counted once for recall. The same standalone query and terms are replayed across raw/filtered; K runs reuse results. Freeze corpus and index externally during the run."}
     from medivector.experiment_snapshot import build_snapshot
