@@ -466,7 +466,8 @@ ACL 與有效期間的核准版本；沒有來源時直接回覆無法確認院�
 [資料關係、角色設定、狀態機、API 與操作說明](docs/knowledge-governance.md)。
 已加入 [PDF 引用追溯](docs/knowledge-governance.md)、[衛教草稿審核／發布](docs/education-workspace.md)、
 [品質規則、快照與發布閘門](docs/quality-audit.md)。人工回答支持性審查（#5）、30 題人工 baseline 與
-獨立 Lab 遠端整合（#8）、真人訪談／Pilot（#20）仍待完成；不把工程測試當作臨床驗證。
+正式 baseline（#8）、真人訪談／Pilot（#20）仍待完成；不把工程測試當作臨床驗證。
+獨立 [.NET Evaluation Lab](https://github.com/yanzzzzzzzzz/rag-evaluation-lab) 已建立於私人 repo，讀取評估匯出檔。
 
 ### 衛教草稿工作台
 

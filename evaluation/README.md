@@ -63,8 +63,9 @@ set or independent human review. Retrieval quality is a separate report field.
 
 ## Ground truth / Evaluation Lab handoff (#8)
 
-The user confirmed that the dataset and separate Evaluation Lab have not been established yet.
-Start with corpus selection and annotation; there is no existing reviewed baseline to import.
+The independent [.NET Evaluation Lab](https://github.com/yanzzzzzzzzz/rag-evaluation-lab) is now available
+in its own private repository. Human-reviewed ground truth is not established yet; start with corpus
+selection and annotation. There is no existing reviewed baseline to import.
 
 `dataset.template.json` is deliberately incomplete. Fill at least 30 stable cases using the frozen
 corpus; include reviewer name/date, answerable, relevant_document_ids and optional evidence_spans
@@ -135,9 +136,11 @@ version and mark it reviewed. Do not bulk-fill fake provenance. Corpus changes r
 
 An independent .NET 10 `rag-evaluation-lab` checkout has been prepared separately (not embedded in this
 repository). Its dependency-free Release build/self-tests independently cover Recall/MRR/Hit/evidence
-coverage/no-answer/P50/P95 and controlled export contracts. Remote repository creation/push is pending;
-no independent Lab CI or reviewed baseline is claimed until that handoff is complete. The Lab consumes
-this export contract without any OpenAI credential. At least five real failure analyses remain dependent
+coverage/no-answer/P50/P95 and controlled export contracts. The private remote is
+https://github.com/yanzzzzzzzzz/rag-evaluation-lab and its CI builds/tests the independent evaluator.
+The Lab consumes this export contract without any OpenAI credential. After creating a reviewed export, run
+`dotnet run --project /path/to/rag-evaluation-lab -- baseline-run.json new-lab-report.json`.
+Do not treat the self-tests or a passing CI as a reviewed baseline. At least five real failure analyses remain dependent
 on a valid reviewed run; do not fabricate failures to fill the queue.
 
 ## Authorized branch comparison (#10)

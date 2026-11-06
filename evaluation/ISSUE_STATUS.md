@@ -1,4 +1,4 @@
-# GitHub issue implementation status — 2026-11-05
+# GitHub issue implementation status — 2026-11-06
 
 ## Current state
 
@@ -10,21 +10,23 @@ The local preview is running; its configured answer model is GPT-6 Luna.
 | Open issue | Remaining requirement |
 |---|---|
 | #5 | Actual human claim/citation-support annotation of prepared real responses; do not turn pending review into Pass |
-| #8 | Human review of 30 proposed cases, accessible independent Lab remote/push/CI, measured baseline and real failure analysis |
+| #8 | Human review of 30 proposed cases, measured baseline and real failure analysis; independent Lab remote/push/CI is established |
 | #9 | Product Epic depends on the remaining reviewed quality and professional Pilot evidence |
 | #10 | Source assistant engineering workflow/scope comparison is available; reviewed answer support and baseline still pending |
 | #12 | Rules, snapshots, audit and gates are available; reviewed baseline/answer-quality evidence still pending |
 | #20 | Actual 3–5 professional interviews and Pilot; protocol/report templates are prepared, no results fabricated |
 
 The independent .NET Lab is a separate checkout, not a platform embedded here. It passes Release build
-and synthetic metric/contract self-tests; its remote is not yet available. See human review materials in
+and synthetic metric/contract self-tests; its private remote is now
+https://github.com/yanzzzzzzzzz/rag-evaluation-lab. See human review materials in
 `candidates/` and the Pilot kit in `../docs/pilot/`.
 
 ## Historical implementation log (2026-11-04 onward)
 
 The following entries record what each increment implemented and which limits applied at that time.
 Later increments supersede earlier pending-feature notes; use the current state above for open/closed status.
-Issue #8 remains preparation until its real human/remote/baseline requirements are satisfied.
+Issue #8 remains preparation until its real human/baseline requirements are satisfied. The Lab remote
+was established on 2026-11-06; earlier entries about the missing remote are historical.
 
 User confirmed that the ground-truth dataset and separate Evaluation Lab have not yet been
 established. Issue #8 remains pending dataset creation and human review; the existing template
@@ -135,3 +137,12 @@ target branch restriction, while never disabling organization/status/validity/AC
 tests cover shared-document dedup and scope denial before embedding; corpus/query drift aborts comparison.
 The source assistant engineering workflow is available; actual answer-support review (#5) and independently
 reviewed quality baseline (#8) remain explicitly pending rather than being inferred from these mechanics.
+
+
+## #8 independent Lab remote established — 2026-11-06
+
+Created private `yanzzzzzzzzz/rag-evaluation-lab` through the user's browser and pushed the independently
+committed .NET source/self-tests/workflow (`26926f6`, `115c4ed`).
+[Independent Lab CI passed](https://github.com/yanzzzzzzzzz/rag-evaluation-lab/actions/runs/42144963691). Human review of the candidate dataset,
+real baseline runs and actual failure analyses are still pending. No professional participants are
+currently available; the review and Pilot materials remain prepared, not falsely marked as validated.
