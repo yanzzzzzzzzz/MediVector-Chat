@@ -1,0 +1,930 @@
+{
+  "dataset_version": "DRAFT-prototype-challenge-v1",
+  "review_status": "pending_human",
+  "notice": "虛構機構的合成文件管理測試；規定、代碼、地點均為虛構，不供真實院所使用。題目與標註由程式準備，未經人工審查。頁面是合成的抽取文字，不代表實測 PDF 解析。",
+  "corpus_version": "a342c52a00f67544c151d334e3924385ff365c2fda5a7cce72ee600a2d5ab1a2",
+  "index_version": "offline-representation-challenge-v1",
+  "embedding_model": "text-embedding-3-small",
+  "retrieval_context": {
+    "branch_id": "main",
+    "department_id": "documents"
+  },
+  "cases": [
+    {
+      "id": "challenge-001",
+      "query": "第一次來看門診，到了以後要先去哪裡？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "62f27360-31a7-59e5-a621-9a084a8ad9f4"
+      ],
+      "expected_document_version_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "62f27360-31a7-59e5-a621-9a084a8ad9f4",
+          "source_sha256": "db3ba03602f88054d8454d1a0405764afadc4af2f2c2d1879adb0c9aa901e1f1",
+          "start": 16,
+          "end": 28
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-002",
+      "query": "初次就診當天要帶哪一張紙？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "62f27360-31a7-59e5-a621-9a084a8ad9f4"
+      ],
+      "expected_document_version_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "62f27360-31a7-59e5-a621-9a084a8ad9f4",
+          "source_sha256": "db3ba03602f88054d8454d1a0405764afadc4af2f2c2d1879adb0c9aa901e1f1",
+          "start": 29,
+          "end": 37
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-003",
+      "query": "第一次看診忘了帶通知文件怎麼處理？",
+      "answerable": true,
+      "category": "similar_titles",
+      "relevant_document_ids": [
+        "62f27360-31a7-59e5-a621-9a084a8ad9f4"
+      ],
+      "expected_document_version_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "62f27360-31a7-59e5-a621-9a084a8ad9f4",
+          "source_sha256": "db3ba03602f88054d8454d1a0405764afadc4af2f2c2d1879adb0c9aa901e1f1",
+          "start": 45,
+          "end": 54
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-004",
+      "query": "已經有回診預約，要去哪裡完成報到？",
+      "answerable": true,
+      "category": "similar_titles",
+      "relevant_document_ids": [
+        "d71e3dfa-eb2a-5920-8b05-ac518db74caa"
+      ],
+      "expected_document_version_ids": [
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d71e3dfa-eb2a-5920-8b05-ac518db74caa",
+          "source_sha256": "897a70207009d17eb712a3f917c9d29f1bbca25dd54d6cbacff34f467d8920a6",
+          "start": 17,
+          "end": 28
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-005",
+      "query": "回來複診還要再拿初診號碼嗎？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "d71e3dfa-eb2a-5920-8b05-ac518db74caa"
+      ],
+      "expected_document_version_ids": [
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d71e3dfa-eb2a-5920-8b05-ac518db74caa",
+          "source_sha256": "897a70207009d17eb712a3f917c9d29f1bbca25dd54d6cbacff34f467d8920a6",
+          "start": 29,
+          "end": 39
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-006",
+      "query": "複診用的卡片找不到，在哪裡補發？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "d71e3dfa-eb2a-5920-8b05-ac518db74caa"
+      ],
+      "expected_document_version_ids": [
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d71e3dfa-eb2a-5920-8b05-ac518db74caa",
+          "source_sha256": "897a70207009d17eb712a3f917c9d29f1bbca25dd54d6cbacff34f467d8920a6",
+          "start": 48,
+          "end": 57
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-007",
+      "query": "辦住院手續要到哪個櫃台？",
+      "answerable": true,
+      "category": "similar_titles",
+      "relevant_document_ids": [
+        "e5292c31-e25d-5cb6-b64c-78c862047768"
+      ],
+      "expected_document_version_ids": [
+        "c5921f24-e638-5353-b455-9cd4737fbf01"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "e5292c31-e25d-5cb6-b64c-78c862047768",
+          "source_sha256": "32c41b661f87e4abee985803f181bdabee86cffcae1c79716889516e7bbe4380",
+          "start": 19,
+          "end": 26
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-008",
+      "query": "辦入院要準備哪兩份文件？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "e5292c31-e25d-5cb6-b64c-78c862047768"
+      ],
+      "expected_document_version_ids": [
+        "c5921f24-e638-5353-b455-9cd4737fbf01"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "e5292c31-e25d-5cb6-b64c-78c862047768",
+          "source_sha256": "32c41b661f87e4abee985803f181bdabee86cffcae1c79716889516e7bbe4380",
+          "start": 29,
+          "end": 39
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-009",
+      "query": "入院表格忘記寫聯絡資料，找誰處理？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "e5292c31-e25d-5cb6-b64c-78c862047768"
+      ],
+      "expected_document_version_ids": [
+        "c5921f24-e638-5353-b455-9cd4737fbf01"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "e5292c31-e25d-5cb6-b64c-78c862047768",
+          "source_sha256": "32c41b661f87e4abee985803f181bdabee86cffcae1c79716889516e7bbe4380",
+          "start": 52,
+          "end": 62
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-010",
+      "query": "要離院了，行政資料先到哪裡核對？",
+      "answerable": true,
+      "category": "similar_titles",
+      "relevant_document_ids": [
+        "159c8aae-d424-58f0-b0c3-b29bdca037f2"
+      ],
+      "expected_document_version_ids": [
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "159c8aae-d424-58f0-b0c3-b29bdca037f2",
+          "source_sha256": "a8683aa86c6dbf31ec77dab6ea468090ccc7eb18e11e8de7cd421c05de7ce3b7",
+          "start": 22,
+          "end": 28
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-011",
+      "query": "離院的收據要再拿一份，去哪裡辦？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "159c8aae-d424-58f0-b0c3-b29bdca037f2"
+      ],
+      "expected_document_version_ids": [
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "159c8aae-d424-58f0-b0c3-b29bdca037f2",
+          "source_sha256": "a8683aa86c6dbf31ec77dab6ea468090ccc7eb18e11e8de7cd421c05de7ce3b7",
+          "start": 39,
+          "end": 48
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-012",
+      "query": "離院資料名字打錯，可以自己改嗎？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "159c8aae-d424-58f0-b0c3-b29bdca037f2"
+      ],
+      "expected_document_version_ids": [
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "159c8aae-d424-58f0-b0c3-b29bdca037f2",
+          "source_sha256": "a8683aa86c6dbf31ec77dab6ea468090ccc7eb18e11e8de7cd421c05de7ce3b7",
+          "start": 59,
+          "end": 75
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-013",
+      "query": "內容寫好以後，應送到哪裡給人檢查？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "d99f0de2-3266-5b4b-a039-85c3e633da5a"
+      ],
+      "expected_document_version_ids": [
+        "618a33e1-d420-561d-afbd-c62e0e701194"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d99f0de2-3266-5b4b-a039-85c3e633da5a",
+          "source_sha256": "5e548c856d6b0b0c731c2df5b9e3607a12ddbc4770eae2e1fa4f5957c79348b5",
+          "start": 11,
+          "end": 19
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-014",
+      "query": "審查退件時必須留下什麼說明？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "d99f0de2-3266-5b4b-a039-85c3e633da5a"
+      ],
+      "expected_document_version_ids": [
+        "618a33e1-d420-561d-afbd-c62e0e701194"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d99f0de2-3266-5b4b-a039-85c3e633da5a",
+          "source_sha256": "5e548c856d6b0b0c731c2df5b9e3607a12ddbc4770eae2e1fa4f5957c79348b5",
+          "start": 42,
+          "end": 49
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-015",
+      "query": "通過審查後，系統會保存哪些追蹤資訊？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "d99f0de2-3266-5b4b-a039-85c3e633da5a"
+      ],
+      "expected_document_version_ids": [
+        "618a33e1-d420-561d-afbd-c62e0e701194"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d99f0de2-3266-5b4b-a039-85c3e633da5a",
+          "source_sha256": "5e548c856d6b0b0c731c2df5b9e3607a12ddbc4770eae2e1fa4f5957c79348b5",
+          "start": 65,
+          "end": 78
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-016",
+      "query": "已經發出去的資料版本弄錯，審核者要怎麼處理？",
+      "answerable": true,
+      "category": "similar_titles",
+      "relevant_document_ids": [
+        "8db486df-e61e-53d7-ae37-925027e85323"
+      ],
+      "expected_document_version_ids": [
+        "0beefd2f-9b12-5872-84c0-605c765dab54"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "8db486df-e61e-53d7-ae37-925027e85323",
+          "source_sha256": "2e1ea7bdd597d10a9302fad824ae7b3d6518bbd0f979364de457ad922478182b",
+          "start": 17,
+          "end": 27
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-017",
+      "query": "下架後一般使用者還查得到那份內容嗎？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "8db486df-e61e-53d7-ae37-925027e85323"
+      ],
+      "expected_document_version_ids": [
+        "0beefd2f-9b12-5872-84c0-605c765dab54"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "8db486df-e61e-53d7-ae37-925027e85323",
+          "source_sha256": "2e1ea7bdd597d10a9302fad824ae7b3d6518bbd0f979364de457ad922478182b",
+          "start": 31,
+          "end": 46
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-018",
+      "query": "已通過的原稿可以直接蓋掉，換成修正版嗎？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "8db486df-e61e-53d7-ae37-925027e85323"
+      ],
+      "expected_document_version_ids": [
+        "0beefd2f-9b12-5872-84c0-605c765dab54"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "8db486df-e61e-53d7-ae37-925027e85323",
+          "source_sha256": "2e1ea7bdd597d10a9302fad824ae7b3d6518bbd0f979364de457ad922478182b",
+          "start": 60,
+          "end": 76
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-019",
+      "query": "想拿公開行政資料的紙本副本，要填哪個表？",
+      "answerable": true,
+      "category": "similar_titles",
+      "relevant_document_ids": [
+        "86b71080-79ef-5dea-8764-f88dfabe3756"
+      ],
+      "expected_document_version_ids": [
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "86b71080-79ef-5dea-8764-f88dfabe3756",
+          "source_sha256": "26632d9972093c98b9d29c34146684a9fabb1f9280b51c3d43cdb37333db223e",
+          "start": 20,
+          "end": 28
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-020",
+      "query": "影印申請交到哪個單位？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "86b71080-79ef-5dea-8764-f88dfabe3756"
+      ],
+      "expected_document_version_ids": [
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "86b71080-79ef-5dea-8764-f88dfabe3756",
+          "source_sha256": "26632d9972093c98b9d29c34146684a9fabb1f9280b51c3d43cdb37333db223e",
+          "start": 29,
+          "end": 36
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-021",
+      "query": "送出紙本副本申請後，何時可以拿到？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "86b71080-79ef-5dea-8764-f88dfabe3756"
+      ],
+      "expected_document_version_ids": [
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "86b71080-79ef-5dea-8764-f88dfabe3756",
+          "source_sha256": "26632d9972093c98b9d29c34146684a9fabb1f9280b51c3d43cdb37333db223e",
+          "start": 42,
+          "end": 49
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-022",
+      "query": "只想證明當天有到場，應該填哪張表？",
+      "answerable": true,
+      "category": "similar_titles",
+      "relevant_document_ids": [
+        "d2b17ac5-2588-5460-9fea-0dd13f84579b"
+      ],
+      "expected_document_version_ids": [
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d2b17ac5-2588-5460-9fea-0dd13f84579b",
+          "source_sha256": "ce5b8340f56086d30e237e5c1b71a48439f5fa7c3a433368dcb57f973c0a352f",
+          "start": 32,
+          "end": 41
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-023",
+      "query": "拿到場證明時，要出示哪個憑據？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "d2b17ac5-2588-5460-9fea-0dd13f84579b"
+      ],
+      "expected_document_version_ids": [
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d2b17ac5-2588-5460-9fea-0dd13f84579b",
+          "source_sha256": "ce5b8340f56086d30e237e5c1b71a48439f5fa7c3a433368dcb57f973c0a352f",
+          "start": 53,
+          "end": 59
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-024",
+      "query": "到場證明寫錯日期，去哪裡改？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "d2b17ac5-2588-5460-9fea-0dd13f84579b"
+      ],
+      "expected_document_version_ids": [
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "d2b17ac5-2588-5460-9fea-0dd13f84579b",
+          "source_sha256": "ce5b8340f56086d30e237e5c1b71a48439f5fa7c3a433368dcb57f973c0a352f",
+          "start": 71,
+          "end": 80
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-025",
+      "query": "約好的時間沒變，但服務位置換了，要去哪裡核對？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "2ce46439-262b-572f-862e-12feaf90e5eb"
+      ],
+      "expected_document_version_ids": [
+        "e2f18334-be59-5ece-a67a-1c38a9fb818a"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "2ce46439-262b-572f-862e-12feaf90e5eb",
+          "source_sha256": "dbcd95ada80b05a03f681a2b41fc8e6fecca9eaf2232757324037c4f2aba4b3b",
+          "start": 33,
+          "end": 38
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-026",
+      "query": "收到換地點的信，預約時間也會一起改嗎？",
+      "answerable": true,
+      "category": "paraphrase",
+      "relevant_document_ids": [
+        "2ce46439-262b-572f-862e-12feaf90e5eb"
+      ],
+      "expected_document_version_ids": [
+        "e2f18334-be59-5ece-a67a-1c38a9fb818a"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "2ce46439-262b-572f-862e-12feaf90e5eb",
+          "source_sha256": "dbcd95ada80b05a03f681a2b41fc8e6fecca9eaf2232757324037c4f2aba4b3b",
+          "start": 13,
+          "end": 20
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-027",
+      "query": "手上有兩張不同位置的通知，該看哪張？",
+      "answerable": true,
+      "category": "similar_titles",
+      "relevant_document_ids": [
+        "2ce46439-262b-572f-862e-12feaf90e5eb"
+      ],
+      "expected_document_version_ids": [
+        "e2f18334-be59-5ece-a67a-1c38a9fb818a"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "2ce46439-262b-572f-862e-12feaf90e5eb",
+          "source_sha256": "dbcd95ada80b05a03f681a2b41fc8e6fecca9eaf2232757324037c4f2aba4b3b",
+          "start": 59,
+          "end": 69
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-028",
+      "query": "剛接手維護工作，第一次登入該用哪種帳號？",
+      "answerable": true,
+      "category": "long_document",
+      "relevant_document_ids": [
+        "1af58657-7854-5bd8-a3b9-595fb7942dfe"
+      ],
+      "expected_document_version_ids": [
+        "28b0a398-3a74-5642-b836-069b3f0431e8"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "1af58657-7854-5bd8-a3b9-595fb7942dfe",
+          "source_sha256": "bc6440aad4776a53953fa6727d217995aacdc9cd5ad319dc1fee38227bd5ab92",
+          "start": 8,
+          "end": 19
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-029",
+      "query": "練習全部做完，要把哪個表送給哪個小組？",
+      "answerable": true,
+      "category": "long_document",
+      "relevant_document_ids": [
+        "1af58657-7854-5bd8-a3b9-595fb7942dfe"
+      ],
+      "expected_document_version_ids": [
+        "28b0a398-3a74-5642-b836-069b3f0431e8"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "1af58657-7854-5bd8-a3b9-595fb7942dfe",
+          "source_sha256": "bc6440aad4776a53953fa6727d217995aacdc9cd5ad319dc1fee38227bd5ab92",
+          "start": 8333,
+          "end": 8350
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-030",
+      "query": "新人演練用的帳號什麼時候停掉？",
+      "answerable": true,
+      "category": "long_document",
+      "relevant_document_ids": [
+        "1af58657-7854-5bd8-a3b9-595fb7942dfe"
+      ],
+      "expected_document_version_ids": [
+        "28b0a398-3a74-5642-b836-069b3f0431e8"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "1af58657-7854-5bd8-a3b9-595fb7942dfe",
+          "source_sha256": "bc6440aad4776a53953fa6727d217995aacdc9cd5ad319dc1fee38227bd5ab92",
+          "start": 8356,
+          "end": 8363
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-031",
+      "query": "出發之前，服務地點要用什麼資料確認？",
+      "answerable": true,
+      "category": "cross_language",
+      "relevant_document_ids": [
+        "4c69962b-d8e2-530c-8023-ee2e8b7b2e0f"
+      ],
+      "expected_document_version_ids": [
+        "f94ded55-bbd2-555c-b194-dad6af742daa"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "4c69962b-d8e2-530c-8023-ee2e8b7b2e0f",
+          "source_sha256": "7a5f6fe8ff3686c5d6418bcecdfbc76feb6458a30bb7d8cca2c433fa11c306d0",
+          "start": 41,
+          "end": 101
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-032",
+      "query": "到了服務中心，確認信要拿給哪個櫃台？",
+      "answerable": true,
+      "category": "cross_language",
+      "relevant_document_ids": [
+        "4c69962b-d8e2-530c-8023-ee2e8b7b2e0f"
+      ],
+      "expected_document_version_ids": [
+        "f94ded55-bbd2-555c-b194-dad6af742daa"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "4c69962b-d8e2-530c-8023-ee2e8b7b2e0f",
+          "source_sha256": "7a5f6fe8ff3686c5d6418bcecdfbc76feb6458a30bb7d8cca2c433fa11c306d0",
+          "start": 116,
+          "end": 173
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-033",
+      "query": "行政事情辦完後，訪客證要交到哪裡？",
+      "answerable": true,
+      "category": "cross_language",
+      "relevant_document_ids": [
+        "4c69962b-d8e2-530c-8023-ee2e8b7b2e0f"
+      ],
+      "expected_document_version_ids": [
+        "f94ded55-bbd2-555c-b194-dad6af742daa"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "4c69962b-d8e2-530c-8023-ee2e8b7b2e0f",
+          "source_sha256": "7a5f6fe8ff3686c5d6418bcecdfbc76feb6458a30bb7d8cca2c433fa11c306d0",
+          "start": 252,
+          "end": 293
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-034",
+      "query": "要來取文件，案件號碼應從哪封信找？",
+      "answerable": true,
+      "category": "cross_language",
+      "relevant_document_ids": [
+        "4e3ca9e7-0661-5ac7-9f55-f33b9ccf14f8"
+      ],
+      "expected_document_version_ids": [
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "4e3ca9e7-0661-5ac7-9f55-f33b9ccf14f8",
+          "source_sha256": "53f1cabaf975ed4d963a8ef37502a84e6634f2e0240cb5c9636ab0111e6aab96",
+          "start": 58,
+          "end": 98
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-035",
+      "query": "取件收條要交給哪個顏色的文件櫃台？",
+      "answerable": true,
+      "category": "cross_language",
+      "relevant_document_ids": [
+        "4e3ca9e7-0661-5ac7-9f55-f33b9ccf14f8"
+      ],
+      "expected_document_version_ids": [
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "4e3ca9e7-0661-5ac7-9f55-f33b9ccf14f8",
+          "source_sha256": "53f1cabaf975ed4d963a8ef37502a84e6634f2e0240cb5c9636ab0111e6aab96",
+          "start": 111,
+          "end": 155
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-036",
+      "query": "領到的紙本缺頁，離開前該找誰？",
+      "answerable": true,
+      "category": "cross_language",
+      "relevant_document_ids": [
+        "4e3ca9e7-0661-5ac7-9f55-f33b9ccf14f8"
+      ],
+      "expected_document_version_ids": [
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d"
+      ],
+      "evidence_spans": [
+        {
+          "document_id": "4e3ca9e7-0661-5ac7-9f55-f33b9ccf14f8",
+          "source_sha256": "53f1cabaf975ed4d963a8ef37502a84e6634f2e0240cb5c9636ab0111e6aab96",
+          "start": 257,
+          "end": 305
+        }
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-037",
+      "query": "大腸鏡之前要停藥幾天？",
+      "answerable": false,
+      "category": "no_answer",
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-038",
+      "query": "MRI 檢查前必須空腹幾個小時？",
+      "answerable": false,
+      "category": "no_answer",
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-039",
+      "query": "診斷證明要付多少費用？",
+      "answerable": false,
+      "category": "no_answer",
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-040",
+      "query": "到場證明可以當成診斷證明使用嗎？",
+      "answerable": false,
+      "category": "no_answer",
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-041",
+      "query": "紙本副本能不能寄到國外？",
+      "answerable": false,
+      "category": "no_answer",
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-042",
+      "query": "回診卡可以讓其他家人借用嗎？",
+      "answerable": false,
+      "category": "no_answer",
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-043",
+      "query": "門診報到可以遲到多久？",
+      "answerable": false,
+      "category": "no_answer",
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    },
+    {
+      "id": "challenge-044",
+      "query": "住院保證金需要多少錢？",
+      "answerable": false,
+      "category": "no_answer",
+      "relevant_document_ids": [],
+      "evidence_spans": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": ""
+    }
+  ]
+}

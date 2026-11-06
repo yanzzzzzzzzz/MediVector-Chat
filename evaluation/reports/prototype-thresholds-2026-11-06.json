@@ -1,0 +1,298 @@
+{
+  "report_kind": "unreviewed_threshold_sweep",
+  "verified_baseline": false,
+  "release_gate_eligible": false,
+  "input_report_sha256": "8cf38ef3e358a43c76a919ce686748a82b7317d59f07cf84eb478795ad7b3c61",
+  "candidate_sha256": "dbba74b5b18ac7e71458858f3aedb52f9c255ba3162c315eece2bc34198aed3c",
+  "rows": [
+    {
+      "variant": "body",
+      "max_distance": 0.35,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 4,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 1
+    },
+    {
+      "variant": "body",
+      "max_distance": 0.35,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 4,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 1
+    },
+    {
+      "variant": "body",
+      "max_distance": 0.45,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 17,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 3
+    },
+    {
+      "variant": "body",
+      "max_distance": 0.45,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 18,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 3
+    },
+    {
+      "variant": "body",
+      "max_distance": 0.55,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 25,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 4
+    },
+    {
+      "variant": "body",
+      "max_distance": 0.55,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 26,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 4
+    },
+    {
+      "variant": "body",
+      "max_distance": 0.65,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 28,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 5
+    },
+    {
+      "variant": "body",
+      "max_distance": 0.65,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 30,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 5
+    },
+    {
+      "variant": "title",
+      "max_distance": 0.35,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 1,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 0
+    },
+    {
+      "variant": "title",
+      "max_distance": 0.35,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 1,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 0
+    },
+    {
+      "variant": "title",
+      "max_distance": 0.45,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 12,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 2
+    },
+    {
+      "variant": "title",
+      "max_distance": 0.45,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 12,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 2
+    },
+    {
+      "variant": "title",
+      "max_distance": 0.55,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 29,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 4
+    },
+    {
+      "variant": "title",
+      "max_distance": 0.55,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 31,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 4
+    },
+    {
+      "variant": "title",
+      "max_distance": 0.65,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 32,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 6
+    },
+    {
+      "variant": "title",
+      "max_distance": 0.65,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 36,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 6
+    },
+    {
+      "variant": "title_pages",
+      "max_distance": 0.35,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 1,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 0
+    },
+    {
+      "variant": "title_pages",
+      "max_distance": 0.35,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 1,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 0
+    },
+    {
+      "variant": "title_pages",
+      "max_distance": 0.45,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 12,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 2
+    },
+    {
+      "variant": "title_pages",
+      "max_distance": 0.45,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 12,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 2
+    },
+    {
+      "variant": "title_pages",
+      "max_distance": 0.55,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 30,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 4
+    },
+    {
+      "variant": "title_pages",
+      "max_distance": 0.55,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 31,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 4
+    },
+    {
+      "variant": "title_pages",
+      "max_distance": 0.65,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 33,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 6
+    },
+    {
+      "variant": "title_pages",
+      "max_distance": 0.65,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 36,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 6
+    },
+    {
+      "variant": "page_chunks",
+      "max_distance": 0.35,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 1,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 0
+    },
+    {
+      "variant": "page_chunks",
+      "max_distance": 0.35,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 1,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 0
+    },
+    {
+      "variant": "page_chunks",
+      "max_distance": 0.45,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 13,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 2
+    },
+    {
+      "variant": "page_chunks",
+      "max_distance": 0.45,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 13,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 2
+    },
+    {
+      "variant": "page_chunks",
+      "max_distance": 0.55,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 29,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 4
+    },
+    {
+      "variant": "page_chunks",
+      "max_distance": 0.55,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 31,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 4
+    },
+    {
+      "variant": "page_chunks",
+      "max_distance": 0.65,
+      "distance_margin": 0.06,
+      "answerable_cases": 36,
+      "answerable_hits": 32,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 6
+    },
+    {
+      "variant": "page_chunks",
+      "max_distance": 0.65,
+      "distance_margin": 0.12,
+      "answerable_cases": 36,
+      "answerable_hits": 36,
+      "unanswerable_cases": 8,
+      "unanswerable_with_candidates": 6
+    }
+  ],
+  "limitations": "Reuses exactly the saved candidate distances; no new embedding or generation. Unreviewed synthetic labels only. Tuning and measuring on the same cases is exploratory, not a validated threshold choice. A returned candidate does not establish an incorrect answer."
+}

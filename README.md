@@ -1,6 +1,14 @@
-# Vector DB 中文問答 Demo
+# MediVector — 醫療文件知識管理原型
 
-這是一個本機執行的中文衛教 RAG 測試專案。它使用 PostgreSQL + pgvector 作為 vector DB，OpenAI embeddings 產生向量，並用 GPT 根據搜尋到的參考資料回答問題。
+這是一個本機執行的醫療文件知識管理原型，展示文件版本管理、審核發布、權限控管、RAG 檢索與引用追溯。它使用 PostgreSQL + pgvector 作為 vector DB，OpenAI embeddings 產生向量，並用 GPT 根據搜尋到的參考資料回答問題。
+
+## 目前定位與驗收範圍
+
+2026-11-06 暫定以「醫療文件知識管理原型」為交付目標。使用合成或經授權的非個人資料，驗證文件流程與工程行為；尚未完成醫療專業驗證，不供實際診療或個人化醫療建議使用。示範中的「核准／發布」代表軟體狀態，不代表醫療內容已獲專業核准。
+
+原型驗收涵蓋：文件建立與版本修訂、角色與院區／科別隔離、審核與撤回、PDF 原件／頁碼追溯、檢索與無證據處理，以及可重現的工程測試。回答與原文是否一致可另做文件核對；此結果不等於醫療內容正確性或臨床安全性驗證。
+
+目前工程待辦優先處理 PDF 漏檢、擴充具代表性的合成／授權語料，並以固定題目與來源比較標題、頁碼及分塊策略。正式人工標註 baseline、醫療內容專業審查與真人 Pilot 列為後續實際導入階段；既有待審資料與 issue 不因此標成完成。詳見 [驗收與待辦紀錄](evaluation/ISSUE_STATUS.md)。
 
 ## 功能
 
@@ -466,7 +474,7 @@ ACL 與有效期間的核准版本；沒有來源時直接回覆無法確認院�
 [資料關係、角色設定、狀態機、API 與操作說明](docs/knowledge-governance.md)。
 已加入 [PDF 引用追溯](docs/knowledge-governance.md)、[衛教草稿審核／發布](docs/education-workspace.md)、
 [品質規則、快照與發布閘門](docs/quality-audit.md)。人工回答支持性審查（#5）、30 題人工 baseline 與
-正式 baseline（#8）、真人訪談／Pilot（#20）仍待完成；不把工程測試當作臨床驗證。
+正式 baseline（#8）、真人訪談／Pilot（#20）仍待完成，列為後續實際導入驗證；不阻擋目前原型工程交付，也不把工程測試當作臨床驗證。
 獨立 [.NET Evaluation Lab](https://github.com/yanzzzzzzzzz/rag-evaluation-lab) 已建立於私人 repo，讀取評估匯出檔。
 
 ### 衛教草稿工作台

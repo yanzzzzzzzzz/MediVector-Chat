@@ -185,3 +185,48 @@ reviewed `retrieval_baseline` command still rejects pending-human inputs. Never 
 a verified baseline. A two-chunk corpus cannot meaningfully distinguish K=3/5/10, and sequential latency
 with reused rewrites is not a fair causal comparison of raw versus filtered speed. Do not change live
 thresholds based solely on these small, unreviewed examples.
+
+
+## Representation ablation for the document-management prototype
+
+Compare body-only, title-prefixed, title/page-prefixed and page-split embeddings against the frozen
+synthetic source packet, without changing the live database or index:
+
+```sh
+python -m evaluation.representation_comparison \
+  evaluation/candidates/local-preview-v1.json \
+  evaluation/candidates/local-preview-corpus-v1.json new-representation-run.json \
+  --acknowledge-synthetic-data
+```
+
+Requires the existing OpenAI embedding configuration. Only use authorized nonpersonal synthetic inputs.
+Each unique input is embedded once; identical query vectors are shared across variants. Ranking uses
+in-memory exact cosine and the runtime reference filter, with expansion disabled throughout. Source
+text/offsets remain unchanged; only the embedding representation differs. Files use fresh paths and
+exclusive creation. This is an unreviewed diagnostic, not a baseline, live ACL test or release gate.
+The current fixture has only two sources; it cannot establish generalization or production quality.
+See [measured analysis](reports/representation-analysis-2026-11-06.md) for results and next experiments.
+
+
+### Expanded prototype challenge and threshold replay
+
+`prototype_fixture` deterministically builds 12 fictional administrative/document-management sources
+and 44 proposed cases (36 answerable, eight no-answer). It includes similar titles, paraphrases,
+long text, cross-language queries and synthetic extracted-page mappings. There is no PDF extraction
+or live authorization claim; authored labels remain pending human review. Source and question authorship
+is shared, so this is not an independent holdout.
+
+```sh
+python -m evaluation.prototype_fixture /tmp/fresh-prototype-fixture
+python -m evaluation.representation_comparison \
+  evaluation/candidates/prototype-challenge-v1.json \
+  evaluation/candidates/prototype-challenge-corpus-v1.json fresh-challenge-run.json \
+  --acknowledge-synthetic-data
+python -m evaluation.threshold_sweep fresh-challenge-run.json \
+  evaluation/candidates/prototype-challenge-v1.json fresh-threshold-run.json
+```
+
+The last command makes no network calls; it replays saved raw distances at four maximum-distance
+thresholds and two margins. Inputs are bound to the candidate packet hash. Use fresh output paths.
+Threshold exploration on the same proposed labels is not a validated deployment choice.
+See [expanded analysis](reports/prototype-challenge-analysis-2026-11-06.md).

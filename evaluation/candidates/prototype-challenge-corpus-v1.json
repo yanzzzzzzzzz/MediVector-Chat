@@ -1,0 +1,301 @@
+{
+  "notice": "虛構機構的合成文件管理測試；規定、代碼、地點均為虛構，不供真實院所使用。題目與標註由程式準備，未經人工審查。頁面是合成的抽取文字，不代表實測 PDF 解析。",
+  "manifest_kind": "offline_synthetic_fixture",
+  "manifest": {
+    "format_version": 1,
+    "organization_id": "fictional-prototype-only",
+    "branch_id": "main",
+    "department_id": "documents",
+    "embedding_model": "text-embedding-3-small",
+    "versions": [
+      {
+        "version_id": "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed",
+        "document_id": "62f27360-31a7-59e5-a621-9a084a8ad9f4",
+        "checksum": "db3ba03602f88054d8454d1a0405764afadc4af2f2c2d1879adb0c9aa901e1f1",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "5a1e763c-7454-54e5-a3f4-39a64a74417f",
+        "document_id": "d71e3dfa-eb2a-5920-8b05-ac518db74caa",
+        "checksum": "897a70207009d17eb712a3f917c9d29f1bbca25dd54d6cbacff34f467d8920a6",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "c5921f24-e638-5353-b455-9cd4737fbf01",
+        "document_id": "e5292c31-e25d-5cb6-b64c-78c862047768",
+        "checksum": "32c41b661f87e4abee985803f181bdabee86cffcae1c79716889516e7bbe4380",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "0e91df0c-6713-5ae4-86ab-d6bba29ec990",
+        "document_id": "159c8aae-d424-58f0-b0c3-b29bdca037f2",
+        "checksum": "a8683aa86c6dbf31ec77dab6ea468090ccc7eb18e11e8de7cd421c05de7ce3b7",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "618a33e1-d420-561d-afbd-c62e0e701194",
+        "document_id": "d99f0de2-3266-5b4b-a039-85c3e633da5a",
+        "checksum": "5e548c856d6b0b0c731c2df5b9e3607a12ddbc4770eae2e1fa4f5957c79348b5",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "0beefd2f-9b12-5872-84c0-605c765dab54",
+        "document_id": "8db486df-e61e-53d7-ae37-925027e85323",
+        "checksum": "2e1ea7bdd597d10a9302fad824ae7b3d6518bbd0f979364de457ad922478182b",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "c633c422-5c86-5510-b7ac-25a636ec4f1d",
+        "document_id": "86b71080-79ef-5dea-8764-f88dfabe3756",
+        "checksum": "26632d9972093c98b9d29c34146684a9fabb1f9280b51c3d43cdb37333db223e",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "d4b4da08-0293-5ce6-bf6e-56ff1c10289d",
+        "document_id": "d2b17ac5-2588-5460-9fea-0dd13f84579b",
+        "checksum": "ce5b8340f56086d30e237e5c1b71a48439f5fa7c3a433368dcb57f973c0a352f",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "e2f18334-be59-5ece-a67a-1c38a9fb818a",
+        "document_id": "2ce46439-262b-572f-862e-12feaf90e5eb",
+        "checksum": "dbcd95ada80b05a03f681a2b41fc8e6fecca9eaf2232757324037c4f2aba4b3b",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "28b0a398-3a74-5642-b836-069b3f0431e8",
+        "document_id": "1af58657-7854-5bd8-a3b9-595fb7942dfe",
+        "checksum": "bc6440aad4776a53953fa6727d217995aacdc9cd5ad319dc1fee38227bd5ab92",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "f94ded55-bbd2-555c-b194-dad6af742daa",
+        "document_id": "4c69962b-d8e2-530c-8023-ee2e8b7b2e0f",
+        "checksum": "7a5f6fe8ff3686c5d6418bcecdfbc76feb6458a30bb7d8cca2c433fa11c306d0",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      },
+      {
+        "version_id": "8c2c6174-28fe-5351-b7d0-df576cdcc63d",
+        "document_id": "4e3ca9e7-0661-5ac7-9f55-f33b9ccf14f8",
+        "checksum": "53f1cabaf975ed4d963a8ef37502a84e6634f2e0240cb5c9636ab0111e6aab96",
+        "version_label": "synthetic-v1",
+        "status": "approved",
+        "note": "Approved is a synthetic workflow state, not clinical approval"
+      }
+    ],
+    "note": "虛構機構的合成文件管理測試；規定、代碼、地點均為虛構，不供真實院所使用。題目與標註由程式準備，未經人工審查。頁面是合成的抽取文字，不代表實測 PDF 解析。",
+    "manifest_sha256": "a342c52a00f67544c151d334e3924385ff365c2fda5a7cce72ee600a2d5ab1a2"
+  },
+  "sources": [
+    {
+      "id": "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed",
+      "document_id": "62f27360-31a7-59e5-a621-9a084a8ad9f4",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】門診報到準備須知",
+      "content": "本文件僅適用初次門診報到。到場後先至藍色服務櫃台領取序號，請攜帶預約通知單。若忘記通知單，向接待人員申請重印。",
+      "checksum": "db3ba03602f88054d8454d1a0405764afadc4af2f2c2d1879adb0c9aa901e1f1",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "5a1e763c-7454-54e5-a3f4-39a64a74417f",
+      "document_id": "d71e3dfa-eb2a-5920-8b05-ac518db74caa",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】門診回診準備須知",
+      "content": "本文件僅適用既有預約的門診回診。先到綠色自助機掃描回診卡，無須重新領取初診序號。回診卡遺失時，請至回診支援窗口補印。",
+      "checksum": "897a70207009d17eb712a3f917c9d29f1bbca25dd54d6cbacff34f467d8920a6",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "c5921f24-e638-5353-b455-9cd4737fbf01",
+      "document_id": "e5292c31-e25d-5cb6-b64c-78c862047768",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】住院文件準備須知",
+      "content": "本文件說明住院行政文件作業。住院報到請到橙色住院櫃台，攜帶住院通知與身分核對表。表單漏填聯絡欄位時，交由住院行政人員協助補登。",
+      "checksum": "32c41b661f87e4abee985803f181bdabee86cffcae1c79716889516e7bbe4380",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "0e91df0c-6713-5ae4-86ab-d6bba29ec990",
+      "document_id": "159c8aae-d424-58f0-b0c3-b29bdca037f2",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】出院文件準備須知",
+      "content": "本文件僅處理出院行政文件，不含照護建議。先至紫色結帳窗口完成文件核對。收據影本向出院文件櫃台申請。文件上的姓名有誤時，交由出院行政人員更正，不自行塗改。",
+      "checksum": "a8683aa86c6dbf31ec77dab6ea468090ccc7eb18e11e8de7cd421c05de7ce3b7",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "618a33e1-d420-561d-afbd-c62e0e701194",
+      "document_id": "d99f0de2-3266-5b4b-a039-85c3e633da5a",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】文件核准作業規範",
+      "content": "文件作者建立草稿後，須提交文件審核佇列。審核者確認版本與適用範圍，再核准發布。退回時須填寫修改理由，由原作者建立修訂。核准紀錄包含審核帳號、時間與版本識別碼。",
+      "checksum": "5e548c856d6b0b0c731c2df5b9e3607a12ddbc4770eae2e1fa4f5957c79348b5",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "0beefd2f-9b12-5872-84c0-605c765dab54",
+      "document_id": "8db486df-e61e-53d7-ae37-925027e85323",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】文件撤回作業規範",
+      "content": "已發布文件發現版本錯誤時，審核者應撤回該版本並填寫原因。撤回後一般讀者無法再從查詢取得該內容，歷史事件仍保留。修正內容須建立新版並重新送審，不能直接覆寫原核准版本。",
+      "checksum": "2e1ea7bdd597d10a9302fad824ae7b3d6518bbd0f979364de457ad922478182b",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "c633c422-5c86-5510-b7ac-25a636ec4f1d",
+      "document_id": "86b71080-79ef-5dea-8764-f88dfabe3756",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】文件影印申請須知",
+      "content": "本文件適用公開行政文件影本。申請者填寫 COPY-A 表並提交文件服務台。紙本影本於第二工作日領取。申請進度以影印案件編號查詢，不能使用診斷證明申請編號。",
+      "checksum": "26632d9972093c98b9d29c34146684a9fabb1f9280b51c3d43cdb37333db223e",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "d4b4da08-0293-5ce6-bf6e-56ff1c10289d",
+      "document_id": "d2b17ac5-2588-5460-9fea-0dd13f84579b",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】文件證明申請須知",
+      "content": "本文件僅示範到場證明申請，未訂定診斷證明規則。申請到場證明填寫 VISIT-B 表，交至證明服務台。領取時出示申請回條。證明上的日期錯誤時，應退回證明服務台更正。",
+      "checksum": "ce5b8340f56086d30e237e5c1b71a48439f5fa7c3a433368dcb57f973c0a352f",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "e2f18334-be59-5ece-a67a-1c38a9fb818a",
+      "document_id": "2ce46439-262b-572f-862e-12feaf90e5eb",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】預約地點變更通知",
+      "content": "本文件僅記錄服務地點調整，不變更預約時段。收到地點變更通知後，請至銀色接待區核對新地點代碼。若通知上有兩個地點代碼，以有簽核戳記的最新通知為準。",
+      "checksum": "dbcd95ada80b05a03f681a2b41fc8e6fecca9eaf2232757324037c4f2aba4b3b",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "28b0a398-3a74-5642-b836-069b3f0431e8",
+      "document_id": "1af58657-7854-5bd8-a3b9-595fb7942dfe",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】新進文件維護者操作手冊",
+      "content": "新進維護者先使用訓練帳號登入測試工作區，完成草稿與撤回演練後才申請正式權限。\n\nAppendix 000: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 001: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 002: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 003: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 004: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 005: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 006: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 007: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 008: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 009: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 010: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 011: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 012: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 013: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 014: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 015: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 016: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 017: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 018: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 019: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 020: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 021: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 022: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 023: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 024: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 025: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 026: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 027: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 028: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 029: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 030: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 031: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 032: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 033: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 034: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 035: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 036: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 037: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 038: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 039: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 040: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 041: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 042: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 043: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\nAppendix 044: Synthetic training record. Check document identifiers, review history, and source links in the sandbox. Record the observed screen and return to the training workspace.\n\n附錄末段：完成演練後，將 TRAIN-C 表交至文件治理小組。測試帳號於訓練結束後停用。",
+      "checksum": "bc6440aad4776a53953fa6727d217995aacdc9cd5ad319dc1fee38227bd5ab92",
+      "pages": [],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "f94ded55-bbd2-555c-b194-dad6af742daa",
+      "document_id": "4c69962b-d8e2-530c-8023-ee2e8b7b2e0f",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】服務中心到場流程",
+      "content": "Synthetic workflow only. Before arrival, confirm the appointment location using the latest invitation.\n\nOn arrival, bring the confirmation letter to the amber reception desk. This does not describe medical preparation.\n\nAfter the administrative visit, return the visitor badge to the exit desk.",
+      "checksum": "7a5f6fe8ff3686c5d6418bcecdfbc76feb6458a30bb7d8cca2c433fa11c306d0",
+      "pages": [
+        {
+          "page": 1,
+          "start": 0,
+          "end": 102,
+          "status": "extracted"
+        },
+        {
+          "page": 2,
+          "start": 102,
+          "end": 102,
+          "status": "no_text"
+        },
+        {
+          "page": 3,
+          "start": 104,
+          "end": 218,
+          "status": "extracted"
+        },
+        {
+          "page": 4,
+          "start": 220,
+          "end": 294,
+          "status": "extracted"
+        }
+      ],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    },
+    {
+      "id": "8c2c6174-28fe-5351-b7d0-df576cdcc63d",
+      "document_id": "4e3ca9e7-0661-5ac7-9f55-f33b9ccf14f8",
+      "version_label": "synthetic-v1",
+      "title": "【虛構示範】文件服務中心到場流程",
+      "content": "Synthetic workflow only. For document collection, use the reference number in the collection email.\n\nBring the collection receipt to the teal document desk. An appointment confirmation letter is not a collection receipt.\n\nIf the printed copy is incomplete, contact the document support desk before leaving.",
+      "checksum": "53f1cabaf975ed4d963a8ef37502a84e6634f2e0240cb5c9636ab0111e6aab96",
+      "pages": [
+        {
+          "page": 1,
+          "start": 0,
+          "end": 99,
+          "status": "extracted"
+        },
+        {
+          "page": 2,
+          "start": 101,
+          "end": 220,
+          "status": "extracted"
+        },
+        {
+          "page": 3,
+          "start": 222,
+          "end": 306,
+          "status": "extracted"
+        }
+      ],
+      "source": "虛構文件管理流程",
+      "license": "本專案自行建立的合成測試文字",
+      "source_url": ""
+    }
+  ]
+}
