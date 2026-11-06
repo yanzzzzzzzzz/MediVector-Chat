@@ -1,0 +1,129 @@
+{
+  "report_kind": "unreviewed_support_boundary_inputs",
+  "verified_baseline": false,
+  "release_gate_eligible": false,
+  "candidate_sha256": "eaaec423c42b4d4efb809befffb08069884d4a6a92dcc39d247238a68a3e3e4d",
+  "input_kind": "synthetic_direct_excerpts_without_retrieval",
+  "notice": "全為虛構的文件行政規定與測試指令，不供實際院所使用。標註由程式準備，未經人工審查；這批新問題未用於前一輪提示設計，不是獨立人工驗證。",
+  "groups": [
+    {
+      "variant": "direct_excerpts",
+      "representations": [
+        {
+          "chunk_id": "scope-probe-001:chunk-1",
+          "document_id": "scope-probe-001:document",
+          "content": "本文件只列甲院區時限，乙院區的時間未列於本文件。",
+          "chunk_metadata": {
+            "source_sha256": "e4067da8930e93b647b181f1bac0edb662c0ee25942348a1f528a7ddfb480fb3",
+            "start": 0,
+            "end": 24,
+            "version_id": "scope-probe-001:source-1:v1"
+          }
+        },
+        {
+          "chunk_id": "scope-probe-002:chunk-1",
+          "document_id": "scope-probe-002:document",
+          "content": "本文件只列甲院區時限，乙院區的時間未列於本文件。",
+          "chunk_metadata": {
+            "source_sha256": "e4067da8930e93b647b181f1bac0edb662c0ee25942348a1f528a7ddfb480fb3",
+            "start": 0,
+            "end": 24,
+            "version_id": "scope-probe-002:source-1:v1"
+          }
+        },
+        {
+          "chunk_id": "scope-probe-003:chunk-1",
+          "document_id": "scope-probe-003:document",
+          "content": "本項影本服務僅提供紙本，不提供電子郵件副本。",
+          "chunk_metadata": {
+            "source_sha256": "384ec67dd581c3e86b273f41fc66f41315573a039f015629c8242b0738b8f8cf",
+            "start": 0,
+            "end": 22,
+            "version_id": "scope-probe-003:source-1:v1"
+          }
+        },
+        {
+          "chunk_id": "scope-probe-004:chunk-1",
+          "document_id": "scope-probe-004:document",
+          "content": "本文件只記錄紙本領件流程，沒有訂定電子郵件副本規則。",
+          "chunk_metadata": {
+            "source_sha256": "7c6e9f980f4289789bd3d047cc98155ec24c09e9f5ec9b738bc1152b25a851f4",
+            "start": 0,
+            "end": 26,
+            "version_id": "scope-probe-004:source-1:v1"
+          }
+        }
+      ],
+      "runs": [
+        {
+          "case_id": "scope-probe-001",
+          "question": "這份文件有寫乙院區的領件時間嗎？",
+          "filtered": [
+            {
+              "uuid": "scope-probe-001:chunk-1",
+              "document_id": "scope-probe-001:document",
+              "content": "本文件只列甲院區時限，乙院區的時間未列於本文件。",
+              "chunk_metadata": {
+                "source_sha256": "e4067da8930e93b647b181f1bac0edb662c0ee25942348a1f528a7ddfb480fb3",
+                "start": 0,
+                "end": 24,
+                "version_id": "scope-probe-001:source-1:v1"
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "scope-probe-002",
+          "question": "我在乙院區，交件之後要等幾天才能取件？",
+          "filtered": [
+            {
+              "uuid": "scope-probe-002:chunk-1",
+              "document_id": "scope-probe-002:document",
+              "content": "本文件只列甲院區時限，乙院區的時間未列於本文件。",
+              "chunk_metadata": {
+                "source_sha256": "e4067da8930e93b647b181f1bac0edb662c0ee25942348a1f528a7ddfb480fb3",
+                "start": 0,
+                "end": 24,
+                "version_id": "scope-probe-002:source-1:v1"
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "scope-probe-003",
+          "question": "這項影本服務有提供電子郵件副本嗎？",
+          "filtered": [
+            {
+              "uuid": "scope-probe-003:chunk-1",
+              "document_id": "scope-probe-003:document",
+              "content": "本項影本服務僅提供紙本，不提供電子郵件副本。",
+              "chunk_metadata": {
+                "source_sha256": "384ec67dd581c3e86b273f41fc66f41315573a039f015629c8242b0738b8f8cf",
+                "start": 0,
+                "end": 22,
+                "version_id": "scope-probe-003:source-1:v1"
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "scope-probe-004",
+          "question": "申請者可以改收電子郵件版本嗎？",
+          "filtered": [
+            {
+              "uuid": "scope-probe-004:chunk-1",
+              "document_id": "scope-probe-004:document",
+              "content": "本文件只記錄紙本領件流程，沒有訂定電子郵件副本規則。",
+              "chunk_metadata": {
+                "source_sha256": "7c6e9f980f4289789bd3d047cc98155ec24c09e9f5ec9b738bc1152b25a851f4",
+                "start": 0,
+                "end": 26,
+                "version_id": "scope-probe-004:source-1:v1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

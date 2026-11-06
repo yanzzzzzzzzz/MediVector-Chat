@@ -79,7 +79,7 @@ def ask_question(payload: dict[str, Any]) -> dict[str, Any]:
     if context and SOURCE_SUPPORT_CHECK_ENABLED:
         try:
             estimate = assess_source_support(api_key, support_question,
-                [{"chunk_id": ref.uuid, "content": ref.content} for ref in references])
+                [{"chunk_id": ref.uuid, "content": ref.content, "title": ref.title} for ref in references])
         except ValueError:
             estimate = {"status": "uncertain", "estimated_answerable": False,
                         "human_reviewed": False, "semantic_support_verified": False,

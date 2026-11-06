@@ -495,3 +495,8 @@ ACL 與有效期間的核准版本；沒有來源時直接回覆無法確認院�
 `source_support_assessment` 摘要，原有人工審核／發布流程仍保留。
 42 次合成案例模型檢查的中位耗時約 1.9 秒，正式使用時需衡量額外延遲與 token 用量。
 詳見 [來源檢查實作與實測](evaluation/reports/source-support-analysis-2026-11-06.md)。
+
+
+來源判斷已補測複合問題、例外、否定、衝突與指令干擾，並修正把資訊缺漏誤判為足夠的案例。
+判斷時可用文件標題辨識情境，支持引文仍限正文。
+[邊界失敗、修正與回歸結果](evaluation/reports/source-support-boundary-analysis-2026-11-06.md)。

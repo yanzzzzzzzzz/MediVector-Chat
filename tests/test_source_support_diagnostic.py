@@ -26,7 +26,7 @@ class SourceSupportDiagnosticTests(unittest.TestCase):
         report = diagnose(self.report, packet, assess, workers=1)
         self.assertEqual(packet, self.packet)
         self.assertEqual(len(calls), 44)
-        self.assertEqual(set(calls[0][1][0]), {'chunk_id', 'content'})
+        self.assertEqual(set(calls[0][1][0]), {'chunk_id', 'content', 'title'})
         self.assertEqual(report['retrieval_only']['false_accept'], 8)
         self.assertEqual(report['with_support_estimate']['false_accept'], 0)
         self.assertEqual(report['with_support_estimate']['false_reject'], 36)
@@ -36,7 +36,7 @@ class SourceSupportDiagnosticTests(unittest.TestCase):
             evaluate_gate(report)
 
     def test_source_question_or_packet_drift_rejected_before_calls(self):
-        for field in ('content', 'uuid', 'document_id', 'chunk_metadata'):
+        for field in ('content', 'title', 'uuid', 'document_id', 'chunk_metadata'):
             report = copy.deepcopy(self.report)
             report['groups'][1]['runs'][0]['filtered'][0][field] = 'changed'
             with self.assertRaises(ValueError):

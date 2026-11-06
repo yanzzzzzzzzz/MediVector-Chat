@@ -1,0 +1,1919 @@
+{
+  "report_kind": "unreviewed_source_support_diagnostic",
+  "verified_baseline": false,
+  "release_gate_eligible": false,
+  "human_review_complete": false,
+  "created_at": "2026-11-06T13:48:06.721105+00:00",
+  "input_report_sha256": "8cf38ef3e358a43c76a919ce686748a82b7317d59f07cf84eb478795ad7b3c61",
+  "candidate_sha256": "dbba74b5b18ac7e71458858f3aedb52f9c255ba3162c315eece2bc34198aed3c",
+  "variant": "title",
+  "workers": 2,
+  "input_kind": "measured_retrieval_candidates",
+  "prompt_sha256": "b8c58a201ee7478f37f2f2f90b89c6620f8c95b207c3cae1baeb08b45f6fe749",
+  "source_build": {
+    "git_sha": "ad996cf2212d2b04b5a2fa8bc0101d0bca1a41ff",
+    "working_tree_dirty": true,
+    "source_sha256": "d8758090419bb680674479fee74f217b352fc00f962cc237252df9bcd295bb78"
+  },
+  "runner_sha256": "8747036ea401d1c800eabfcd723424b804b6a6de24a2fd3408b954f101ce39c1",
+  "retrieval_only": {
+    "true_accept": 36,
+    "false_accept": 6,
+    "true_reject": 2,
+    "false_reject": 0,
+    "false_reject_rate": 0.0,
+    "false_accept_rate": 0.75
+  },
+  "with_support_estimate": {
+    "true_accept": 36,
+    "false_accept": 0,
+    "true_reject": 8,
+    "false_reject": 0,
+    "false_reject_rate": 0.0,
+    "false_accept_rate": 0.0
+  },
+  "uncertain_cases": 0,
+  "model_request_failures": 0,
+  "invalid_model_outputs": 0,
+  "token_usage": {
+    "prompt_tokens": 51172,
+    "completion_tokens": 4135,
+    "total_tokens": 55307
+  },
+  "wall_ms": 38413.46,
+  "p50_model_check_ms": 1701.385,
+  "p95_model_check_ms": 2495.84,
+  "rows": [
+    {
+      "case_id": "challenge-001",
+      "question": "第一次來看門診，到了以後要先去哪裡？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+        "f94ded55-bbd2-555c-b194-dad6af742daa:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "第一次來看門診到場後，應先前往哪個地點或櫃台。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+                "quote": "本文件僅適用初次門診報到。到場後先至藍色服務櫃台領取序號，請攜帶預約通知單。",
+                "chunk_start": 0,
+                "chunk_end": 38
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2471.66,
+        "usage": {
+          "prompt_tokens": 1016,
+          "completion_tokens": 125,
+          "total_tokens": 1141
+        }
+      }
+    },
+    {
+      "case_id": "challenge-002",
+      "question": "初次就診當天要帶哪一張紙？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "初次就診當天應攜帶哪一張紙。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+                "quote": "本文件僅適用初次門診報到。到場後先至藍色服務櫃台領取序號，請攜帶預約通知單。若忘記通知單，向接待人員申請重印。",
+                "chunk_start": 0,
+                "chunk_end": 55
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2297.72,
+        "usage": {
+          "prompt_tokens": 1145,
+          "completion_tokens": 133,
+          "total_tokens": 1278
+        }
+      }
+    },
+    {
+      "case_id": "challenge-003",
+      "question": "第一次看診忘了帶通知文件怎麼處理？",
+      "category": "similar_titles",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "第一次看診忘了帶通知文件時，應如何處理。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+                "quote": "本文件僅適用初次門診報到。到場後先至藍色服務櫃台領取序號，請攜帶預約通知單。若忘記通知單，向接待人員申請重印。",
+                "chunk_start": 0,
+                "chunk_end": 55
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1936.18,
+        "usage": {
+          "prompt_tokens": 1028,
+          "completion_tokens": 133,
+          "total_tokens": 1161
+        }
+      }
+    },
+    {
+      "case_id": "challenge-004",
+      "question": "已經有回診預約，要去哪裡完成報到？",
+      "category": "similar_titles",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "已經有回診預約者應去哪裡完成報到。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+                "quote": "本文件僅適用既有預約的門診回診。先到綠色自助機掃描回診卡，無須重新領取初診序號。",
+                "chunk_start": 0,
+                "chunk_end": 40
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1601.77,
+        "usage": {
+          "prompt_tokens": 913,
+          "completion_tokens": 118,
+          "total_tokens": 1031
+        }
+      }
+    },
+    {
+      "case_id": "challenge-005",
+      "question": "回來複診還要再拿初診號碼嗎？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "回來複診時是否需要再領取初診號碼。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+                "quote": "本文件僅適用既有預約的門診回診。先到綠色自助機掃描回診卡，無須重新領取初診序號。回診卡遺失時，請至回診支援窗口補印。",
+                "chunk_start": 0,
+                "chunk_end": 58
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2192.28,
+        "usage": {
+          "prompt_tokens": 913,
+          "completion_tokens": 136,
+          "total_tokens": 1049
+        }
+      }
+    },
+    {
+      "case_id": "challenge-006",
+      "question": "複診用的卡片找不到，在哪裡補發？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "複診用卡片遺失時，應在哪裡補發或補印。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+                "quote": "回診卡遺失時，請至回診支援窗口補印。",
+                "chunk_start": 40,
+                "chunk_end": 58
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1422.26,
+        "usage": {
+          "prompt_tokens": 798,
+          "completion_tokens": 101,
+          "total_tokens": 899
+        }
+      }
+    },
+    {
+      "case_id": "challenge-007",
+      "question": "辦住院手續要到哪個櫃台？",
+      "category": "similar_titles",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "辦住院手續應前往哪個櫃台。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+                "quote": "住院報到請到橙色住院櫃台，攜帶住院通知與身分核對表。",
+                "chunk_start": 14,
+                "chunk_end": 40
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1530.11,
+        "usage": {
+          "prompt_tokens": 1035,
+          "completion_tokens": 101,
+          "total_tokens": 1136
+        }
+      }
+    },
+    {
+      "case_id": "challenge-008",
+      "question": "辦入院要準備哪兩份文件？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "辦入院需準備住院通知。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+                "quote": "住院報到請到橙色住院櫃台，攜帶住院通知與身分核對表。",
+                "chunk_start": 14,
+                "chunk_end": 40
+              }
+            ]
+          },
+          {
+            "requirement": "辦入院需準備身分核對表。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+                "quote": "住院報到請到橙色住院櫃台，攜帶住院通知與身分核對表。",
+                "chunk_start": 14,
+                "chunk_end": 40
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2291.71,
+        "usage": {
+          "prompt_tokens": 916,
+          "completion_tokens": 181,
+          "total_tokens": 1097
+        }
+      }
+    },
+    {
+      "case_id": "challenge-009",
+      "question": "入院表格忘記寫聯絡資料，找誰處理？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+        "f94ded55-bbd2-555c-b194-dad6af742daa:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "入院表格忘記填寫聯絡資料時，應找誰處理。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+                "quote": "表單漏填聯絡欄位時，交由住院行政人員協助補登。",
+                "chunk_start": 40,
+                "chunk_end": 63
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1629.25,
+        "usage": {
+          "prompt_tokens": 1258,
+          "completion_tokens": 99,
+          "total_tokens": 1357
+        }
+      }
+    },
+    {
+      "case_id": "challenge-010",
+      "question": "要離院了，行政資料先到哪裡核對？",
+      "category": "similar_titles",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+        "618a33e1-d420-561d-afbd-c62e0e701194:title:1",
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "離院時，行政資料應先到哪裡核對。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+                "quote": "先至紫色結帳窗口完成文件核對。",
+                "chunk_start": 20,
+                "chunk_end": 35
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1526.69,
+        "usage": {
+          "prompt_tokens": 1292,
+          "completion_tokens": 87,
+          "total_tokens": 1379
+        }
+      }
+    },
+    {
+      "case_id": "challenge-011",
+      "question": "離院的收據要再拿一份，去哪裡辦？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "離院收據要再拿一份時，應前往哪裡辦理？",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+                "quote": "收據影本向出院文件櫃台申請。",
+                "chunk_start": 35,
+                "chunk_end": 49
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1658.0,
+        "usage": {
+          "prompt_tokens": 921,
+          "completion_tokens": 95,
+          "total_tokens": 1016
+        }
+      }
+    },
+    {
+      "case_id": "challenge-012",
+      "question": "離院資料名字打錯，可以自己改嗎？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "離院資料名字打錯時，是否可以自行更改。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+                "quote": "文件上的姓名有誤時，交由出院行政人員更正，不自行塗改。",
+                "chunk_start": 49,
+                "chunk_end": 76
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1712.78,
+        "usage": {
+          "prompt_tokens": 799,
+          "completion_tokens": 97,
+          "total_tokens": 896
+        }
+      }
+    },
+    {
+      "case_id": "challenge-013",
+      "question": "內容寫好以後，應送到哪裡給人檢查？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "618a33e1-d420-561d-afbd-c62e0e701194:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+        "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "內容寫好後，應送到哪裡供人檢查？",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "618a33e1-d420-561d-afbd-c62e0e701194:title:1",
+                "quote": "文件作者建立草稿後，須提交文件審核佇列。審核者確認版本與適用範圍，再核准發布。",
+                "chunk_start": 0,
+                "chunk_end": 39
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "618a33e1-d420-561d-afbd-c62e0e701194:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1658.54,
+        "usage": {
+          "prompt_tokens": 1306,
+          "completion_tokens": 108,
+          "total_tokens": 1414
+        }
+      }
+    },
+    {
+      "case_id": "challenge-014",
+      "question": "審查退件時必須留下什麼說明？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+        "618a33e1-d420-561d-afbd-c62e0e701194:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "審查退件時必須留下的說明內容（例如修改理由）。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "618a33e1-d420-561d-afbd-c62e0e701194:title:1",
+                "quote": "退回時須填寫修改理由，由原作者建立修訂。",
+                "chunk_start": 39,
+                "chunk_end": 59
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "618a33e1-d420-561d-afbd-c62e0e701194:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1682.38,
+        "usage": {
+          "prompt_tokens": 1303,
+          "completion_tokens": 89,
+          "total_tokens": 1392
+        }
+      }
+    },
+    {
+      "case_id": "challenge-015",
+      "question": "通過審查後，系統會保存哪些追蹤資訊？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:2",
+        "618a33e1-d420-561d-afbd-c62e0e701194:title:1",
+        "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:1",
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "通過審查後系統保存的追蹤資訊有哪些？",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "618a33e1-d420-561d-afbd-c62e0e701194:title:1",
+                "quote": "核准紀錄包含審核帳號、時間與版本識別碼。",
+                "chunk_start": 59,
+                "chunk_end": 79
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "618a33e1-d420-561d-afbd-c62e0e701194:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1770.1,
+        "usage": {
+          "prompt_tokens": 2865,
+          "completion_tokens": 90,
+          "total_tokens": 2955
+        }
+      }
+    },
+    {
+      "case_id": "challenge-016",
+      "question": "已經發出去的資料版本弄錯，審核者要怎麼處理？",
+      "category": "similar_titles",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+        "618a33e1-d420-561d-afbd-c62e0e701194:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "已發出去的資料版本弄錯時，審核者應採取的處理方式。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+                "quote": "已發布文件發現版本錯誤時，審核者應撤回該版本並填寫原因。",
+                "chunk_start": 0,
+                "chunk_end": 28
+              }
+            ]
+          },
+          {
+            "requirement": "撤回後如何修正並重新發布。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+                "quote": "修正內容須建立新版並重新送審，不能直接覆寫原核准版本。",
+                "chunk_start": 55,
+                "chunk_end": 82
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "0beefd2f-9b12-5872-84c0-605c765dab54:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2495.84,
+        "usage": {
+          "prompt_tokens": 934,
+          "completion_tokens": 184,
+          "total_tokens": 1118
+        }
+      }
+    },
+    {
+      "case_id": "challenge-017",
+      "question": "下架後一般使用者還查得到那份內容嗎？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:2",
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "下架（撤回）後，一般使用者是否仍能查到該內容。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+                "quote": "撤回後一般讀者無法再從查詢取得該內容，歷史事件仍保留。",
+                "chunk_start": 28,
+                "chunk_end": 55
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "0beefd2f-9b12-5872-84c0-605c765dab54:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1689.99,
+        "usage": {
+          "prompt_tokens": 2732,
+          "completion_tokens": 103,
+          "total_tokens": 2835
+        }
+      }
+    },
+    {
+      "case_id": "challenge-018",
+      "question": "已通過的原稿可以直接蓋掉，換成修正版嗎？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+        "618a33e1-d420-561d-afbd-c62e0e701194:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "已通過的原稿是否可以直接覆寫或蓋掉，換成修正版。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "0beefd2f-9b12-5872-84c0-605c765dab54:title:1",
+                "quote": "修正內容須建立新版並重新送審，不能直接覆寫原核准版本。",
+                "chunk_start": 55,
+                "chunk_end": 82
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "0beefd2f-9b12-5872-84c0-605c765dab54:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1833.74,
+        "usage": {
+          "prompt_tokens": 932,
+          "completion_tokens": 101,
+          "total_tokens": 1033
+        }
+      }
+    },
+    {
+      "case_id": "challenge-019",
+      "question": "想拿公開行政資料的紙本副本，要填哪個表？",
+      "category": "similar_titles",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "取得公開行政資料的紙本副本應填寫哪個表。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+                "quote": "本文件適用公開行政文件影本。申請者填寫 COPY-A 表並提交文件服務台。",
+                "chunk_start": 0,
+                "chunk_end": 37
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1739.96,
+        "usage": {
+          "prompt_tokens": 1038,
+          "completion_tokens": 100,
+          "total_tokens": 1138
+        }
+      }
+    },
+    {
+      "case_id": "challenge-020",
+      "question": "影印申請交到哪個單位？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "確認影印申請應提交至哪個單位。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+                "quote": "申請者填寫 COPY-A 表並提交文件服務台。",
+                "chunk_start": 14,
+                "chunk_end": 37
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1464.09,
+        "usage": {
+          "prompt_tokens": 792,
+          "completion_tokens": 87,
+          "total_tokens": 879
+        }
+      }
+    },
+    {
+      "case_id": "challenge-021",
+      "question": "送出紙本副本申請後，何時可以拿到？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "送出紙本副本申請後，何時可以領取紙本副本。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+                "quote": "紙本影本於第二工作日領取。",
+                "chunk_start": 37,
+                "chunk_end": 50
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1874.58,
+        "usage": {
+          "prompt_tokens": 908,
+          "completion_tokens": 91,
+          "total_tokens": 999
+        }
+      }
+    },
+    {
+      "case_id": "challenge-022",
+      "question": "只想證明當天有到場，應該填哪張表？",
+      "category": "similar_titles",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "只想證明當天有到場時，應填寫哪張表。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+                "quote": "申請到場證明填寫 VISIT-B 表，交至證明服務台。",
+                "chunk_start": 23,
+                "chunk_end": 50
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1618.97,
+        "usage": {
+          "prompt_tokens": 931,
+          "completion_tokens": 100,
+          "total_tokens": 1031
+        }
+      }
+    },
+    {
+      "case_id": "challenge-023",
+      "question": "拿到場證明時，要出示哪個憑據？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "領取到場證明時應出示的憑據",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+                "quote": "領取時出示申請回條。",
+                "chunk_start": 50,
+                "chunk_end": 60
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1606.76,
+        "usage": {
+          "prompt_tokens": 812,
+          "completion_tokens": 86,
+          "total_tokens": 898
+        }
+      }
+    },
+    {
+      "case_id": "challenge-024",
+      "question": "到場證明寫錯日期，去哪裡改？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "到場證明日期寫錯時，應前往何處更正。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+                "quote": "證明上的日期錯誤時，應退回證明服務台更正。",
+                "chunk_start": 60,
+                "chunk_end": 81
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1976.93,
+        "usage": {
+          "prompt_tokens": 810,
+          "completion_tokens": 98,
+          "total_tokens": 908
+        }
+      }
+    },
+    {
+      "case_id": "challenge-025",
+      "question": "約好的時間沒變，但服務位置換了，要去哪裡核對？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "f94ded55-bbd2-555c-b194-dad6af742daa:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "服務時間維持不變、服務位置已變更時，應去哪裡核對新地點？",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1",
+                "quote": "本文件僅記錄服務地點調整，不變更預約時段。收到地點變更通知後，請至銀色接待區核對新地點代碼。",
+                "chunk_start": 0,
+                "chunk_end": 46
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2844.7,
+        "usage": {
+          "prompt_tokens": 1022,
+          "completion_tokens": 125,
+          "total_tokens": 1147
+        }
+      }
+    },
+    {
+      "case_id": "challenge-026",
+      "question": "收到換地點的信，預約時間也會一起改嗎？",
+      "category": "paraphrase",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "收到地點變更通知後，預約時間是否也會一併變更。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1",
+                "quote": "本文件僅記錄服務地點調整，不變更預約時段。",
+                "chunk_start": 0,
+                "chunk_end": 21
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2110.66,
+        "usage": {
+          "prompt_tokens": 802,
+          "completion_tokens": 98,
+          "total_tokens": 900
+        }
+      }
+    },
+    {
+      "case_id": "challenge-027",
+      "question": "手上有兩張不同位置的通知，該看哪張？",
+      "category": "similar_titles",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "有兩張不同位置的通知時，判斷應以哪一張通知為準。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1",
+                "quote": "若通知上有兩個地點代碼，以有簽核戳記的最新通知為準。",
+                "chunk_start": 46,
+                "chunk_end": 72
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1907.89,
+        "usage": {
+          "prompt_tokens": 918,
+          "completion_tokens": 104,
+          "total_tokens": 1022
+        }
+      }
+    },
+    {
+      "case_id": "challenge-028",
+      "question": "剛接手維護工作，第一次登入該用哪種帳號？",
+      "category": "long_document",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:1",
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:2",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "剛接手維護工作者第一次登入應使用哪種帳號。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "28b0a398-3a74-5642-b836-069b3f0431e8:title:1",
+                "quote": "新進維護者先使用訓練帳號登入測試工作區，完成草稿與撤回演練後才申請正式權限。",
+                "chunk_start": 0,
+                "chunk_end": 38
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "28b0a398-3a74-5642-b836-069b3f0431e8:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2043.78,
+        "usage": {
+          "prompt_tokens": 2726,
+          "completion_tokens": 113,
+          "total_tokens": 2839
+        }
+      }
+    },
+    {
+      "case_id": "challenge-029",
+      "question": "練習全部做完，要把哪個表送給哪個小組？",
+      "category": "long_document",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:2",
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "練習全部完成後應送交的表單名稱。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "28b0a398-3a74-5642-b836-069b3f0431e8:title:2",
+                "quote": "附錄末段：完成演練後，將 TRAIN-C 表交至文件治理小組。測試帳號於訓練結束後停用。",
+                "chunk_start": 2392,
+                "chunk_end": 2436
+              }
+            ]
+          },
+          {
+            "requirement": "練習全部完成後應將表單交給哪個小組。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "28b0a398-3a74-5642-b836-069b3f0431e8:title:2",
+                "quote": "附錄末段：完成演練後，將 TRAIN-C 表交至文件治理小組。測試帳號於訓練結束後停用。",
+                "chunk_start": 2392,
+                "chunk_end": 2436
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "28b0a398-3a74-5642-b836-069b3f0431e8:title:2"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2506.89,
+        "usage": {
+          "prompt_tokens": 2492,
+          "completion_tokens": 212,
+          "total_tokens": 2704
+        }
+      }
+    },
+    {
+      "case_id": "challenge-030",
+      "question": "新人演練用的帳號什麼時候停掉？",
+      "category": "long_document",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:2",
+        "28b0a398-3a74-5642-b836-069b3f0431e8:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "新人演練用的帳號何時停用。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "28b0a398-3a74-5642-b836-069b3f0431e8:title:2",
+                "quote": "測試帳號於訓練結束後停用。",
+                "chunk_start": 2423,
+                "chunk_end": 2436
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "28b0a398-3a74-5642-b836-069b3f0431e8:title:2"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1549.05,
+        "usage": {
+          "prompt_tokens": 2489,
+          "completion_tokens": 88,
+          "total_tokens": 2577
+        }
+      }
+    },
+    {
+      "case_id": "challenge-031",
+      "question": "出發之前，服務地點要用什麼資料確認？",
+      "category": "cross_language",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "e2f18334-be59-5ece-a67a-1c38a9fb818a:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "f94ded55-bbd2-555c-b194-dad6af742daa:title:1",
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "出發之前確認服務地點時，應使用的資料。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "f94ded55-bbd2-555c-b194-dad6af742daa:title:1",
+                "quote": "Before arrival, confirm the appointment location using the latest invitation.",
+                "chunk_start": 25,
+                "chunk_end": 102
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "f94ded55-bbd2-555c-b194-dad6af742daa:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1590.61,
+        "usage": {
+          "prompt_tokens": 1270,
+          "completion_tokens": 81,
+          "total_tokens": 1351
+        }
+      }
+    },
+    {
+      "case_id": "challenge-032",
+      "question": "到了服務中心，確認信要拿給哪個櫃台？",
+      "category": "cross_language",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1",
+        "f94ded55-bbd2-555c-b194-dad6af742daa:title:1",
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "確認信到服務中心後應交給哪個櫃台。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "f94ded55-bbd2-555c-b194-dad6af742daa:title:1",
+                "quote": "On arrival, bring the confirmation letter to the amber reception desk.",
+                "chunk_start": 104,
+                "chunk_end": 174
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "f94ded55-bbd2-555c-b194-dad6af742daa:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2037.06,
+        "usage": {
+          "prompt_tokens": 1260,
+          "completion_tokens": 84,
+          "total_tokens": 1344
+        }
+      }
+    },
+    {
+      "case_id": "challenge-033",
+      "question": "行政事情辦完後，訪客證要交到哪裡？",
+      "category": "cross_language",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "f94ded55-bbd2-555c-b194-dad6af742daa:title:1",
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "行政事情辦完後，訪客證應交到哪裡。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "f94ded55-bbd2-555c-b194-dad6af742daa:title:1",
+                "quote": "After the administrative visit, return the visitor badge to the exit desk.",
+                "chunk_start": 220,
+                "chunk_end": 294
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "f94ded55-bbd2-555c-b194-dad6af742daa:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1675.78,
+        "usage": {
+          "prompt_tokens": 1260,
+          "completion_tokens": 85,
+          "total_tokens": 1345
+        }
+      }
+    },
+    {
+      "case_id": "challenge-034",
+      "question": "要來取文件，案件號碼應從哪封信找？",
+      "category": "cross_language",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1",
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "要來領取文件時，案件號碼應從哪封信中查找。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1",
+                "quote": "For document collection, use the reference number in the collection email.",
+                "chunk_start": 25,
+                "chunk_end": 99
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1904.24,
+        "usage": {
+          "prompt_tokens": 1281,
+          "completion_tokens": 92,
+          "total_tokens": 1373
+        }
+      }
+    },
+    {
+      "case_id": "challenge-035",
+      "question": "取件收條要交給哪個顏色的文件櫃台？",
+      "category": "cross_language",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "0e91df0c-6713-5ae4-86ab-d6bba29ec990:title:1",
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1",
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1",
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "取件收條應交給哪個顏色的文件櫃台。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1",
+                "quote": "Bring the collection receipt to the teal document desk.",
+                "chunk_start": 101,
+                "chunk_end": 156
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1835.75,
+        "usage": {
+          "prompt_tokens": 1268,
+          "completion_tokens": 89,
+          "total_tokens": 1357
+        }
+      }
+    },
+    {
+      "case_id": "challenge-036",
+      "question": "領到的紙本缺頁，離開前該找誰？",
+      "category": "cross_language",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1",
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "領到的紙本缺頁時，離開前應聯絡的對象或窗口。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1",
+                "quote": "If the printed copy is incomplete, contact the document support desk before leaving.",
+                "chunk_start": 222,
+                "chunk_end": 306
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "8c2c6174-28fe-5351-b7d0-df576cdcc63d:title:1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1663.28,
+        "usage": {
+          "prompt_tokens": 1142,
+          "completion_tokens": 96,
+          "total_tokens": 1238
+        }
+      }
+    },
+    {
+      "case_id": "challenge-037",
+      "question": "大腸鏡之前要停藥幾天？",
+      "category": "no_answer",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": false,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [],
+        "supporting_chunk_ids": [],
+        "reason": "no_sources",
+        "elapsed_ms": 0,
+        "usage": null
+      }
+    },
+    {
+      "case_id": "challenge-038",
+      "question": "MRI 檢查前必須空腹幾個小時？",
+      "category": "no_answer",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "MRI 檢查前必須空腹的時數",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1522.89,
+        "usage": {
+          "prompt_tokens": 914,
+          "completion_tokens": 39,
+          "total_tokens": 953
+        }
+      }
+    },
+    {
+      "case_id": "challenge-039",
+      "question": "診斷證明要付多少費用？",
+      "category": "no_answer",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "診斷證明的費用金額",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1881.82,
+        "usage": {
+          "prompt_tokens": 1159,
+          "completion_tokens": 36,
+          "total_tokens": 1195
+        }
+      }
+    },
+    {
+      "case_id": "challenge-040",
+      "question": "到場證明可以當成診斷證明使用嗎？",
+      "category": "no_answer",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "d4b4da08-0293-5ce6-bf6e-56ff1c10289d:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "c633c422-5c86-5510-b7ac-25a636ec4f1d:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "到場證明是否可以作為診斷證明使用。",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1604.87,
+        "usage": {
+          "prompt_tokens": 1163,
+          "completion_tokens": 41,
+          "total_tokens": 1204
+        }
+      }
+    },
+    {
+      "case_id": "challenge-041",
+      "question": "紙本副本能不能寄到國外？",
+      "category": "no_answer",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": false,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [],
+        "supporting_chunk_ids": [],
+        "reason": "no_sources",
+        "elapsed_ms": 0,
+        "usage": null
+      }
+    },
+    {
+      "case_id": "challenge-042",
+      "question": "回診卡可以讓其他家人借用嗎？",
+      "category": "no_answer",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1",
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "確認回診卡是否可以讓其他家人借用。",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1160.04,
+        "usage": {
+          "prompt_tokens": 910,
+          "completion_tokens": 39,
+          "total_tokens": 949
+        }
+      }
+    },
+    {
+      "case_id": "challenge-043",
+      "question": "門診報到可以遲到多久？",
+      "category": "no_answer",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "baf63b68-18d1-5d92-9ff4-0aedc84cf6ed:title:1",
+        "5a1e763c-7454-54e5-a3f4-39a64a74417f:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "門診報到可以遲到多久。",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1200.45,
+        "usage": {
+          "prompt_tokens": 908,
+          "completion_tokens": 36,
+          "total_tokens": 944
+        }
+      }
+    },
+    {
+      "case_id": "challenge-044",
+      "question": "住院保證金需要多少錢？",
+      "category": "no_answer",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "c5921f24-e638-5353-b455-9cd4737fbf01:title:1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "住院保證金的金額",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1255.9,
+        "usage": {
+          "prompt_tokens": 791,
+          "completion_tokens": 34,
+          "total_tokens": 825
+        }
+      }
+    }
+  ],
+  "limitations": "Only model-estimated source sufficiency, not an answer or a semantic/clinical guarantee. Verbatim quotes establish provenance, not entailment or complete requirement decomposition. Scores use unreviewed program-authored proposed labels on the same synthetic challenge. Retrieval-only candidate presence is an ablation comparator, not existing chat acceptance behavior. No live endpoint/index change. Prompt token usage is not a monetary cost calculation. Non-sufficient and model failures are treated as non-acceptance, with failures counted separately."
+}

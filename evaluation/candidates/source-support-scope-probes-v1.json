@@ -1,0 +1,62 @@
+{
+  "dataset_version": "DRAFT-source-support-scope-probes-v1",
+  "review_status": "pending_human",
+  "notice": "全為虛構的文件行政規定與測試指令，不供實際院所使用。標註由程式準備，未經人工審查；這批新問題未用於前一輪提示設計，不是獨立人工驗證。",
+  "corpus_version": "60c423341e61a0ba30d571cdd52ae4667c6a7eb4a7181e32a8c9542b695c2ba2",
+  "index_version": "direct-excerpts-no-retrieval-v1",
+  "embedding_model": "not-used-direct-excerpts",
+  "retrieval_context": {
+    "branch_id": "fictional",
+    "department_id": "documents"
+  },
+  "cases": [
+    {
+      "id": "scope-probe-001",
+      "query": "這份文件有寫乙院區的領件時間嗎？",
+      "answerable": true,
+      "category": "coverage",
+      "relevant_document_ids": [
+        "scope-probe-001:document"
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": "",
+      "proposed_rationale": "問題只問文件涵蓋範圍，可引用缺漏聲明。"
+    },
+    {
+      "id": "scope-probe-002",
+      "query": "我在乙院區，交件之後要等幾天才能取件？",
+      "answerable": false,
+      "category": "coverage",
+      "relevant_document_ids": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": "",
+      "proposed_rationale": "索取實際時限，缺漏聲明不能提供天數。"
+    },
+    {
+      "id": "scope-probe-003",
+      "query": "這項影本服務有提供電子郵件副本嗎？",
+      "answerable": true,
+      "category": "prohibition",
+      "relevant_document_ids": [
+        "scope-probe-003:document"
+      ],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": "",
+      "proposed_rationale": "明確不提供是實質服務規定，可以回答否。"
+    },
+    {
+      "id": "scope-probe-004",
+      "query": "申請者可以改收電子郵件版本嗎？",
+      "answerable": false,
+      "category": "prohibition",
+      "relevant_document_ids": [],
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "review_notes": "",
+      "proposed_rationale": "沒有訂定不代表允許或禁止。"
+    }
+  ]
+}

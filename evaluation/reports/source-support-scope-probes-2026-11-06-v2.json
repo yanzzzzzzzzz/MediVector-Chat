@@ -1,0 +1,199 @@
+{
+  "report_kind": "unreviewed_source_support_diagnostic",
+  "verified_baseline": false,
+  "release_gate_eligible": false,
+  "human_review_complete": false,
+  "created_at": "2026-11-06T13:48:15.098287+00:00",
+  "input_report_sha256": "33c211577c6881078503413ccb7ae15b7f46a3343a514544c2861f0c1a6c43f8",
+  "candidate_sha256": "eaaec423c42b4d4efb809befffb08069884d4a6a92dcc39d247238a68a3e3e4d",
+  "variant": "direct_excerpts",
+  "workers": 2,
+  "input_kind": "synthetic_direct_excerpts_without_retrieval",
+  "prompt_sha256": "b8c58a201ee7478f37f2f2f90b89c6620f8c95b207c3cae1baeb08b45f6fe749",
+  "source_build": {
+    "git_sha": "ad996cf2212d2b04b5a2fa8bc0101d0bca1a41ff",
+    "working_tree_dirty": true,
+    "source_sha256": "d8758090419bb680674479fee74f217b352fc00f962cc237252df9bcd295bb78"
+  },
+  "runner_sha256": "8747036ea401d1c800eabfcd723424b804b6a6de24a2fd3408b954f101ce39c1",
+  "retrieval_only": {
+    "true_accept": 2,
+    "false_accept": 2,
+    "true_reject": 0,
+    "false_reject": 0,
+    "false_reject_rate": 0.0,
+    "false_accept_rate": 1.0
+  },
+  "with_support_estimate": {
+    "true_accept": 2,
+    "false_accept": 0,
+    "true_reject": 2,
+    "false_reject": 0,
+    "false_reject_rate": 0.0,
+    "false_accept_rate": 0.0
+  },
+  "uncertain_cases": 0,
+  "model_request_failures": 0,
+  "invalid_model_outputs": 0,
+  "token_usage": {
+    "prompt_tokens": 2877,
+    "completion_tokens": 231,
+    "total_tokens": 3108
+  },
+  "wall_ms": 3460.33,
+  "p50_model_check_ms": 1713.11,
+  "p95_model_check_ms": 2025.93,
+  "rows": [
+    {
+      "case_id": "scope-probe-001",
+      "question": "這份文件有寫乙院區的領件時間嗎？",
+      "category": "coverage",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "scope-probe-001:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "確認文件是否有列出乙院區的領件時間。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "scope-probe-001:chunk-1",
+                "quote": "本文件只列甲院區時限，乙院區的時間未列於本文件。",
+                "chunk_start": 0,
+                "chunk_end": 24
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "scope-probe-001:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2025.93,
+        "usage": {
+          "prompt_tokens": 719,
+          "completion_tokens": 78,
+          "total_tokens": 797
+        }
+      }
+    },
+    {
+      "case_id": "scope-probe-002",
+      "question": "我在乙院區，交件之後要等幾天才能取件？",
+      "category": "coverage",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "scope-probe-002:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "乙院區交件後需等待幾天才能取件。",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1706.61,
+        "usage": {
+          "prompt_tokens": 724,
+          "completion_tokens": 41,
+          "total_tokens": 765
+        }
+      }
+    },
+    {
+      "case_id": "scope-probe-003",
+      "question": "這項影本服務有提供電子郵件副本嗎？",
+      "category": "prohibition",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "scope-probe-003:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "這項影本服務是否提供電子郵件副本。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "scope-probe-003:chunk-1",
+                "quote": "本項影本服務僅提供紙本，不提供電子郵件副本。",
+                "chunk_start": 0,
+                "chunk_end": 22
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "scope-probe-003:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1719.61,
+        "usage": {
+          "prompt_tokens": 716,
+          "completion_tokens": 74,
+          "total_tokens": 790
+        }
+      }
+    },
+    {
+      "case_id": "scope-probe-004",
+      "question": "申請者可以改收電子郵件版本嗎？",
+      "category": "prohibition",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "scope-probe-004:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "申請者是否可以改收電子郵件版本。",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1342.08,
+        "usage": {
+          "prompt_tokens": 718,
+          "completion_tokens": 38,
+          "total_tokens": 756
+        }
+      }
+    }
+  ],
+  "limitations": "Only model-estimated source sufficiency, not an answer or a semantic/clinical guarantee. Verbatim quotes establish provenance, not entailment or complete requirement decomposition. Scores use unreviewed program-authored proposed labels on the same synthetic challenge. Retrieval-only candidate presence is an ablation comparator, not existing chat acceptance behavior. No live endpoint/index change. Prompt token usage is not a monetary cost calculation. Non-sufficient and model failures are treated as non-acceptance, with failures counted separately."
+}

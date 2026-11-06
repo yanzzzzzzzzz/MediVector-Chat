@@ -29,9 +29,9 @@ def classification_summary(rows, field):
 
 def diagnose(report, packet, assessor, *, variant='title', workers=2, progress=None):
     validate_candidate_packet(packet)
-    if (report.get('report_kind') != 'unreviewed_representation_comparison' or
+    if (report.get('report_kind') not in {'unreviewed_representation_comparison', 'unreviewed_support_boundary_inputs'} or
             report.get('verified_baseline') is not False or report.get('release_gate_eligible') is not False):
-        raise ValueError('Only unreviewed synthetic representation runs are supported')
+        raise ValueError('Only unreviewed synthetic representation runs or direct boundary inputs are supported')
     if report.get('candidate_sha256') != digest(packet):
         raise ValueError('Candidate packet differs from measured run')
     if not 1 <= workers <= 4:
@@ -52,13 +52,15 @@ def diagnose(report, packet, assessor, *, variant='title', workers=2, progress=N
         for ref in run['filtered']:
             original = representations.get(ref['uuid'])
             if (not original or ref['uuid'] in seen or ref['document_id'] != original['document_id'] or
-                    ref['content'] != original['content'] or ref['chunk_metadata'] != original['chunk_metadata']):
+                    ref['content'] != original['content'] or ref.get('title') != original.get('title') or
+                    ref['chunk_metadata'] != original['chunk_metadata']):
                 raise ValueError('Source differs from frozen representation')
             seen.add(ref['uuid'])
     started = time.monotonic()
     def evaluate(run):
         case = cases[run['case_id']]
-        refs = [{'chunk_id': ref['uuid'], 'content': ref['content']} for ref in run['filtered']]
+        refs = [{'chunk_id': ref['uuid'], 'content': ref['content'],
+                 **({'title': ref['title']} if 'title' in ref else {})} for ref in run['filtered']]
         estimate = assessor(run['question'], refs)
         if (estimate.get('human_reviewed') is not False or estimate.get('semantic_support_verified') is not False or
                 estimate.get('status') not in {'sufficient', 'partial', 'insufficient', 'uncertain'} or
@@ -82,6 +84,7 @@ def diagnose(report, packet, assessor, *, variant='title', workers=2, progress=N
             'release_gate_eligible': False, 'human_review_complete': False,
             'created_at': datetime.now(timezone.utc).isoformat(), 'input_report_sha256': digest(report),
             'candidate_sha256': digest(packet), 'variant': variant, 'workers': workers,
+            'input_kind': report.get('input_kind', 'measured_retrieval_candidates'),
             'prompt_sha256': digest({'prompt': PROMPT, 'schema': SCHEMA}),
             'source_build': source_build(), 'runner_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             'retrieval_only': classification_summary(rows, 'retrieval_has_candidates'),
@@ -105,7 +108,9 @@ def markdown(report):
     lines = ['# 來源可回答性隔離比較（AI 估計，未經人工審查）', '', report['limitations'], '',
              '| 策略 | 提議可回答題接受 | 提議可回答題拒絕 | 提議無答案題接受 | 提議無答案題拒絕 |',
              '|---|---:|---:|---:|---:|']
-    for key, label in [('retrieval_only', '有候選就接受（比較基準）'), ('with_support_estimate', '來源可回答性估計')]:
+    baseline = ('有提供片段就接受（無檢索比較）' if report.get('input_kind') == 'synthetic_direct_excerpts_without_retrieval'
+                else '有候選就接受（比較基準）')
+    for key, label in [('retrieval_only', baseline), ('with_support_estimate', '來源可回答性估計')]:
         s = report[key]
         lines.append(f"| {label} | {s['true_accept']} | {s['false_reject']} | {s['false_accept']} | {s['true_reject']} |")
     lines += ['', f"模型檢查 P50/P95：{report['p50_model_check_ms']} / {report['p95_model_check_ms']} ms。",

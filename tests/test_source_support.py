@@ -44,6 +44,13 @@ class SourceSupportTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_support({**self.valid, 'status': 'sufficient'}, self.refs)
 
+    def test_title_can_supply_context_but_cannot_supply_a_supporting_quote(self):
+        refs = [{**self.refs[0], 'title': '申請費用為零元'}]
+        parsed = copy.deepcopy(self.valid)
+        parsed['requirements'][0]['evidence'][0]['quote'] = refs[0]['title']
+        with self.assertRaisesRegex(ValueError, 'verbatim source text'):
+            validate_support(parsed, refs)
+
     @patch('medivector.source_support.openai_post')
     def test_empty_sources_and_invalid_input_never_call_model(self, post):
         result = assess_source_support('key', '表單名稱？', [])
@@ -58,11 +65,11 @@ class SourceSupportTests(unittest.TestCase):
     def test_request_contains_only_question_and_sources_not_proposed_labels(self, post):
         post.return_value = {'choices': [{'message': {'content': json.dumps(self.valid)}}],
                              'usage': {'total_tokens': 42, 'untrusted_field': 'omit'}}
-        refs = [{**self.refs[0], 'answerable': True, 'reviewed_by': 'ignore', 'title': 'ignore'}]
+        refs = [{**self.refs[0], 'answerable': True, 'reviewed_by': 'ignore', 'title': '影本申請'}]
         result = assess_source_support('key', '表單名稱？', refs)
         payload = post.call_args.args[2]
         self.assertEqual(json.loads(payload['messages'][1]['content']),
-                         {'question': '表單名稱？', 'source_excerpts': self.refs})
+                         {'question': '表單名稱？', 'source_excerpts': [{**self.refs[0], 'title': '影本申請'}]})
         self.assertEqual(payload['response_format']['type'], 'json_schema')
         self.assertTrue(result['estimated_answerable'])
         self.assertEqual(result['usage'], {'total_tokens': 42})

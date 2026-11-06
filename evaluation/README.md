@@ -255,3 +255,26 @@ A separate opt-in runtime flag (`SOURCE_SUPPORT_CHECK_ENABLED`, default false) e
 estimator before institutional answer generation. Persisted chat/audit data contain summaries only;
 raw model requirements/quotes are confined to the authorized offline diagnostic report.
 See [measured source-support analysis](reports/source-support-analysis-2026-11-06.md).
+
+
+### Fresh boundary cases and paired scope probes
+
+The versioned `source_support_boundaries` fixtures contain 18 direct-excerpt cases for compound
+questions, conditional scope, negation, conflicting rules and embedded instructions, plus four
+paired document-coverage versus substantive-rule probes. These are synthetic author-proposed labels,
+not independent human truth. No retrieval, PDF parsing or live ACL validation occurs in these cases.
+
+```sh
+python -m evaluation.source_support_boundaries /tmp/fresh-support-boundaries
+python -m evaluation.source_support_boundaries /tmp/fresh-support-boundaries --scope-probes
+python -m evaluation.source_support_diagnostic \
+  evaluation/candidates/source-support-boundary-input-v1.json \
+  evaluation/candidates/source-support-boundaries-v1.json fresh-boundary-run.json \
+  --variant direct_excerpts --workers 2 --acknowledge-synthetic-data
+```
+
+For the paired probes, use `source-support-scope-input-v1.json` and
+`source-support-scope-probes-v1.json` instead. The diagnostic uses a distinct direct-input report kind
+and labels the comparator accordingly. Author-proposed rationales and labels are never sent to the model.
+Source titles can provide document context, but all supporting quotes must still occur in body text.
+See [the failure, regression and final comparison](reports/source-support-boundary-analysis-2026-11-06.md).

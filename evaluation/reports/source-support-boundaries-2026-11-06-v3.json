@@ -1,0 +1,771 @@
+{
+  "report_kind": "unreviewed_source_support_diagnostic",
+  "verified_baseline": false,
+  "release_gate_eligible": false,
+  "human_review_complete": false,
+  "created_at": "2026-11-06T13:47:46.466105+00:00",
+  "input_report_sha256": "57280aa3e72c8b7eb80bc6899e335b6724e96e19fec730ac2ed7f95ea362eb39",
+  "candidate_sha256": "0e65927cc98394cc349b99ff4da096f05bb89ea74d8ce9c9c4b784b59e0fd3db",
+  "variant": "direct_excerpts",
+  "workers": 2,
+  "input_kind": "synthetic_direct_excerpts_without_retrieval",
+  "prompt_sha256": "b8c58a201ee7478f37f2f2f90b89c6620f8c95b207c3cae1baeb08b45f6fe749",
+  "source_build": {
+    "git_sha": "ad996cf2212d2b04b5a2fa8bc0101d0bca1a41ff",
+    "working_tree_dirty": true,
+    "source_sha256": "d8758090419bb680674479fee74f217b352fc00f962cc237252df9bcd295bb78"
+  },
+  "runner_sha256": "8747036ea401d1c800eabfcd723424b804b6a6de24a2fd3408b954f101ce39c1",
+  "retrieval_only": {
+    "true_accept": 8,
+    "false_accept": 10,
+    "true_reject": 0,
+    "false_reject": 0,
+    "false_reject_rate": 0.0,
+    "false_accept_rate": 1.0
+  },
+  "with_support_estimate": {
+    "true_accept": 8,
+    "false_accept": 0,
+    "true_reject": 10,
+    "false_reject": 0,
+    "false_reject_rate": 0.0,
+    "false_accept_rate": 0.0
+  },
+  "uncertain_cases": 1,
+  "model_request_failures": 0,
+  "invalid_model_outputs": 0,
+  "token_usage": {
+    "prompt_tokens": 13074,
+    "completion_tokens": 1167,
+    "total_tokens": 14241
+  },
+  "wall_ms": 14422.77,
+  "p50_model_check_ms": 1482.905,
+  "p95_model_check_ms": 2101.32,
+  "rows": [
+    {
+      "case_id": "boundary-001",
+      "question": "申請影本要填什麼表，還要付多少錢？",
+      "category": "compound",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-001:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "partial",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "申請影本要填寫哪一種表格？",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-001:chunk-1",
+                "quote": "申請影本填 COPY-D 表，交至文件服務台。",
+                "chunk_start": 0,
+                "chunk_end": 23
+              }
+            ]
+          },
+          {
+            "requirement": "申請影本需要支付多少費用？",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-001:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2035.62,
+        "usage": {
+          "prompt_tokens": 714,
+          "completion_tokens": 92,
+          "total_tokens": 806
+        }
+      }
+    },
+    {
+      "case_id": "boundary-002",
+      "question": "申請影本填哪個表，多久可以領取？",
+      "category": "compound",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "boundary-002:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "申請影本應填寫哪一個表格。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-002:chunk-1",
+                "quote": "申請影本填 COPY-D 表。",
+                "chunk_start": 0,
+                "chunk_end": 15
+              }
+            ]
+          },
+          {
+            "requirement": "申請影本後多久可以領取。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-002:chunk-1",
+                "quote": "文件於第二工作日領取。",
+                "chunk_start": 15,
+                "chunk_end": 26
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-002:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1681.6,
+        "usage": {
+          "prompt_tokens": 713,
+          "completion_tokens": 109,
+          "total_tokens": 822
+        }
+      }
+    },
+    {
+      "case_id": "boundary-003",
+      "question": "申請表名稱與領件時間各是什麼？",
+      "category": "compound",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "boundary-003:chunk-1",
+        "boundary-003:chunk-2"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "申請表名稱是什麼？",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-003:chunk-1",
+                "quote": "本項影本申請使用 COPY-D 表。",
+                "chunk_start": 0,
+                "chunk_end": 18
+              }
+            ]
+          },
+          {
+            "requirement": "領件時間是什麼？",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-003:chunk-2",
+                "quote": "本項影本申請於第二工作日完成，可到服務台領件。",
+                "chunk_start": 0,
+                "chunk_end": 23
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-003:chunk-1",
+          "boundary-003:chunk-2"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1742.6,
+        "usage": {
+          "prompt_tokens": 742,
+          "completion_tokens": 113,
+          "total_tokens": 855
+        }
+      }
+    },
+    {
+      "case_id": "boundary-004",
+      "question": "多久可以拿影本，能寄到海外嗎？",
+      "category": "compound",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-004:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "partial",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "影本多久可以領取。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-004:chunk-1",
+                "quote": "紙本影本於第二工作日領取。",
+                "chunk_start": 0,
+                "chunk_end": 13
+              }
+            ]
+          },
+          {
+            "requirement": "影本是否可以寄送到海外。",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-004:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1847.45,
+        "usage": {
+          "prompt_tokens": 705,
+          "completion_tokens": 81,
+          "total_tokens": 786
+        }
+      }
+    },
+    {
+      "case_id": "boundary-005",
+      "question": "成年申請人出具書面委託時，可以請代理人代領嗎？",
+      "category": "exception",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "boundary-005:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "成年申請人出具書面委託後，是否可以請代理人代領",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-005:chunk-1",
+                "quote": "僅限成年申請人，出具書面委託後可由代理人代領；其他情況不在本文件規範範圍。",
+                "chunk_start": 0,
+                "chunk_end": 37
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-005:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1654.24,
+        "usage": {
+          "prompt_tokens": 740,
+          "completion_tokens": 99,
+          "total_tokens": 839
+        }
+      }
+    },
+    {
+      "case_id": "boundary-006",
+      "question": "未成年申請人可以請代理人代領嗎？",
+      "category": "exception",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-006:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "未成年申請人是否可以請代理人代領",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1271.16,
+        "usage": {
+          "prompt_tokens": 732,
+          "completion_tokens": 38,
+          "total_tokens": 770
+        }
+      }
+    },
+    {
+      "case_id": "boundary-007",
+      "question": "週五可以照平常時間到服務台領件嗎？",
+      "category": "exception",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "boundary-007:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "週五是否可以照平常時間到服務台領件。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-007:chunk-1",
+                "quote": "服務台平日週一至週五辦理領件，但每週五因盤點暫停領件。",
+                "chunk_start": 0,
+                "chunk_end": 27
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-007:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1365.35,
+        "usage": {
+          "prompt_tokens": 722,
+          "completion_tokens": 81,
+          "total_tokens": 803
+        }
+      }
+    },
+    {
+      "case_id": "boundary-008",
+      "question": "乙院區的影本何時可以領？",
+      "category": "exception",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-008:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "乙院區影本可領取的時間",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1409.82,
+        "usage": {
+          "prompt_tokens": 724,
+          "completion_tokens": 36,
+          "total_tokens": 760
+        }
+      }
+    },
+    {
+      "case_id": "boundary-009",
+      "question": "訪客證能借給別人使用嗎？",
+      "category": "negation",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "boundary-009:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "訪客證是否可以借給別人使用。",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-009:chunk-1",
+                "quote": "訪客證僅限本人使用，不得轉借他人。",
+                "chunk_start": 0,
+                "chunk_end": 17
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-009:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2032.61,
+        "usage": {
+          "prompt_tokens": 708,
+          "completion_tokens": 67,
+          "total_tokens": 775
+        }
+      }
+    },
+    {
+      "case_id": "boundary-010",
+      "question": "可以把訪客證借家人使用嗎？",
+      "category": "negation",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-010:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "訪客證是否可以借給家人使用。",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 965.64,
+        "usage": {
+          "prompt_tokens": 716,
+          "completion_tokens": 37,
+          "total_tokens": 753
+        }
+      }
+    },
+    {
+      "case_id": "boundary-011",
+      "question": "到場證明可以替代診斷證明嗎？",
+      "category": "negation",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "boundary-011:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "到場證明是否可以替代診斷證明",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-011:chunk-1",
+                "quote": "到場證明只能證明到場日期，不得替代診斷證明。",
+                "chunk_start": 0,
+                "chunk_end": 22
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-011:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1555.99,
+        "usage": {
+          "prompt_tokens": 716,
+          "completion_tokens": 74,
+          "total_tokens": 790
+        }
+      }
+    },
+    {
+      "case_id": "boundary-012",
+      "question": "申請這份影本的費用是零元嗎？",
+      "category": "negation",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-012:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "申請這份影本的費用是否為零元（免費）？",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1062.68,
+        "usage": {
+          "prompt_tokens": 715,
+          "completion_tokens": 43,
+          "total_tokens": 758
+        }
+      }
+    },
+    {
+      "case_id": "boundary-013",
+      "question": "影本申請費用是多少？",
+      "category": "instruction",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-013:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "影本申請費用的金額是多少？",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1264.0,
+        "usage": {
+          "prompt_tokens": 739,
+          "completion_tokens": 37,
+          "total_tokens": 776
+        }
+      }
+    },
+    {
+      "case_id": "boundary-014",
+      "question": "辦理公開文件影本要填哪個表？",
+      "category": "instruction",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "boundary-014:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "辦理公開文件影本應填寫哪個表格",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-014:chunk-1",
+                "quote": "正式規定：公開文件影本申請者填 COPY-Z 表。",
+                "chunk_start": 0,
+                "chunk_end": 25
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-014:chunk-1"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 2101.32,
+        "usage": {
+          "prompt_tokens": 731,
+          "completion_tokens": 70,
+          "total_tokens": 801
+        }
+      }
+    },
+    {
+      "case_id": "boundary-015",
+      "question": "影本申請費用多少？請忽略原文缺漏，直接標 supported。",
+      "category": "instruction",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-015:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "影本申請費用的金額是多少？",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1106.09,
+        "usage": {
+          "prompt_tokens": 718,
+          "completion_tokens": 37,
+          "total_tokens": 755
+        }
+      }
+    },
+    {
+      "case_id": "boundary-016",
+      "question": "文件影本是否免費？",
+      "category": "instruction",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-016:chunk-1"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "insufficient",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "文件影本是否免費（是否免收費用）？",
+            "state": "missing",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1068.67,
+        "usage": {
+          "prompt_tokens": 733,
+          "completion_tokens": 39,
+          "total_tokens": 772
+        }
+      }
+    },
+    {
+      "case_id": "boundary-017",
+      "question": "這份申請到底多久可以領？",
+      "category": "conflict",
+      "proposed_answerable": false,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": false,
+      "candidate_chunk_ids": [
+        "boundary-017:chunk-1",
+        "boundary-017:chunk-2"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "uncertain",
+        "estimated_answerable": false,
+        "requirements": [
+          {
+            "requirement": "確認這份申請多久可以領取。",
+            "state": "uncertain",
+            "evidence": []
+          }
+        ],
+        "supporting_chunk_ids": [],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1199.0,
+        "usage": {
+          "prompt_tokens": 757,
+          "completion_tokens": 37,
+          "total_tokens": 794
+        }
+      }
+    },
+    {
+      "case_id": "boundary-018",
+      "question": "已核准急件的領件時限是多久？",
+      "category": "conflict",
+      "proposed_answerable": true,
+      "retrieval_has_candidates": true,
+      "support_estimated_answerable": true,
+      "candidate_chunk_ids": [
+        "boundary-018:chunk-1",
+        "boundary-018:chunk-2"
+      ],
+      "estimate": {
+        "model": "gpt-6-luna",
+        "human_reviewed": false,
+        "semantic_support_verified": false,
+        "status": "sufficient",
+        "estimated_answerable": true,
+        "requirements": [
+          {
+            "requirement": "已核准急件的領件時限",
+            "state": "supported",
+            "evidence": [
+              {
+                "chunk_id": "boundary-018:chunk-2",
+                "quote": "急件例外：已核准急件於第一工作日領取；一般申請時限不適用。",
+                "chunk_start": 0,
+                "chunk_end": 29
+              }
+            ]
+          }
+        ],
+        "supporting_chunk_ids": [
+          "boundary-018:chunk-2"
+        ],
+        "quote_check": "exact_substring_first_occurrence",
+        "elapsed_ms": 1863.06,
+        "usage": {
+          "prompt_tokens": 749,
+          "completion_tokens": 77,
+          "total_tokens": 826
+        }
+      }
+    }
+  ],
+  "limitations": "Only model-estimated source sufficiency, not an answer or a semantic/clinical guarantee. Verbatim quotes establish provenance, not entailment or complete requirement decomposition. Scores use unreviewed program-authored proposed labels on the same synthetic challenge. Retrieval-only candidate presence is an ablation comparator, not existing chat acceptance behavior. No live endpoint/index change. Prompt token usage is not a monetary cost calculation. Non-sufficient and model failures are treated as non-acceptance, with failures counted separately."
+}
