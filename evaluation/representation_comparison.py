@@ -35,7 +35,14 @@ def representations(sources, variant):
                 raise ValueError('Invalid page offsets')
             previous_end = page['end']
         if variant == 'page_chunks' and pages:
-            spans = [(p['start'], p['end'], [p['page']]) for p in pages if p['end'] > p['start']]
+            spans = []
+            for page in pages:
+                if page['end'] == page['start']:
+                    continue
+                manifest = chunk_manifest(text[page['start']:page['end']],
+                                          document_id=source['document_id'], version=source['id'])
+                spans.extend((page['start'] + c['start'], page['start'] + c['end'], [page['page']])
+                             for c in manifest['chunks'])
         else:
             manifest = chunk_manifest(text, document_id=source['document_id'], version=source['id'], pages=pages)
             spans = [(c['start'], c['end'], c['pages']) for c in manifest['chunks']]

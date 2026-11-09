@@ -35,6 +35,16 @@ https://github.com/yanzzzzzzzzz/rag-evaluation-lab. See human review materials i
 
 ## Historical implementation log (2026-11-04 onward)
 
+### 2026-11-09 PDF 長頁分塊比較修正
+
+修正 `evaluation.representation_comparison` 的逐頁表示法：原先直接把整頁當作單一片段，
+長頁面會繞過 baseline 的 6,000 字元分塊設定。現在每頁內沿用 baseline 分塊，並將位置轉回
+整份原文的 offset；同頁多個片段保留頁碼，空白頁不造成後續頁碼位移。
+新增兩項實際可選取文字 PDF 回歸測試，涵蓋長頁尾端證據、空白第二頁、第三頁與逐段原文位置。
+完整 143 項後端測試在一次性 PostgreSQL／pgvector 容器通過（Python 3.12），未呼叫 OpenAI。
+此輪只修正隔離比較工具，未重建正式索引、調整線上門檻或重跑 embedding 品質比較；
+既有實測報告保留原樣，不能據此宣稱 Recall 改善。#5／#8／#20 人工驗收仍未完成。
+
 The following entries record what each increment implemented and which limits applied at that time.
 Later increments supersede earlier pending-feature notes; use the current state above for open/closed status.
 Issue #8 remains preparation until its real human/baseline requirements are satisfied. The Lab remote

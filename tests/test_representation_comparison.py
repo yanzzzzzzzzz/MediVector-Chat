@@ -5,6 +5,8 @@ import unittest
 from pathlib import Path
 
 from evaluation.representation_comparison import compare, cosine_distance, markdown, representations
+from medivector.chunking import page_text
+from pdf_fixture import pdf_bytes
 
 
 class RepresentationComparisonTests(unittest.TestCase):
@@ -34,6 +36,39 @@ class RepresentationComparisonTests(unittest.TestCase):
             self.assertEqual(a['chunk_metadata'], c['chunk_metadata'])
             self.assertTrue(b['embedding_input'].startswith('文件標題：'))
         self.assertIn('PDF 頁碼：1、3', pages[1]['embedding_input'])
+
+    def test_real_pdf_long_page_is_bounded_and_retains_last_page_evidence(self):
+        text, pages = page_text(pdf_bytes([
+            ['Repeated selectable PDF text. ' * 260, 'End of long page evidence.'],
+            [], ['Final page evidence: form Z-42.'],
+        ]))
+        source = {'id': 'pdf-v1', 'document_id': 'pdf-doc', 'title': 'Long PDF',
+                  'content': text, 'pages': pages,
+                  'checksum': hashlib.sha256(text.encode()).hexdigest()}
+        rows = representations([source], 'page_chunks')
+        self.assertGreater(len(rows), 2)
+        self.assertEqual([p['status'] for p in pages], ['extracted', 'no_text', 'extracted'])
+        self.assertEqual(rows[-1]['chunk_metadata']['pages'], [3])
+        self.assertIn('form Z-42', rows[-1]['content'])
+        self.assertTrue(all(len(row['content']) <= 6000 for row in rows))
+        for row in rows:
+            meta = row['chunk_metadata']
+            self.assertEqual(row['content'], text[meta['start']:meta['end']])
+            page = pages[meta['pages'][0] - 1]
+            self.assertGreaterEqual(meta['start'], page['start'])
+            self.assertLessEqual(meta['end'], page['end'])
+        for page in (pages[0], pages[2]):
+            page_rows = [r for r in rows if r['chunk_metadata']['pages'] == [page['page']]]
+            self.assertEqual(''.join(r['content'] for r in page_rows), text[page['start']:page['end']])
+
+    def test_real_pdf_short_pages_keep_existing_representation(self):
+        text, pages = page_text(pdf_bytes([['First page.'], [], ['Third page.']]))
+        source = {'id': 'short-v1', 'document_id': 'short-doc', 'title': 'Short PDF',
+                  'content': text, 'pages': pages,
+                  'checksum': hashlib.sha256(text.encode()).hexdigest()}
+        rows = representations([source], 'page_chunks')
+        self.assertEqual([r['content'] for r in rows], ['First page.', 'Third page.'])
+        self.assertEqual([r['chunk_metadata']['pages'] for r in rows], [[1], [3]])
 
     def test_rejects_source_drift_and_invalid_page_mapping(self):
         sources = copy.deepcopy(self.corpus['sources'])

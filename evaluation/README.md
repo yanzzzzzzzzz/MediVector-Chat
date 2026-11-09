@@ -205,6 +205,11 @@ in-memory exact cosine and the runtime reference filter, with expansion disabled
 text/offsets remain unchanged; only the embedding representation differs. Files use fresh paths and
 exclusive creation. This is an unreviewed diagnostic, not a baseline, live ACL test or release gate.
 The current fixture has only two sources; it cannot establish generalization or production quality.
+Page-split representations apply the baseline 6,000-character chunking limit within each nonempty
+page, then translate offsets back into the original extracted text. Long pages can produce multiple
+chunks with the same page number; blank pages retain their original numbering. The title/page prefix
+is additional metadata outside that body limit. Regression tests exercise actual selectable-text PDF
+extraction, long pages and blank pages; this does not cover OCR or establish retrieval quality gains.
 See [measured analysis](reports/representation-analysis-2026-11-06.md) for results and next experiments.
 
 
